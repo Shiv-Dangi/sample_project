@@ -1,0 +1,97 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEMD{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Single Day collection Report for counter orders
+		  </div>
+		</div>
+		<style>
+			.whutwhut{
+				-webkit-appearance: menulist-button;
+			   	height: 42px;
+			   	width: 200px;
+			}
+			input[type="date"]::-webkit-inner-spin-button{
+			    display: none;
+			}
+		</style>
+		<div class = "jumbotron">
+			<form class = "form-inline" method = "post" action = "/searchsingleday/counter/">
+				{%csrf_token%}
+				<div class = "form-group">
+					<input type = "date" class = "form-control" style="width: 200px;" name = "order_date" />
+				</div>
+				<div class = "form-group">
+					<select name = "order_type" class = "whutwhut">
+						<option value = "all" default>all types</option>
+						<option value = "table_order">Table Orders</option>
+						<option value = "branch_order">Branch Orders</option>
+					</select>
+				</div>
+				<div class = "form-group">
+					<select name = "paymentmode" class = "whutwhut">
+						<option value = "all" default>all modes</option>
+						{% for paymentmode in paymentmodes %}
+							<option value = "{{paymentmode.payment_mode}}">{{paymentmode.payment_mode}}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class = "form-group">
+					<select name = "waiter" class = "whutwhut">
+						<option value = "all" default>all waiters</option>
+						{%for waiter in waiters%}
+							<option value = "{{waiter.id}}">{{waiter}}</option>
+						{%endfor%}
+					</select>
+				</div>
+				<div class = "form-group">
+					<input type = "submit" value = "search" class = "btn btn-danger"/>
+				</div>
+			</form>
+		</div>
+		<div class = "">
+			{% if ords%}
+			<table class = "table table-bordered">
+				<tr>
+					<th>s.no</th>
+					<th>order no</th>
+					<th>total</th>
+					<th>vat</th>
+					<th>s.tax</th>
+					<th>s.charge</th>
+					<th>Dis.</th>
+					<th>grand total</th>
+				</tr>
+			{%for ord in ords%}
+				<tr>
+					<td>{{forloop.counter}}</td>
+					<td><a href="/myadmin/counterorderdetail/{{ord.order_number}}/">{{ord.order_number}}</a></td>
+					<td>{{ord.subtotal}}</td>
+					<td>{{ord.vat_rs}}</td>
+					<td>{{ord.service_tax_rs}}</td>
+					<td>{{ord.service_charge_rs}}</td>
+					<td>{{ord.discount_rs}}</td>
+					<td>{{ord.grand_total}}</td>
+				</tr>
+			{%endfor%}
+				<tr>	
+					<th colspan="2">TOTAL:</th>
+					<th>{{total.tot}}</th>
+					<th>{{total.vat}}</th>
+					<th>{{total.ser_tax}}</th>
+					<th>{{total.ser_charge}}</th>
+					<th>{{total.dis}}</th>
+					<th>{{total.gtot}}</th>
+				</tr>
+
+			</table>
+			{%endif%}
+		</div>
+	</div>
+
+{%endblock content%}

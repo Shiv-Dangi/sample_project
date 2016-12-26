@@ -1,0 +1,60 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color: #10452f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Manage Promotions
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<div class="row">
+				<div class = "pull-left"><b>Manage Promotion Video</b></div><br>
+				<div>
+					<form class = "form-horizontal" method = "post" action = "/myadmin/promotionvideo/" enctype="multipart/form-data">
+						{% csrf_token %}
+						<div class = "form-group">
+							<label for="Promotion_video" class="col-sm-2 control-label">Video URL: </label>
+							<div class="col-sm-8">
+						        <input type="text" class="form-control" id="videoid" name = "video1" value="{{promotionvideo.0.video}}">
+						    </div>
+						    <div class="col-sm-2">
+						    	<button type="submit" class="btn btn-primary">Update</button>
+						    </div>
+						</div>
+					</form>
+				</div>
+			</div>
+			<hr/>
+			<div class="row" style="margin-top: 20px">
+				<div class = "pull-left"><b>Manage Promotion Images</b></div><br>
+					<form class = "form-horizontal" method = "post" action = "/myadmin/addpromotionimage/" enctype="multipart/form-data">
+						{% csrf_token %}
+						<div class = "form-group">
+							<label for="promotion_image" class="col-sm-2 control-label">New Image URL: </label>
+							<div class="col-sm-8">
+						        <input type="text" class="form-control" id="image" name = "image">
+						    </div>
+						    <div class="col-sm-2">
+					            <button type="submit" class="btn btn-primary">Add</button>
+					        </div>
+						</div>
+					</form>
+					<table class = "table table-striped">
+						<tbody>
+						{% for image in promotionimage%}
+							<tr>
+								<td>{{forloop.counter}}</td>
+								<td>{{image.image_url | truncatechars:80}}</td>
+								<td><a href="/myadmin/deletepromotionimage/{{image.id}}/" class="glyphicon glyphicon-trash"></a></td>
+							</tr>
+						{%endfor%}
+						</tbody>
+					</table>
+			</div>
+		</div>
+	</div>
+{%endblock content%}

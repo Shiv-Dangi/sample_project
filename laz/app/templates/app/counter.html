@@ -1,0 +1,847 @@
+{% extends "app/baseadmin.html" %}
+{% load staticfiles %}
+{% load harishtags %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<link rel = "stylesheet" href = "{% static 'app/css/jquery-ui.min.css' %}" />
+	<style type="text/css">
+		input[type="Number"]::-webkit-inner-spin-button{
+		    display: none;
+		}
+		.tableorder {
+			padding-bottom: 20px;
+		}
+		.tooltip {
+		    position: relative;
+		    display: inline-block;
+		    border-bottom: 1px dotted black;
+		}
+
+		.tooltip .tooltiptext {
+		    visibility: hidden;
+		    width: 120px;
+		    background-color: black;
+		    color: #fff;
+		    text-align: center;
+		    border-radius: 6px;
+		    padding: 5px 0;
+
+		    /* Position the tooltip */
+		    position: absolute;
+		    z-index: 1;
+		}
+
+		.tooltip:hover .tooltiptext {
+		    visibility: visible;
+		}
+
+		.table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td {
+    	padding: 2px;
+    	}
+	</style>
+
+<!-- modal for adding expense -->
+		<div class="modal fade" id="addtodayexpense" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		    <!-- modal header -->
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="exampleModalLabel">Enter Expense Detail</h4>
+		      </div>
+		      <!-- end of modal header -->
+		      <!-- modal body -->
+		      <div class="modal-body">
+		      	<div class="form-horizontal">
+		      		<form class="form-horizontal" method="post" action="/myadmin/addtodayexpense/">
+		      			{% csrf_token %}
+		      			<div class="form-group">
+				          	<label for="table_number" class="col-sm-3 control-label">Expense For: </label>
+				          	<div class="col-sm-9">
+				          		<input type="text" class="form-control" name="expense_for" required />
+				          	</div>
+				          </div>
+				          <div class="form-group">
+				            <label for="table_name" class="col-sm-3 control-label">Amount: </label>
+				            <div class="col-sm-9">
+				            	<input type="Number" class="form-control" name="amount" required />
+				            </div>
+				          </div>
+				          <input name="url" value="{{request.path}}" type="hidden" />
+				          <div class="form-group text-center">
+				          	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				          	<input class = "btn btn-primary" type = "submit"  value = "submit" />
+				          </div>
+		      		</form>
+		      	</div>
+		      </div>
+		      <!-- end of modal body -->
+		    </div>
+		  </div>
+		</div>
+<!-- end of addexpense modal -->
+
+<!-- modal for collecting expense -->
+		<div class="modal fade" id="collecttodayexpense" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		    <!-- modal header -->
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="exampleModalLabel">Enter Collection Detail</h4>
+		      </div>
+		    <!-- end of modal header -->
+		    <!-- modal body -->
+		      <div class="modal-body">
+		      	<div class="form-horizontal">
+		      		<form class="form-horizontal" method="post" action="/myadmin/addtodayexpensecollection/">
+		      			{% csrf_token %}
+		      			<div class="form-group">
+				          	<label for="table_number" class="col-sm-3 control-label">Collection For: </label>
+				          	<div class="col-sm-9">
+				          		<input type="text" class="form-control" name="collect_for" required />
+				          	</div>
+				          </div>
+				          <div class="form-group">
+				            <label for="table_name" class="col-sm-3 control-label">Amount: </label>
+				            <div class="col-sm-9">
+				            	<input type="Number" class="form-control" name="amount" required />
+				            </div>
+				          </div>
+				          <input name="url" value="{{request.path}}" type="hidden" />
+				          <div class="form-group text-center">
+				          	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				          	<input class = "btn btn-primary" type = "submit"  value = "submit" />
+				          </div>
+		      		</form>
+		      	</div>
+		      </div>
+		      <!-- end of modal body -->
+		    </div>
+		  </div>
+		</div>
+<!-- end of collecting expense modal -->
+
+<!-- modal for add delivery boy expense -->
+	<div class="modal fade" id="paydeliveryboy" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	    <!-- modal header -->
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="exampleModalLabel">Pay Delivery Boy</h4>
+	      </div>
+	      <!-- end of modal header -->
+	      <!-- modal body -->
+	      <div class="modal-body">
+	      	<div class="form-horizontal">
+	      		<form class="form-horizontal" method="post" action="/myadmin/paydeliveryboy/">
+	      			{% csrf_token %}
+	      			<div class="form-group">
+			          	<label for="table_number" class="col-sm-3 control-label">Delivery Boy: </label>
+			          	<div class="col-sm-9">
+			          		<select name = "delivery_boy" required class="form-control">
+								<option value = "" default>Please select a delivery boy</option>
+								{%for deli in deliveryboys%}
+									<option value = "{{deli.loginid}}">{{deli.first_name}} {{deli.last_name}}</option>
+								{%endfor%}
+							</select>
+			          	</div>
+			          </div>
+			          <div class="form-group">
+			            <label for="table_name" class="col-sm-3 control-label">Amount: </label>
+			            <div class="col-sm-9">
+			            	<input type="Number" class="form-control" name="amount" required />
+			            </div>
+			          </div>
+			          <input name="url" value="{{request.path}}" type="hidden" />
+			          <div class="form-group text-center">
+			          	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			          	<input class = "btn btn-primary" type = "submit"  value = "submit" />
+			          </div>
+	      		</form>
+	      	</div>
+	      </div>
+	      <!-- end of modal body -->
+	    </div>
+	  </div>
+	</div>
+<!-- end of paydeliveryboy modal -->
+
+<!-- modal for show today's expenses -->
+	<div class="modal fade" id="viewtodayexpense" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	    <div class="modal-dialog">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                Today's Expenses
+	                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	            </div>
+	            <div class="modal-body">
+	                <table class = "table table-bordered">
+	                	<thead>
+	                		<th>S. NO.</th>
+	                		<th>Expense For</th>
+	                		<th>Amount</th>
+                            <th>Action</th>
+	                	</thead>
+	                	<tbody>
+                			{% for expense in today_expenses%}
+                			<tr id="expense-{{ forloop.counter }}">
+                				<td>{{forloop.counter}}</td>
+                				<td>{{expense.expense_for}}</td>
+                				<td>{{expense.amount}}</td>
+                                <td><button onclick="removeExpense('{{ expense }}')"><span class="glyphicon glyphicon-remove"></span></button></td>
+                			</tr>
+                			{% endfor %}
+                			<tr>
+                				<th colspan="2">Total Expense</th>
+                				<th id="expense-total" colspan="2">₹ {{today_expense_total.amount__sum|default_if_none:0|floatformat:"0"}}</th>
+                			</tr>
+	                	</tbody>
+	                </table>
+	            </div>
+	            <div class="modal-footer">
+	            	<button class="btn btn-primary" data-dismiss="modal">Close</button>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+<!-- end of show today's expense modal -->
+
+<!-- modal for show today's expense collection -->
+	<div class="modal fade" id="viewtodaycollection" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	    <div class="modal-dialog">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                Today's collection
+	                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	            </div>
+	            <div class="modal-body">
+	                <table class = "table table-bordered">
+	                	<thead>
+	                		<th>S. NO.</th>
+	                		<th>Expense For</th>
+	                		<th>Amount</th>
+                      <!-- <th>Action</th> -->
+	                	</thead>
+	                	<tbody>
+                			{% for expense in today_collection%}
+                			<tr id="collection-{{ forloop.counter }}">
+                				<td>{{forloop.counter}}</td>
+                				<td>{{expense.collection_for}}</td>
+                				<td>{{expense.amount}}</td>
+                        <!-- <td><button onclick="removeExpCollection('{{ expense }}')"><span class="glyphicon glyphicon-remove"></span></button></td> -->
+                			</tr>
+                			{% endfor %}
+                			<tr>
+                				<th colspan="2">Total Collection</th>
+                				<th id="collection-total" style="color: forestgreen;">₹ {{today_collection_total.amount__sum|default_if_none:0|floatformat:"0"}}</th>
+                			</tr>
+	                	</tbody>
+	                </table>
+	            </div>
+	            <div class="modal-footer">
+	            	<button class="btn btn-primary" data-dismiss="modal">Close</button>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+<!-- end of show today's expense collection modal -->
+
+<!-- modal for show today's expenses of delivery boy -->
+	<div class="modal fade" id="viewdelboyexpense" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	    <div class="modal-dialog">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                Delivery Boy Payments
+	                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	            </div>
+	            <div class="modal-body">
+	                <table class = "table table-bordered">
+	                	<thead>
+	                		<th>S. NO.</th>
+	                		<th>Delivery Boy</th>
+	                		<th>Amount</th>
+                            <th>Action</th>
+	                	</thead>
+	                	<tbody>
+                			{% for expense in delboy_payments%}
+                			<tr id="delexp-{{ expense }}">
+                				<td>{{forloop.counter}}</td>
+                				<td>{{expense.delivery_boy}}</td>
+                				<td>{{expense.amount}}</td>
+                                <td><button onclick="removedelexp('{{ expense.delivery_boy.loginid }}')"><span class="glyphicon glyphicon-remove"></span></button></td>
+                			</tr>
+                			{% endfor %}
+                			<tr>
+                				<th colspan="2">Total</th>
+                				<th id="delexp-total" colspan="2">{{delboy_payment_total.amount__sum|floatformat:"0"}}</th>
+                			</tr>
+	                	</tbody>
+	                </table>
+	            </div>
+	            <div class="modal-footer">
+	            	<button class="btn btn-primary" data-dismiss="modal">Close</button>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+<!-- end of show today's expense of delivery boy modal -->
+
+<!-- modal for show Collection from delivery boy -->
+	<div class="modal fade" id="collecttodelboy" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	    <div class="modal-dialog">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                Collection from Delivery Boys
+	                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	            </div>
+	            <div class="modal-body">
+	            	<div class = "form-inline">
+						<label>Date</label>
+						<input type = "date" class="form-control" style="width:auto;" id="collectiondate"/>
+						<button class="btn btn-primary" onclick="collectiondata();">search</button>
+					</div>
+					<div class="delboycollections">
+						{% include "app/delboycollection.html" %}
+					</div>
+	            </div>
+	            <div class="modal-footer">
+	            	<button class="btn btn-primary" data-dismiss="modal">Close</button>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	<script type="text/javascript">
+		function collectiondata() {
+			var date = $('#collectiondate').val();
+			var url = '/myadmin/counter/collectiondata/';
+			$.post(url, {'date': date}, function(data){
+				$(".delboycollections").html(data);
+			});
+		}
+
+		function collectfromdboy(del_boy){
+			var date = $('#collectiondate').val();
+			var url = '/myadmin/counter/amountcollected/';
+			$.post(url, {'date': date, 'del_boy': del_boy},function(){
+
+			}).done(function(){
+				$.post('/myadmin/counter/collectiondata/', {'date': date}, function(data){
+					$(".delboycollections").html(data);
+				});
+			});
+		}
+	</script>
+<!-- end of show collection from delivery boy modal -->
+
+<!-- Branch Edit Modal -->
+		<div id="branchModal" class="modal fade" role="dialog">
+		  <div class="modal-dialog">
+
+		    <!-- Modal content-->
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal">&times;</button>
+		        <h4 class="modal-title">Change Branch</h4>
+		      </div>
+		      <div class="modal-body">
+		        <p>Select a branch to change</p>
+		      </div>
+		      <form class = "form-horizontal text-center" method = "post" action = "/myadmin/counter/">
+		        {% csrf_token %}
+		          <div class="form-group">
+		          	<label for="branch_name" class="col-sm-3 control-label">Branch Name </label>
+		          	<div class="col-sm-8">
+		          		<select class="form-control" name="branch_name" id="branch_name" required>
+							{% for branch in branches %}
+							<option value="{{branch.branch}}">{{branch.branch}}</option>}
+							{% endfor %}
+						</select>
+		          		<!-- <input type="text" class="form-control" id="table_number" name="table_number" required /> -->
+		          	</div>
+		          </div>
+		          <button type="submit" class="btn btn-primary">Change Branch</button>
+		      </form>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		      </div>
+		    </div>
+
+		  </div>
+		</div>
+<!-- end of branch edit modal -->
+
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f; margin-bottom:2px;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+
+	<div class="row" style="margin:10px;">
+		<div class= "col-sm-12 tableorder">
+			{% include "app/tableorder.html" %}
+		</div>
+	</div>
+	<div class="text-center">
+		<h5><b>CTRL+Q</b> : Print QT;  <b>CTRL+Z</b> : Print Bill;  <b>CTRL+X</b> : Table Vacate;</h5>
+	</div>
+	<div class="row" style="background:#10462f;color:#ffffff;padding-left:10%;">
+		<br>
+		<div class="additional-function text-center col-sm-2" style="padding-right:10px;margin-top: 10px;">
+			<a href="../counterdashboard/" class="btn btn-primary" style="width: 100px;background:transparent;border-color:#ffffff;border-width:1px;font-size:12px;">Dashboard</a>
+		</div>
+		{% if request.session.admin.role == 'billinguser' or request.session.admin.role == 'admin' %}
+		<div class="additional-function text-center col-sm-2" style="margin-top: 10px; padding-right:10px;">
+			<a href="/myadmin/counterorder/" class="btn btn-primary" style="width: 110px;background:transparent;border-color:#ffffff;border-width:1px;font-size:12px;">Counter Order</a>
+		</div>
+		{% endif %}
+		<div class="additional-function text-center col-sm-2" style="margin-top: 10px; padding-right:10px;">
+			<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#addtodayexpense" style="width: 110px;background:transparent;border-color:#ffffff;border-width:1px;font-size:12px;">Add Expense</a>
+		</div>
+        <div class="additional-function text-center col-sm-2" style="margin-top: 10px; padding-right: 10px;">
+			<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#collecttodayexpense" style="width: 110px;background:transparent;border-color:#ffffff;border-width:1px;font-size:12px;">Add Collection</a>
+		</div>
+		<div class="additional-function text-center col-sm-2" style="margin-top: 10px;padding-right:10px;">
+			<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#paydeliveryboy" style="width: 110px;background:transparent;border-color:#ffffff;border-width:1px;font-size:12px;">Pay Del. Boy</a>
+		</div>
+		<div class="additional-function text-center col-sm-2" style="margin-top: 10px;padding-right:10px;">
+			<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#viewtodayexpense" style="width: 110px;background:transparent;border-color:#ffffff;border-width:1px;font-size:12px;">Today Exp: ₹ {{today_expense_total.amount__sum|default_if_none:0|floatformat:"0"}}</a>
+		</div>
+        <div class="additional-function text-center col-sm-2" style="margin-top: 10px;padding-right:10px;">
+			<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#viewtodaycollection" style="width: 110px;background:transparent;border-color:#ffffff;border-width:1px;font-size:12px;">Today Coll: ₹ {{today_collection_total.amount__sum|default_if_none:0|floatformat:"0"}}</a>
+		</div>
+		<div class="additional-function text-center col-sm-2" style="margin-top: 10px;padding-right:10px;">
+			<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#viewdelboyexpense" style="width: 110px;background:transparent;border-color:#ffffff;border-width:1px;font-size:12px;">Del. Pay: ₹ {{delboy_payment_total.amount__sum|default_if_none:0|floatformat:"0"}}</a>
+		</div>
+		<!-- <div class="additional-function text-center col-sm-1" style="margin-top: 10px;padding-right:10px;">
+			<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#collecttodelboy"  style="width: 130px;background:transparent;border-color:#ffffff;border-width:1px;font-size:12px;">Collect from DelBoy</a>
+		</div> -->
+		<div class="additional-function text-center col-sm-4" style="margin-top: 10px;padding-right:10px;">
+		{% if request.session.admin.role == 'admin' %}
+			<table class = "table table-bordered">
+            	<thead>
+            		<th>Payment Mode</th>
+            		<th>Amount</th>
+            	</thead>
+            	<tbody>
+        			{% for key, value in payment_received.items%}
+            			{% if key != 'total' %}
+            			<tr>
+            				<td>{{key}}</td>
+            				<td>₹ {{value.grand_total__sum|default_if_none:0|floatformat:"0"}}</td>
+            			</tr>
+            			{% endif %}
+        			{% endfor %}
+            	</tbody>
+            	<tfoot>
+            		<th>Total</th>
+            		<th>₹ {{payment_received.total.grand_total__sum|default_if_none:0|floatformat:"0"}}</th>
+            	</tfoot>
+            </table>
+        </div>
+        <div class="additional-function text-center col-sm-2" style="margin-top: 10px;padding-right:10px;">
+            <table class = "table table-bordered">
+            	<thead>
+            		<th>Finals</th>
+            		<th>Amount</th>
+            	</thead>
+            	<tbody onload="getsetValues()">
+        			<tr>
+        				<td>Counter COD</td>
+        				<td>₹ {{counter_cash.grand_total__sum|default_if_none:0|floatformat:"0"}}</td>
+        			</tr>
+        			<tr>
+        				<td>Expenses</td>
+        				<td>₹ {{today_expense_total.amount__sum|default_if_none:0|floatformat:"0"}}</td>
+        			</tr>
+                    <tr>
+        				<td>Expense Collection</td>
+        				<td>₹ {{today_collection_total.amount__sum|default_if_none:0|floatformat:"0"}}</td>
+        			</tr>
+        			<tr>
+        				<td>Del. Paid</td>
+        				<td>₹ {{delboy_payment_total.amount__sum|default_if_none:0|floatformat:"0"}}</td>
+        			</tr>
+        			<tr>
+        				<td>Del. Received</td>
+        				<td>₹ {{del_received.amount__sum|default_if_none:0|floatformat:"0"}}</td>
+        			</tr>
+            	</tbody>
+            	<tfoot>
+            		<th>Tot. Cash Present</th>
+            		<th>₹ {{total_countercash|floatformat:"0"}}</th>
+            	</tfoot>
+            </table>
+        </div>
+        <div class="additional-function text-center col-sm-2" style="margin-top: 10px;padding-right:10px;">
+			<table class = "table table-bordered">
+            	<thead>
+            		<th>Home Deliveries</th>
+            		<th>Amount</th>
+            	</thead>
+            	<tbody onload="getsetValues()">
+        			<tr>
+        				<td>Online Pay</td>
+        				<td>₹ {{online_total|default_if_none:0|floatformat:"0"}}</td>
+        			</tr>
+                    <tr>
+        				<td>Sodexo Meal Passes</td>
+        				<td>₹ {{sodexo_total|default_if_none:0|floatformat:"0"}}</td>
+        			</tr>
+        			<tr>
+        				<td>Credit</td>
+        				<td>₹ {{credit_total|default_if_none:0|floatformat:"0"}}</td>
+        			</tr>
+            	</tbody>
+            	<tfoot>
+            		<th>Total</th>
+            		<th>₹ {{total_home_deliveries}}</th>
+            	</tfoot>
+            </table>
+        </div>
+							{% endif %}
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		function tableorder(table){
+			$('#loadingmessage').show();
+			$.get('/tableorder/',{'table_number': table},function(data){
+				$(".tableorder").html(data);
+				$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper').css({'display': 'block'});
+				$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1)').css({'display': 'block'});
+				$('#loadingmessage').hide();
+			})
+		}
+
+		function editWaiter(){
+			$('select[name=waiterdropdown]').css({'display': 'inline-block'});
+			$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper > div:nth-child(1) > div > div').css({'display': 'none'});
+		}
+
+		// function to generate new counter order
+		function createtableorder(table){
+			$('#loadingmessage').show();
+			$.post("/myadmin/placetableorder/", {"table_number":table}, function(data){
+			}).done(function(){
+				$.get('/tableorder/',{'table_number': table},function(data){
+					$(".tableorder").html(data);
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper').css({'display': 'block'});
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1)').css({'display': 'block'});
+					$('#loadingmessage').hide();
+				})
+			});
+		}
+
+		// function for calculating total in additem form.
+		function calculate() {
+			var quantity = document.getElementById('quantity').value;
+			var price = document.getElementById('price').value;
+			var total = document.getElementById('total');
+			var mytotal = quantity * price;
+			total.value = mytotal;
+		}
+
+		// function to assign waiter to a table
+		function assignwaiter(order_number, table_number){
+			var order_id = 'assignw' + order_number;
+			var waiter = document.getElementById(order_id).value;
+			var url = "/myadmin/assignwaiter/";
+			$.post(url, {'waiter':waiter, 'order_number':order_number}, function(data){
+
+			}).done(function(){
+				$.get('/tableorder/',{'table_number': table_number},function(data){
+					$(".tableorder").html(data);
+					$('select[name=waiterdropdown]').css({'display': 'none'});
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper').css({'display': 'block'});
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1)').css({'display': 'block'});
+				})
+			});
+		}
+
+		// function to remove items from cart
+		function subtractordercart(item_code,item_subname,item_quantity,order_number, table_number){
+			// var order_number = '{{order.order_number}}';
+			// var table_number = document.querySelector('.table-number').id;
+			$(".removeitem").attr("disabled", true);
+			$.post("/myadmin/subtractitemtotableorder/",{"item_code":item_code,"item_subname":item_subname,"item_quantity":item_quantity,"order_number":order_number},function(data){
+			}).done(function(){
+				$.get('/tableorder/',{'table_number': table_number},function(data){
+					$(".tableorder").html(data);
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper').css({'display': 'block'});
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1)').css({'display': 'block'});
+				})
+			});
+		}
+
+		// function to add items to cart
+		function addordercart(order_number){
+			var item_code = document.getElementById('item_code').value;
+			var item_subname = document.getElementById('item_subname').value;
+			var item_quantity = document.getElementById('quantity').value;
+			// var order_number = '{{order.order_number}}';
+			var table_number = document.querySelector('.table-number').id;
+			$.post("/myadmin/additemtotableorder/",{"item_code":item_code,"item_subname":item_subname,"item_quantity":item_quantity,"order_number":order_number},function(data){
+					$(".item-description").html(data);
+					$('#item').val('');
+					$('#quantity').val('1');
+					$('#price').val('');
+					$('#total').val('');
+			});
+		}
+
+		// js for disable radio buttons along side with table's column
+		$(':radio').click(function(){
+		    return false;
+		});
+
+ 		// function to print a order
+		function printDiv(divName) {
+		    var printContents = document.getElementById(divName).innerHTML;
+		    var originalContents = document.body.innerHTML;
+
+		    document.body.innerHTML = printContents;
+
+		    window.print();
+
+		    document.body.innerHTML = originalContents;
+		    return true;
+		}
+
+		// function to order print qt of an table
+		function printqt(divName, order_number, table_number) {
+			if (table_number != '0'){
+				$.post("/myadmin/printqt/",{"order_number":order_number},function(data){
+				}).done(function(){
+					$.get('/tableorder/',{'table_number': table_number},function(data){
+						$(".tableorder").html(data);
+						$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper').css({'display': 'block'});
+						$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1)').css({'display': 'block'});
+					})
+				});
+				printDiv(divName);
+			} else {
+				$.post("/myadmin/printqt/",{"order_number":order_number},function(data){
+				}).done(function(){
+					$.get('/tableorder/',{'table_number': table_number},function(data){
+						$(".tableorder").html(data);
+						$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper').css({'display': 'block'});
+						$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1)').css({'display': 'block'});
+					})
+				});
+				printDiv(divName);
+			}
+		}
+
+		// function to add customer information with a order
+		function addcustomerinfo (order_number, table_number){
+			var customer_number = $('#customer_number').val();
+			var customer_name = $('#customer_name').val();
+			var url = "/myadmin/addcustomerinfo/";
+			$.post(url, {'order_number':order_number, 'customer_number':customer_number, 'customer_name':customer_name}, function(data){
+				$('#addcustomerinfo').modal('hide');
+			}).done(function(){
+				$.get('/tableorder/',{'table_number': table_number},function(data){
+					$(".tableorder").html(data);
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper').css({'display': 'block'});
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1)').css({'display': 'block'});
+				})
+			});
+		}
+
+		// Send SMS to Customer
+		function foronlinepay (order_number, customer_number){
+			var url = "/send_sms_at_counter/";
+			$.post(url, {'order_number':order_number, 'customer_number':customer_number})
+		}
+
+		// function to edit advance pay
+		function editadvance_pay(order_number, advance_pay){
+			var url = "/myadmin/edit_advance_pay/";
+			$.post(url, {'order_number': order_number, 'advance_pay': advance_pay}, function(data){
+				if(data['status'] == 'success')
+					{	
+						$('#advance_pay').text(data['advance_pay']);
+						$('#balance_pay').text(data['balance_pay']);
+					};
+			});
+		}
+
+		// function to edit discount for a counter order
+		function editdiscount(order_number, discount_percent) {
+			var url = "/myadmin/editdiscount_counter/";
+			$.post(url, {'order_number': order_number, 'discount_percent': discount_percent}, function(data){
+				if(data['status'] == 'success')
+					{
+						$('#discount_rs').val(data['discount_rs']);
+						$('#grand_total').text(data['grand_total']);
+					};
+			});
+		}
+
+		function editdiscount_rs(order_number, subtotal, discount_rs) {
+			var discount_percent = (discount_rs * 100) / subtotal;
+			$('#discount_percent').val(discount_percent);
+			var url = "/myadmin/editdiscount_counter/";
+			$.post(url, {'order_number':order_number, 'discount_percent':discount_percent}, function(data){
+				if(data['status'] == 'success')
+					{
+						$('#grand_total').text(data['grand_total']);
+					};
+			});
+		}
+
+		// function for skip button
+		function skipcustomerinfo(order_number, table_number){
+			var customer_number = 'skipped';
+			var customer_name = 'skipped';
+			var url = "/myadmin/addcustomerinfo/";
+			$.post(url, {'order_number':order_number, 'customer_number':customer_number, 'customer_name':customer_name}, function(data){
+				$('#addcustomerinfo').modal('hide');
+			}).done(function(){
+				$.get('/tableorder/',{'table_number': table_number},function(data){
+					$(".tableorder").html(data);
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper').css({'display': 'block'});
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1)').css({'display': 'block'});
+				})
+			});
+		}
+
+		// function for bill print
+		function printbill(order_number, table_number){
+			var post_url = "/myadmin/billprint/"+order_number+"/";
+			$.post(post_url, function(data){}).done(function(){
+				$.get('/tableorder/',{'table_number': table_number},function(data){
+					$(".tableorder").html(data);
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper').css({'display': 'block'});
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1)').css({'display': 'block'});
+					if(table_number != 0)
+						$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper > div:nth-child(3)').css({'display': 'none'});
+					else {
+						$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper > div:nth-child(2)').css({'display': 'none'});
+					}
+					setTimeout(function() { $('select[name=payment-mode]').focus() }, 500);
+				})
+			});
+			printcounterorder(order_number);
+		}
+
+		// function for print button below order number on dashboard
+		function printcounterorder(order_number){
+			url = '/myadmin/printcounterorder/' + order_number + '/';
+			var printWindow = window.open(url, '_blank');
+			printWindow.onload = function() {
+			    var isIE = /(MSIE|Trident\/|Edge\/)/i.test(navigator.userAgent);
+			    if (isIE) {
+
+			        printWindow.print();
+			        setTimeout(function () { printWindow.close(); }, 100);
+
+			    } else {
+
+			        setTimeout(function () {
+			            printWindow.print();
+			            var ival = setInterval(function() {
+			                printWindow.close();
+			                clearInterval(ival);
+			            }, 200);
+			        }, 500);
+			    }
+			}
+		}
+
+		// function to add a payment mode to an order
+		function addpaymode(order_number, table_number) {
+			var order_id = "paymode" + order_number
+			var payment_mode = document.getElementById(order_id).value;
+			var url = "/myadmin/addpaymode/";
+			$.post(url, {'payment_mode':payment_mode, 'order_number':order_number}, function(data){
+
+			}).done(function(){
+                if(table_number != 0) {
+                    $.get('/tableorder/', {'table_number': table_number}, function (data) {
+                        $(".tableorder").html(data);
+							$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper').css({'display': 'block'});
+							$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1)').css({'display': 'block'});
+                    })
+                }
+                else{
+                    location.reload();
+                }
+			});
+		}
+
+        function removeExpense(expense1){
+            {% for expense in today_expenses %}
+                if('{{ expense }}' == expense1 ){
+                    var idx = "#expense-{{ forloop.counter }}";
+                    $(idx).fadeOut(500, function () {
+                            var ls = $(idx).text().split("\n");
+                            ls = ls[ls.length-3];
+                            console.log($("#expense-total").text() - ls);
+                            $("#expense-total").text({{today_expense_total.amount__sum}} - ls);
+                        $.post('/myadmin/removetodayexpense/', {'expense_for': '{{ expense.expense_for }}', 'url': '{{ request.path }}', 'amount': '{{expense.amount}}'}, function() {
+                            location.reload();
+                        });
+                    });
+                }
+            {% endfor %}
+        }
+
+        function removeExpCollection(expense1){
+            console.log("Hello");
+            {% for expense in today_collection %}
+                if('{{ expense }}' == expense1 ){
+                    var idx = "#collection-{{ forloop.counter }}";
+                    $(idx).fadeOut(500, function () {
+                            var ls = $(idx).text().split("\n");
+                            ls = ls[ls.length-3];
+                            console.log($("#collection-total").text() - ls);
+                            $("#collection-total").text({{today_collection_total.amount__sum}} - ls);
+                        $.post('/myadmin/removetodaycollection/', {'collection_for': '{{ expense.collection_for }}', 'url': '{{ request.path }}', 'amount': '{{ expense.amount }}'}, function() {
+                            location.reload();
+                        });
+                    });
+                }
+            {% endfor %}
+        }
+
+        function removedelexp(expense1){
+            {% for expense in delboy_payments %}
+                if('{{ expense.delivery_boy.loginid }}' == expense1 ){
+                    var idx = "#delexp-{{ expense }}";
+                    $(idx).fadeOut(500, function () {
+                            var ls = $(idx).text().split("\n");
+                            ls = ls[ls.length-3];
+                            console.log($("#delexp-total").text() - ls);
+                            $("#delexp-total").text({{delboy_payment_total.amount__sum}} - ls);
+                        $.post('/myadmin/removedelexp/', {'login_id': '{{ expense.delivery_boy.loginid }}', 'url': '{{ request.path }}', 'amount': ls}, function() {
+                            location.reload();
+                        });
+                    });
+                }
+            {% endfor %}
+        }
+	</script>
+	<script type="text/javascript" src="{% static 'app/js/jquery.ui.js' %}"></script>
+	<script type="text/javascript" src="{% static 'app/js/shortcut.js' %}"></script>
+	<script type="text/javascript">
+		shortcut.add("ctrl+q", function() {
+			document.getElementById("printqtbtn").click();
+	    });
+	    shortcut.add("ctrl+z", function() {
+	    	document.getElementById("printbillbtn").click();
+	    });
+	    shortcut.add("ctrl+x", function() {
+	    	document.getElementById("vacatetblbtn").click();
+	    });
+	    shortcut.add("ctrl+a", function() {
+	    	document.getElementById("select_table").focus();
+	    });
+	    shortcut.add("ctrl+d", function() {
+	    	document.getElementById("discount_percent").focus();
+	    });
+	    shortcut.add("ctrl+c", function() {
+	    	document.getElementById("customer_number").focus();
+	    }); 
+	</script>
+{%endblock content%}

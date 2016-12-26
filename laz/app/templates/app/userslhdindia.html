@@ -1,0 +1,93 @@
+{% extends "app/customerend_base.html" %}
+{%load staticfiles%}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block mainbody%}
+	<div class = "container">
+		<div class = "jumbotron text-center" style="background:transparent;">
+			{% if user.gender == 'Male' %}
+				<img src = "/static/app/img/male.png" width="150" height="150">
+			{% else %}
+				<img src = "/static/app/img/female.png" width="150" height="150">
+			{% endif %}
+			<form class = "form-horizontal" method = "post" action = "/myadmin/edituserslhdindia/{{user.phone}}/">
+				{% csrf_token %}
+				<h4><b>{{user.full_name}}</b></h4>
+				<h4> Mobile Number: <b>{{user.phone}}</b> </h4>
+				<h4> Email Address: <b>{{user.email}}</b> </h4>
+				<div class = "form-group" style="padding-left:40px;padding-right:40px;padding-top:40px;margin-bottom:0px;">
+					<label for="address" class="col-sm-2 control-label">My Address: <br><h6>Address can be edited on order placement</h6></label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="address" placeholder="address" name = "address" value="{{user.address}}" readonly>
+				    </div>
+				</div>
+				<div class = "form-group" style="padding-left:40px;padding-right:40px;">
+					<label for="city" class="col-sm-2 control-label">My City: </label>
+					<div class="col-sm-10">
+				        <select class="form-control" id="city" name = "city" readonly>
+				        	{%for city in cities%}
+							<option value="{{city}}" {% if user.city == city %}selected{% endif %}>{{city}}</option>
+							{%endfor%}
+			        	</select>
+				    </div>
+				</div>
+				<div class = "form-group" style="padding-left:40px;padding-right:40px;">
+					<label for="company" class="col-sm-2 control-label">My Occupation: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="company" placeholder="company" name = "company" value="{{user.company}}">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="credit_limit" class="col-sm-2 control-label">Credit Limit: </label>
+					<div class="col-sm-10 text-left">
+				        <h5 style="padding-left:25px;">₹ {{user.credit_limit}}</h5>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="e_wallet" class="col-sm-2 control-label">e-Wallet: </label>
+					<div class="col-sm-10 text-left">
+				        <h5 style="padding-left:25px;">₹ {{user.e_wallet}}</h5>
+				    </div>
+				</div>
+				<!-- <div class = "form-group">
+					<label for="otp" class="col-sm-2 control-label">OTP: </label>
+					<div class="col-sm-10">
+				        <input type="text"  pattern = "[0-9]{6}" class="form-control" id="otp" placeholder="456233" name = "otp" value="{{user.otp}}">
+				    </div>
+				</div> -->
+				<div class = "form-group" style="padding-left:40px;padding-right:40px;">
+					<label for="dateofbirth" class="col-sm-2 control-label">Date of Birth: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="dateofbirth" placeholder="YYYY-MM-DD" name = "dateofbirth" required title="enter a valid date in desired formet" value="{{user.date_of_birth | date:"Y-m-d"}}">
+				    </div>
+				</div>
+			    <div class="form-group">
+			      	<button type="submit" style="background:#10462f;" class="btn btn-primary">Update My Info</button>
+			    </div>
+			</form>
+		</div>
+		<table class = "table table-bordered">
+			<tr>
+				<th>Order No</th>
+				<th>Order Status</th>
+				<th>Total</th>
+				<th>Discount</th>
+				<th>VAT</th>
+				<th>Delivery Charge</th>
+				<th>Grand Total</th>
+			</tr>
+			{% for ord in orders %}
+				{% if ord.order_status != 'delivered' and ord.order_status != 'cancelled' %}
+					<tr>
+						<td><a href="/myorderdetail/{{ord.order_number}}/" target="_blank">{{ord.order_number}}</a></td>
+						<td>{{ord.order_status}}</td>
+						<td>₹ {{ord.subtotal|floatformat:"2"}}</td>
+						<td>₹ {{ord.discount_rs|floatformat:"2"}}</td>
+						<td>₹ {{ord.vat_rs|floatformat:"2"}}</td>
+						<td>₹ {{ord.delivery_charge|floatformat:"2"}}</td>
+						<td>₹ {{ord.grand_total|floatformat:"2"}}</td>
+					</tr>
+				{% endif %}
+			{% endfor %}
+		</table>
+	</div>
+{%endblock mainbody%}

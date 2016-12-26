@@ -1,0 +1,79 @@
+{% extends "app/laundry_customerendbase.html" %}
+{%block title%}LHDINDIA LAUNDRY | LAUNDRY SERVICES IN BHOPAL | ONLINE LAUNDRY IN BHOPAL | GET CLOTHES WASHED ONLINE{%endblock title%}
+
+{% block content %}
+<div class="container">
+	<div class="row" style="margin-top:20px;">
+		<div class="col l3"></div>
+		<div class="col l6 s12 center-align">
+		  <ul class="tabs">
+		    <li class="tab col s6"><a {% if 'opensignuptab' not in request.session %} class="active" {% endif %} href="#login">LOGIN</a></li>
+		    <li class="tab col s6"><a {% if 'opensignuptab' in request.session %} class="active" {% endif %} href="#signup">SIGNUP</a></li>
+		  </ul>
+		</div>
+		<div class="col l3"></div>
+		<div id="login" class="col s12" style="margin-top:10px;">
+			<div class="row">
+				<div class="col l3"></div>
+				<div class="col s12 l6" style="margin-bottom:100px;">
+					<form action="/laundry/laundry_login/" method="post">
+			            {%csrf_token%}
+			            <div class="input-field">
+			              <input type="text" name="phone" size="30" id="phone" placeholder="Phone" required>
+			              <input type="password" name="password" size="30" id="password" placeholder="Password" required>
+			              <div class="center-align">
+				              <button class="waves-effect waves-teal light-blue btn-flat" type="submit" style="width:50%;color:#ffffff;">Submit</button>
+				          </div>
+			            </div>
+			        </form>
+			        {% if 'userisblocked' in request.session %}
+			       	<h6 align="center">You are blocked by admin</h6>
+			        {% endif %}
+			        {% if 'userinvalid' in request.session %}
+			        <h6 align="center">Invalid Credentials. Please Check.</h6>
+			        {% endif %}
+			        {% if 'wrongpassword' in request.session %}
+			        <h6 align="center">Wrong Password. Please Check.</h6>
+			        {% endif %}
+				</div>
+				<div class="col l3"></div>
+			</div>
+		</div>
+		<div id="signup" class="col s12" style="margin-top:10px;">
+			<div class="row">
+				<div class="col l3"></div>
+				<div class="col s12 l6">
+					<form action="/laundry/laundry_signup/" method="post">
+			            {%csrf_token%}
+			            <div class="input-field">
+			              <input type="text" name="phone" size="30" id="phone" placeholder="Phone" required>
+			              <input type="text" name="name" size="30" id="name" placeholder="Name" required>
+			              <input type="email" name="email" size="30" id="email" placeholder="Email" required>
+			              <input type="password" name="password" size="30" id="password" placeholder="Password" required>
+			              <select id="gender" name="gender">
+			              	<option value="Male">Male</option>
+			              	<option value="Female">Female</option>
+			              </select>
+			              <div class="center-align">
+				              <button class="waves-effect waves-teal light-blue btn-flat" type="submit" style="width:50%;color:#ffffff;">Submit</button>
+				          </div>
+			            </div>
+			        </form>
+			        {% if 'passwordlessthansix' in request.session %}
+			       	<h6 align="center">Password should be more than six characters.</h6>
+			        {% endif %}
+			        {% if 'phonenotequaltoten' in request.session %}
+			        <h6 align="center">Phone number should be equal to 10 digits.</h6>
+			        {% endif %}
+			        {% if 'mobileexistsalready' in request.session %}
+			        <h6 align="center">You are already signed up. Please Login.</h6>
+			        {% endif %}
+				</div>
+				<div class="col l3"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+{% endblock %}

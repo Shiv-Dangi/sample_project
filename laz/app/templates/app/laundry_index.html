@@ -1,0 +1,115 @@
+{% extends "app/laundry_customerendbase.html" %}
+{%block title%}LHDINDIA LAUNDRY | LAUNDRY SERVICES IN BHOPAL | ONLINE LAUNDRY IN BHOPAL | GET CLOTHES WASHED ONLINE{%endblock title%}
+
+{% block content %}
+
+<div class="parallax-container valign-wrapper">
+  	<div class="parallax"><img src="https://s27.postimg.org/9omhq5r5f/black_and_white_clean_housework_launderette.jpg"></div>
+  	<div class="center-block" style="color:#ffffff;">
+	  	<div class="valign">
+	  		<a class="btn-large" href="/laundry/loginsignup/" style="color:#ffffff;font-family: 'Raleway', sans-serif; border: 2px solid white; border-radius: 5px;"><b>BOOK NOW</b></a>
+	  	</div> 
+  	</div>   
+</div>
+
+<div class="row">
+	<div class="row col l4 s12 light-blue lighten-2" style="padding:20px;">
+		<div class="col s4" style="color:#ffffff;">
+			<i class="fa fa-clock-o fa-4x" aria-hidden="true"></i>
+		</div>
+		<div class="col s8" style="color:#ffffff;">
+			<h5 style="font-family: 'Raleway', sans-serif;">7-Days a week</h5>
+			<p style="font-family: 'Raleway', sans-serif;">We are always there to cater to your needs as and when they arise.</p>
+		</div>
+	</div>
+	<div class="row col l4 s12 light-blue darken-1" style="padding:20px;">
+		<div class="col s4" style="color:#ffffff;">
+			<i class="fa fa-phone-square fa-4x" aria-hidden="true"></i>
+		</div>
+		<div class="col s8" style="color:#ffffff;">
+			<h5 style="font-family: 'Raleway', sans-serif;">Need help?</h5>
+			<p style="font-family: 'Raleway', sans-serif;">Call our representative on 0755 4222227 for any help that you may need.</p>
+		</div>
+	</div>
+	<div class="row col l4 s12 light-blue darken-4" style="padding:20px;">
+		<div class="col s4" style="color:#ffffff;">
+			<i class="fa fa-envelope-square fa-4x" aria-hidden="true"></i>
+		</div>
+		<div class="col s8" style="color:#ffffff;">
+			<h5 style="font-family: 'Raleway', sans-serif;">Drop us an email</h5>
+			<p style="font-family: 'Raleway', sans-serif;">For any suggestions/complaints drop us an email on laundry@lhdindia.com .</p>
+		</div>
+	</div>
+</div>
+<h4 class="center-align" style="font-family: 'Raleway', sans-serif; color:#03a9f4;"><b>WHY LHDINDIA LAUNDRY?</b></h4>
+<p class="center-align" style="font-family: 'Raleway', sans-serif;">These are some of all the reasons why you should choose us</p>
+<div class="row center-align" style="margin-top:50px;">
+	<div class="col l3 s12">
+		<i class="fa fa-truck fa-5x" aria-hidden="true"></i>
+		<h5 style="font-family: 'Raleway', sans-serif;"><b>Faster Deliveries</b></h5>
+		<p style="font-family: 'Raleway', sans-serif;">Get your orders completed within 48 hours with our lightening-fast pickup and drop-off facilities.</p>
+	</div>
+	<div class="col l3 s12">
+		<i class="fa fa-eercast fa-5x" aria-hidden="true"></i>
+		<h5 style="font-family: 'Raleway', sans-serif;"><b>Quality Detergent Used</b></h5>
+		<p style="font-family: 'Raleway', sans-serif;">We use quality liquid detergents for washing your clothes so that they remain as new for long.</p>
+	</div>
+	<div class="col l3 s12">
+		<i class="fa fa-life-bouy fa-5x" aria-hidden="true"></i>
+		<h5 style="font-family: 'Raleway', sans-serif;"><b>Hygienic Wash</b></h5>
+		<p style="font-family: 'Raleway', sans-serif;">No matter how small your order load is, we make sure it is washed seperately and hygiene is maintained.</p>
+	</div>
+	<div class="col l3 s12">
+		<i class="fa fa-money fa-5x" aria-hidden="true"></i>
+		<h5 style="font-family: 'Raleway', sans-serif;"><b>Pocket-Friendly</b></h5>
+		<p style="font-family: 'Raleway', sans-serif;">We would like to match others' prices, but for that we would have to raise ours!</p>
+	</div>
+</div>
+
+<div class="container" style="margin-top:50px;">
+	<div class="row">
+		<h4 class="center-align" style="font-family: 'Raleway', sans-serif;color:#03a9f4;"><b>OUR PRICING</b></h4>
+		<p class="center-align" style="font-family: 'Raleway', sans-serif;">We would like to match others' prices, but for that we would have to raise ours!</p>
+		<div class="center-align">
+			<a href="/laundry/pricing/" style="font-family: 'Raleway', sans-serif;">Check Detailed Pricing</a>
+		</div>
+	</div>
+	<div class="row">
+		{% for laundryplan in laundryplans %}
+		<div class="col s4 center-align">
+			<h5 style="font-family: 'Raleway', sans-serif;background:#ffffff;color:#000000;padding:10px;">
+			<b>{{laundryplan.plan_name}}</b></h5>
+			{% if laundryplan.pricing_per_kg != "" %}
+			<h5 style="font-family: 'Raleway', sans-serif;background:#03a9f4;color:#ffffff;padding:20px;padding-top:0px;">
+			<span class="fa fa-caret-down" aria-hidden="true"></span><br>
+			<b><span class="fa fa-rupee" aria-hidden="true"></span>&nbsp;{{laundryplan.pricing_per_kg}}</b></h5>
+			{% endif %}
+			{% if laundryplan.pricing_as_whole != "" %}
+			<h5 style="font-family: 'Raleway', sans-serif;background:#03a9f4;color:#ffffff;padding:20px;padding-top:0px;">
+			<span class="fa fa-caret-down" aria-hidden="true"></span><br>
+			<b><span class="fa fa-rupee" aria-hidden="true"></span>&nbsp;{{laundryplan.pricing_as_whole}}</b></h5>
+			{% endif %}
+			<table class="centered bordered">
+				<tbody style="font-family: 'Raleway', sans-serif;">
+		          <tr>
+		            <td>{{laundryplan.lot_size}}</td>
+		          </tr>
+		          <tr>
+		            <td>{{laundryplan.plan_name}}</td>
+		          </tr>
+		          <tr>
+		            <td>Free Pickup</td>
+		          </tr>
+		          <tr>
+		            <td>Free Delivery</td>
+		          </tr>
+		        </tbody>
+		    </table>
+		    <button class="waves-effect waves-teal light-blue btn-flat" style="width:100%;color:#ffffff;font-family: 'Raleway', sans-serif;"><b>Order Now</b></button>
+		</div>
+		{% endfor %}
+	</div>
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,47 @@
+<div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal">&times;</button>
+	<h4 class="modal-title">Offer: {{offer.offer_name|title}}</h4>
+</div>
+
+<div class="modal-body">
+	<div class="row">
+		<div class="col-md-4 col-sm-12">
+			<h5>Offer Date: {{offer.offer_date}}</h5>
+		</div>
+		<div class="col-md-8 col-sm-12">
+			<h5>Time: {{offer.start_time}} to {{offer.end_time}}</h5>
+		</div>
+	</div>
+	{% for daytime in offer.offermenu_set.all|dictsort:"date" %}
+		<a href="/offerindex/{{offer.id}}/{{daytime.daytime}}">
+			<ul class="list-unstyled" id="{{daytime.daytime}}">
+				<li>
+					<div class="row">
+						<div class="col-sm-6">
+							<h5 style="color:#10462f;">{{daytime.daytime}}</h5>
+						</div>
+						<div class="col-sm-6">
+							<h5 align="center">{{daytime.date}}</h5>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</a>
+	{% endfor %}
+</div>
+
+<div class="modal-footer">
+	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+</div>
+
+<script>
+	var duplicateChk = {};
+
+	$('ul[id]').each (function () {
+	    if (duplicateChk.hasOwnProperty(this.id)) {
+	       $(this).remove();
+	    } else {
+	       duplicateChk[this.id] = 'true';
+	    }
+	});
+</script>

@@ -1,0 +1,53 @@
+<div class = "container">
+	<a href = "/myadmin/" class = "navbar-brand" style="padding: 0px 0px;">
+		<img src="/static/app/img/lhdlogo.jpg" width="175" height="60">
+	</a>
+	<button class = "navbar-toggle" data-toggle = "collapse" data-target = ".navcollapse">
+		<span class = "glyphicon glyphicon-menu-hamburger text-danger"></span>
+	</button>
+	<style>
+		ul > li > a:hover { 
+		border-bottom: 3px solid #d2e28b;
+		background-color: #d2e28b;
+		color:#d2e28b;
+		}
+		body{
+			background-color:#d2e28b;
+		}
+		.navbar-inverse .navbar-nav>li>a {
+		    color: #ffffff;
+		}
+		.navbar-inverse .navbar-nav>li>a:hover {
+		    color: #d2e28b;
+		}
+	</style>
+	<div class = "collapse navbar-collapse navcollapse pull-right">
+		<ul class = "nav navbar-nav">
+			<li class = ""><a style="padding-bottom:0px;padding-top:28px;" href = "/myadmin/">DashBoard</a></li>
+			{% if request.session.admin.role == 'admin' %}
+			<li class = ""><a style="padding-bottom:0px;padding-top:28px;" href = "/myadmin/applicationsetup">Application Setup</a></li>
+			{% endif %}
+			{% if not request.session.admin.role == 'branchuser' %}
+			<li class = ""><a style="padding-bottom:0px;padding-top:28px;" href = "/myadmin/neworder">New Order</a></li>
+			{% endif %}
+			{% if not request.session.admin.role == 'billinguser' %}
+			<li class = ""><a style="padding-bottom:0px;padding-top:28px;" href = "/myadmin/checkonlineorderpage/">Check online Order</a></li>
+			<li class = ""><a style="padding-bottom:0px;padding-top:28px;" href = "/currenttracking/">Tracking</a></li>
+			<li class = ""><a style="padding-bottom:0px;padding-top:28px;" href = "/allreports/">Reports</a></li>
+			{% endif %}
+			{% if request.session.admin.role == 'billinguser' or request.session.admin.role == 'admin' or request.session.admin.role == 'branchuser' %}
+                <li class = ""><a style="padding-bottom:0px;padding-top:28px;" href = "/myadmin/counter/">Counter</a></li>
+{#			<li class="dropdown">#}
+{#				<a class="dropdown-toggle" data-toggle="dropdown" href="#" style="padding-bottom:0px;padding-top:28px;">#}
+{#        			Counter<span class="caret"></span>#}
+{#        		</a>#}
+{#        		<ul class="dropdown-menu">#}
+{#		          <li class = ""><a href = "/myadmin/counter/">Update Counter</a></li>#}
+{#		          <li class = ""><a href = "/myadmin/counterdashboard/">Counter Dashboard</a></li>#}
+{#		        </ul>#}
+{#			</li>#}
+			{% endif %}
+			<li class = ""><a style="padding-bottom:0px;padding-top:28px;" href = "/clearsession/">Logout</a></li>
+		</ul>
+	</div>
+</div>

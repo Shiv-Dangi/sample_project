@@ -1,0 +1,102 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<style type="text/css">
+		table
+		{
+		    counter-reset: Serial;           /* Set the Serial counter to 0 */
+		}
+		.del_boyreport_table tr td:first-child:before
+			{
+			  counter-increment: Serial;      /* Increment the Serial counter */
+			  content: counter(Serial); /* Display the counter */
+			}
+	</style>
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Delivery Boy Report
+		  </div>
+		</div>
+		<style>
+			.whutwhut{
+				-webkit-appearance: menulist-button;
+			   	height: 42px;
+			   	width: 120px;
+			}
+			input[type="date"]::-webkit-inner-spin-button{
+			    display: none;
+			}
+		</style>
+		<div class = "jumbotron">
+			<form class = "form-inline" method = "post" action = "/searchdelboy/">
+				{%csrf_token%}
+				<div class = "form-group">
+					<label>Delivery Date</label>
+				</div>
+				<div class = "form-group">
+					<input type = "date" class = "form-control" style = "width:auto;" name = "delvery_date" placeholder = "delivery-date"/>
+				</div>
+				<div class = "form-group">
+					<input type = "submit" value = "search" class = "btn btn-danger"/>
+				</div>
+			</form>
+		</div>
+
+		{% for pmode, porder in payment_tables.items %}
+			<h5><b>{{pmode.payment_mode|title}}</b></h5>
+			<div class="">
+				{% if porder %}
+					<table class = "table table-bordered del_boyreport_table">
+						<tr>
+							<th>s.no</th>
+							<th>Delivery Boy Name</th>
+							<th>order Count</th>
+							<th>Total (Rs)</th>
+							<th>Discount (Rs)</th>
+							<th>wallet dis.</th>
+							<th>vat</th>
+							<th>s.tax</th>
+							<th>s.charge</th>
+							<th>del.charge</th>
+							<th>grand total</th>
+						</tr>
+					{%for key, value in porder.items %}
+						{% if key != 'total' %}
+						<tr>
+							<td></td>
+							<td>{{key.first_name}} {{key.last_name}}-{{key.mobile}}</td>
+							<td>{{value.order_count}}</td>
+							<td>{{value.total_rs}}</td>
+							<td>{{value.discount}}</td>
+							<td>{{value.ewallet}}</td>
+							<td>{{value.vat}}</td>
+							<td>{{value.ser_tax}}</td>
+							<td>{{value.ser_charge}}</td>
+							<td>{{value.del_charge}}</td>
+							<td>{{value.gtot}}</td>
+						</tr>
+						{%endif%}
+					{%endfor%}
+						<tr>	
+							<th colspan="2">TOTAL:</th>
+							<th>{{porder.total.order_count|default:"0.0"}}</th>
+							<th>{{porder.total.total_rs|default:"0.0"}}</th>
+							<th>{{porder.total.discount|default:"0.0"}}</th>
+							<th>{{porder.total.ewallet|default:"0.0"}}</th>
+							<th>{{porder.total.vat|default:"0.0"}}</th>
+							<th>{{porder.total.ser_tax|default:"0.0"}}</th>
+							<th>{{porder.total.ser_charge|default:"0.0"}}</th>
+							<th>{{porder.total.del_charge|default:"0.0"}}</th>
+							<th>{{porder.total.gtot|default:"0.0"|floatformat:"0"}}</th>
+						</tr>
+					</table>
+				{% endif %}
+			</div>
+		{% endfor %}
+	</div>
+
+{%endblock content%}

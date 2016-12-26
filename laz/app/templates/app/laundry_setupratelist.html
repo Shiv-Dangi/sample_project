@@ -1,0 +1,92 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color: #10452f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Setup Rate List
+		  </div>
+		</div>
+		<div class = "jumbotron row">
+			{% if 'item_code_exists' in request.session %}
+				<h5>Item Code Already Exists</h5>
+			{% endif %}
+			<div class="row">
+				<form class = "form" method = "post" action = "/laundry/setupratelist/">
+					{% csrf_token %}
+					<div class = "form-group">
+						<div class="col-sm-2">
+					        <input type="text" class="form-control" id="item_code" placeholder="Item Code" name = "item_code" required>
+					    </div>
+					</div>
+					<div class = "form-group">
+						<div class="col-sm-2">
+					        <input type="text" class="form-control" id="item_name" placeholder="Item Name" name = "item_name" required>
+					    </div>
+					</div>
+					<div class = "form-group">
+						<div class="col-sm-2">
+					        <input type="text" class="form-control" id="steam_iron_price" placeholder="Steam Iron" name = "steam_iron_price">
+					    </div>
+					</div>
+					<div class = "form-group">
+						<div class="col-sm-2">
+					        <input type="text" class="form-control" id="wash_fold_price" placeholder="Wash Fold" name = "wash_fold_price">
+					    </div>
+					</div>
+					<div class = "form-group">
+						<div class="col-sm-2">
+					        <input type="text" class="form-control" id="wash_iron_price" placeholder="Wash Iron" name = "wash_iron_price">
+					    </div>
+					</div>
+					<div class = "form-group">
+						<div class="col-sm-2">
+					        <input type="text" class="form-control" id="dryclean_price" placeholder="Dryclean" name = "dryclean_price">
+					    </div>
+					</div>
+					<div class = "form-group">
+						<div class="col-sm-2">
+					        <input type="checkbox" class="form-control" id="is_express" name = "is_express">
+					    </div>
+					</div>
+				    <div class="form-group">
+				      <div class="col-sm-2" style="margin-top:5px;">
+				        <button type="submit" class="btn btn-primary">Submit</button>
+				      </div>
+				    </div>
+				</form>
+			</div><br><br>
+			<table class = "table table-striped col-sm-12">
+				<thead>
+					<tr>
+						<th>Item Code</th>
+						<th>Item Name</th>
+						<th>Steam Iron</th>
+						<th>Wash and Fold</th>
+						<th>Wash and Iron</th>
+						<th>Dry Clean</th>
+						<th>For Express</th>
+						<th>Delete</th>
+					</tr>
+				</thead>
+				<tbody>
+				{% for item in items%}
+					<tr>
+						<td>{{item.item_code}}</td>
+						<td>{{item.item_name}}</td>
+						<td>{{item.steam_iron_price}}</td>
+						<td>{{item.wash_fold_price}}</td>
+						<td>{{item.wash_iron_price}}</td>
+						<td>{{item.dryclean_price}}</td>
+						<td>{{item.is_express}}</td>
+						<td><a href="/laundry/deleteratelistitem/{{item.item_code}}/" class="glyphicon glyphicon-remove"></a></td>
+					</tr>
+				{%endfor%}
+				</tbody>
+			</table>
+		</div>
+	</div>
+{%endblock content%}

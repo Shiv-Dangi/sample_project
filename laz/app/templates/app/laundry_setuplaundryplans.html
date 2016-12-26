@@ -1,0 +1,81 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color: #10452f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Setup Laundry Plans
+		  </div>
+		</div>
+		<div class = "jumbotron row">
+			{% if 'plan_code_exists' in request.session %}
+				<h5>Plan Code Already Exists</h5>
+			{% endif %}
+			{% if 'please_not_both' in request.session %}
+				<h5>You need to fill only/at least of out of /kg price and whole price.</h5>
+			{% endif %}
+			<div class="row">
+				<form class = "form" method = "post" action = "/laundry/setuplaundryplans/">
+					{% csrf_token %}
+					<div class = "form-group">
+						<div class="col-sm-2">
+					        <input type="text" class="form-control" id="plan_code" placeholder="Plan Code" name = "plan_code" required>
+					    </div>
+					</div>
+					<div class = "form-group">
+						<div class="col-sm-2">
+					        <input type="text" class="form-control" id="plan_name" placeholder="Plan Name" name = "plan_name" required>
+					    </div>
+					</div>
+					<div class = "form-group">
+						<div class="col-sm-2">
+					        <input type="text" class="form-control" id="lot_size" placeholder="Lot Size (Empty if none)" name = "lot_size">
+					    </div>
+					</div>
+					<div class = "form-group">
+						<div class="col-sm-2">
+					        <input type="text" class="form-control" id="pricing_per_kg" placeholder="/kg price (Empty if none)" name = "pricing_per_kg">
+					    </div>
+					</div>
+					<div class = "form-group">
+						<div class="col-sm-2">
+					        <input type="text" class="form-control" id="pricing_as_whole" placeholder="all price (Empty if none)" name = "pricing_as_whole">
+					    </div>
+					</div>
+				    <div class="form-group">
+				      <div class="col-sm-2" style="margin-top:5px;">
+				        <button type="submit" class="btn btn-primary">Submit</button>
+				      </div>
+				    </div>
+				</form>
+			</div><br><br>
+			<table class = "table table-striped col-sm-12">
+				<thead>
+					<tr>
+						<th>Plan Code</th>
+						<th>Plan Name</th>
+						<th>Lot Size</th>
+						<th>Price per Kg</th>
+						<th>Price as a whole</th>
+						<th>Delete</th>
+					</tr>
+				</thead>
+				<tbody>
+				{% for plan in plans%}
+					<tr>
+						<td>{{plan.plan_code}}</td>
+						<td>{{plan.plan_name}}</td>
+						<td>{{plan.lot_size}}</td>
+						<td>{{plan.pricing_per_kg}}</td>
+						<td>{{plan.pricing_as_whole}}</td>
+						<td><a href="/laundry/deletelaundryplan/{{plan.plan_code}}/" class="glyphicon glyphicon-remove"></a></td>
+					</tr>
+				{%endfor%}
+				</tbody>
+			</table>
+		</div>
+	</div>
+{%endblock content%}

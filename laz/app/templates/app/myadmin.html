@@ -1,0 +1,216 @@
+{% extends "app/baseadmin.html" %}
+{% load harishtags %}
+{%load staticfiles%}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<style type="text/css">
+		input[type="date"]::-webkit-inner-spin-button{
+		    display: none;
+		}
+		table thead tr th{
+			font-size: small;
+			/*font-weight: normal;*/
+		}
+		.dashboard{
+			font-size: small;
+			font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
+			font-weight: normal;
+			color: #000000;
+		}
+		.order-num{
+			font-size: large;
+		}
+		.timer{
+			font-size: large;
+			font-family: Algerian;
+			font-weight: bold;
+		}
+		.nav-tabs{
+		  background-color:#d2e28b;
+		}
+		.nav-tabs > li > a {
+			color: #10452f;	
+		}
+		.nav-tabs > li > a:hover {
+			color: #10452f;
+			background-color: #d2e28b;
+			border-bottom: 0px;	
+		}
+		.heading-row > th {
+			background-color: #10452f;
+			color: #ffffff;
+			font-family:"Courier New", Courier, monospace;
+			font-size:small;
+		}
+		table{
+			background-color: #d2e28b;
+		}
+		table tbody tr th table tbody {
+			background-color: #d2e28b;
+		}
+	</style>
+
+	<!-- order cancel Modal -->
+	<div class="modal fade" id="cancel-order" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	    <div class="modal-dialog">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                Order Cancel modal
+	            </div>
+	            <div class="modal-body">
+	                <form class = "form-horizontal ordercancel-form" method = "post">
+						{% csrf_token %}
+						<div class = "col-sm-10 col-sm-offset-1">
+							<div class = "form-group">
+								<label for="customer-name">Reason of cancel The Order</label>
+								<textarea type="text" class="form-control" name="cancel_reason">
+								</textarea>
+							</div>
+						</div>
+					    <div class="form-group">
+					      <div class="col-sm-10 col-sm-offset-4">
+					        <button type="submit" class="btn btn-primary">Cancel Order</button>
+					        <button class="btn btn-primary" data-dismiss="modal">Close</button>
+					      </div>
+					    </div>
+					</form>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	<script type="text/javascript">
+		$('#cancel-order').on('shown.bs.modal', function(e) {
+		    $(this).find('.ordercancel-form').attr('action', $(e.relatedTarget).data('href'));
+		});
+	</script>
+	<!-- end of order cancel model -->
+
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container dashboard" style="margin-left:5px;margin-right:5px;width:100%;">
+		{% include "app/updatedashboard.html" %}
+	</div>
+	<div class="footer navbar-fixed-bottom" style="background-color:#10452f;">
+		<div class="row">
+			<div class="col-sm-11">
+				<div class="pull-left" style="padding-top: 5px;font-size:small;">Welcome, {{request.session.admin.name}}-lhdhakeem&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					{% now "j-F-Y" %} -> BOOKED({{ today_orders|get_value_from_dict:'booked'}}) | ASSIGNED({{ today_orders|get_value_from_dict:'assigned'}}) | ACCEPTED({{ today_orders|get_value_from_dict:'accepted'}}) | DISPATCHED({{ today_orders|get_value_from_dict:'dispatched'}}) | DELIVERED({{ today_orders|get_value_from_dict:'delivered'}}) | CANCELED({{ today_orders|get_value_from_dict:'cancelled'}}) | Paid/COD({{ today_orders|get_value_from_dict:'paid'}}/{{ today_orders|get_value_from_dict:'cod'}}) | Online Payment({{ today_orders|get_value_from_dict:'onlinepayment'}}).
+				<div>
+			</div>
+			<div class="col-sm-1">
+			</div>
+		</div>
+	</div>
+
+	<script>
+		function printorder(order_number){
+			url = '/myadmin/printorder/' + order_number + '/';
+			var printWindow = window.open(url, '_blank');
+			printWindow.onload = function() {
+			    var isIE = /(MSIE|Trident\/|Edge\/)/i.test(navigator.userAgent);
+			    if (isIE) {
+
+			        printWindow.print();
+			        setTimeout(function () { printWindow.close(); }, 100);
+
+			    } else {
+
+			        setTimeout(function () {
+			            printWindow.print();
+			            var ival = setInterval(function() {
+			                printWindow.close();
+			                clearInterval(ival);
+			            }, 200);
+			        }, 500);
+			    }
+			}
+		}
+
+		function acceptorder(order_number){
+			var post_url = "/myadmin/orderaccepted/"+order_number+"/";
+			$.post(post_url, function(data){}).done(function(){
+				$.get("/myadmin/updatedashboard/", function(data){
+					$(".dashboard").html(data);
+				})
+			});
+			printorder(order_number);
+		}
+
+		function dispatchorder(order_number){
+			var order_id = 'dispatch' + order_number;
+			var delboy = document.getElementById(order_id).value;
+			var url = "/myadmin/orderadddel/" + order_number + "/";
+			$.post(url, {'del': delboy}, function(data){
+				
+			}).done(function(){
+				$.get('/myadmin/updatedashboard/',function(data){
+					$(".dashboard").html(data);
+				})
+			});
+		}
+
+		$(function() { 
+		    // for bootstrap 3 use 'shown.bs.tab', for bootstrap 2 use 'shown' in the next line
+		    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+		        // save the latest tab; use cookies if you like 'em better:
+		        localStorage.setItem('lastTab', $(this).attr('href'));
+		    });
+
+		    // go to the latest tab, if it exists:
+		    var lastTab = localStorage.getItem('lastTab');
+		    if (lastTab) {
+		        $('[href="' + lastTab + '"]').tab('show');
+		    }
+		});
+
+		function searchorders(){
+			var order_number = document.getElementById('sorder_number').value;
+			var customer_name = document.getElementById('scustomer_name').value;
+			var customer_mobile = document.getElementById('scustomer_mobile').value;
+			var del_date = document.getElementById('sdel_date').value;
+			var del_boy = document.getElementById('sdel_boy').value;
+			var payment_mode = document.getElementById('spayment_mode').value;
+			$.post("/myadmin/dashboard/searchorder/", {"order_number":order_number, "customer_name":customer_name, "customer_mobile":customer_mobile, "del_date":del_date, "del_boy":del_boy, "payment_mode":payment_mode}, function(data){
+				$(".search-order").html(data);
+			});
+		}
+
+		setInterval(ajaxCall, 60000);
+		function ajaxCall() {
+			// var tabclass = document.getElementById('searchorder').className;
+			if (!document.getElementById('searchorder').className){
+				$.ajax({
+					url : "/myadmin/updatedashboard/",
+					type: "get",
+		        	success : function(data){
+		        		$(".dashboard").html(data);
+		        	},
+		        	error: function(data){
+			            console.log('errors');
+			        }
+		        });
+			}
+		};
+	</script>
+	<!-- js for timers -->
+	<script src = "{% static 'app/js/countdown.min.js' %}"></script>
+	<script type="text/javascript">
+		setInterval(function() {
+			$('[data-countup]').each(function(){
+				var $this = $(this), finalDate = $(this).data('countup');
+				var timespan = countdown(new Date(finalDate), new Date());
+			    var div = document.getElementById($(this).attr('id'));
+			    div.innerHTML = "-" + timespan.days + ", " + timespan.hours + ":" + timespan.minutes + ":" + timespan.seconds
+			});
+		}, 1000);
+		setInterval(function() {
+			$('[data-countdown]').each(function(){
+				var $this = $(this), finalDate = $(this).data('countdown');
+				var timespan = countdown(new Date(finalDate));
+			    var div = document.getElementById($(this).attr('id'));
+			    div.innerHTML =  timespan.days + ", " + timespan.hours + ":" + timespan.minutes + ":" + timespan.seconds
+			});
+		}, 1000);
+	</script>
+{%endblock content%}

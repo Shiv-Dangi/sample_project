@@ -1,0 +1,42 @@
+<html>
+<head>
+</head>
+<body>
+	<form method="POST" name="customerData" action="/online_payment/">
+		{% csrf_token %}
+		<table width="40%" height="100" border='1' align="center">
+			<caption>
+				<font size="4" color="blue"><b>Checkout</b></font>
+				<hr>
+			</caption>
+		</table>
+		<table width="40%" height="100" border='1' align="center">
+			<tr>
+				<td>Parameter Name:</td>
+				<td>Parameter Value:</td>
+			</tr>
+			<tr>
+				<td>Merchant Id</td>
+				<td><input disabled="disabled" type="text" name="merchant_id" id="merchant_id" value="2954" /> </td>
+			</tr>
+			<tr>
+				<td>Order Id</td>
+				<td><input disabled="disabled" type="text" name="order_id" value={{ order_no }} /></td>
+			</tr>
+			<tr>
+				<td>Currency</td>
+				<td><input disabled="disabled" type="text" name="currency" value="INR" /></td>
+			</tr>
+			<tr>
+				<td>Amount</td>
+				<td><input disabled="disabled" type="text" name="amount" value={{request.session.cart.grandtotal}} /></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><INPUT TYPE="submit" value="Checkout"></td>
+			</tr>
+			
+		</table>
+	</form>
+</body>
+</html>

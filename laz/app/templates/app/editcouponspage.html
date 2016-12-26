@@ -1,0 +1,78 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class = "jumbotron">
+			<form class = "form-horizontal" method = "post" action = "/myadmin/editcoupons/{{coupon.id}}/">
+				{% csrf_token %}
+				<legend>Edit Coupons Detail</legend>
+				<div class = "form-group">
+					<label for="num_of_coupon" class="col-sm-2 control-label">No of Coupon: </label>
+					<div class="col-sm-10">
+				        <input type="Number" class="form-control" id="num_of_coupon" name = "num_of_coupons" value="{{coupon.num_of_coupons}}" readonly />
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="prefix" class="col-sm-2 control-label">Prefix: </label>
+					<div class="col-sm-10">
+				        <input type="text" pattern = ".{4,10}" class="form-control" id="prefix" name = "prefix"  value="{{coupon.prefix}}" readonly />
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="suffix" class="col-sm-2 control-label">Suffix: </label>
+					<div class="col-sm-10">
+				        <input type="text" pattern = ".{4,10}" class="form-control" id="suffix" name = "suffix"  value="{{coupon.suffix}}" readonly />
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="start_from" class="col-sm-2 control-label">Start From: </label>
+					<div class="col-sm-10">
+				        <input type="Number" class="form-control" id="start_from" name = "start_from" readonly="" value="{{coupon.start_from}}" />
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="start_date" class="col-sm-2 control-label">Start Date: </label>
+					<div class="col-sm-10">
+				        <input type="date" class="form-control" id="start_date" placeholder="YYYY-MM-DD" name = "start_date" required title="enter a valid date in desired formet" value="{{coupon.start_date | date:"Y-m-d"}}">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="end_date" class="col-sm-2 control-label">End Date: </label>
+					<div class="col-sm-10">
+				        <input type="date" class="form-control" id="end_date" placeholder="YYYY-MM-DD" name = "end_date" required title="enter a valid date in desired formet" value="{{coupon.end_date | date:"Y-m-d"}}">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="discount_type" class="col-sm-2 control-label">Discount Type</label>
+					<div class="col-sm-10">
+				        <select class="form-control" id="discount_type" name = "discount_type">
+							<option value="Rs" {% if coupon.discount_type == 'Rs' %}selected{% endif %}>Rs</option>
+							<option value="persent" {% if coupon.discount_type == 'persent' %}selected{% endif %}>%</option>
+			        	</select>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="discount_value" class="col-sm-2 control-label">Discount Value: </label>
+					<div class="col-sm-10">
+				        <input type="Number" class="form-control" id="discount_value" name = "discount_value" readonly="" value="{{coupon.discount_value}}" />
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="block_user" class="col-sm-2 control-label">Is Active: </label>
+					<div class="col-sm-10">
+				        <input type="checkbox" class="form-control" id="is_active" name = "is_active" value="1" {% if coupon.is_active == True %}checked{% endif %}>
+				    </div>
+				</div>
+				<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+			    <div class="form-group">
+			      <div class="col-sm-10 col-sm-offset-6">
+			        <button type="submit" class="btn btn-primary">Uppdate</button>
+			      </div>
+			    </div>
+			</form>
+		</div>
+	</div>
+{%endblock content%}

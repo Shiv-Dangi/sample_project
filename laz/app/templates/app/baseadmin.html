@@ -1,0 +1,27 @@
+{%load staticfiles%}
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="description" content="LHDINDIA (Lazeez Hakeem) delivers quality food to your doorstep without delivery charges for most of Bhopal. Order Now!">
+		<meta name="keywords" content="LHDINDIA, LAZEEZ HAKEEM, Food Home Delivery in Bhopal, Online Food Ordering in Bhopal, Bulk Food Ordering in Bhopal, Lazeez Wednesday Offer, Lazeez Wednesday Menu">
+		<title>{%block title%}{%endblock title%}</title>
+		{%block customerend_css%} {%endblock customerend_css%}
+		<link rel="shortcut icon" href="{% static 'app/img/favicon.ico' %}" />
+		<link rel = "stylesheet" href = "{% static 'app/css/bootstrap.css' %}" />
+		<link rel = "stylesheet" href = "{% static 'app/css/custom.css' %}" />
+		<link href='https://fonts.googleapis.com/css?family=Titillium+Web:400,200' rel='stylesheet' type='text/css'>
+		<link href='https://fonts.googleapis.com/css?family=Great+Vibes' rel='stylesheet' type='text/css'>
+		<link href="https://fonts.googleapis.com/css?family=Lalezar" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=PT+Sans+Narrow" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Shadows+Into+Light" rel="stylesheet">
+	</head>
+	<body style="background:#d2e28b;">
+		<script src = "https://code.jquery.com/jquery-1.11.0.min.js"
+  integrity="sha256-spTpc4lvj4dOkKjrGokIrHkJgNA0xMS98Pw9N7ir9oI="
+  crossorigin="anonymous"></script>
+		{%block content%}
+		{%endblock content%}
+		<script src = "{% static 'app/js/bootstrap.js' %}"></script>
+		{%block customerend_js%} {%endblock customerend_js%}
+	</body>
+</html>

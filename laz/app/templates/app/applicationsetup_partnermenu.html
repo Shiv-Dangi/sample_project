@@ -1,0 +1,126 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<style type="text/css">
+		.additem {
+			padding-left: 22px;
+		}
+		.control-field {
+			padding-left: 0px;
+			padding-right: 0px;
+		}
+		.btn {
+			margin-top: 25px
+		}
+	</style>
+	<script>
+		function doAction(partner_id) {
+			$.ajax({
+				url : "/partnermenuajaxreload/",
+				data : { item_category: $('#item_category').val(), item_type: $('#item_type').val(), item_name: $('#item_name').val(), item_subname: $('#item_subname').val(), partner_id: partner_id},
+	        	success : function(data){
+	        		$(".additemform").html(data);
+	        	}
+	        });
+		};
+	</script>
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class= "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-align-justify"></span>&nbsp;&nbsp;&nbsp;Partner Menu
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<div>Partner Name: &nbsp;&nbsp;&nbsp; {{partner.partner_name}}</div></br>
+			<div class="row additemform">
+				<form method = "post" action = "/myadmin/createpartneritem/{{partner.loginid}}/" enctype="multipart/form-data">
+				  	{% csrf_token %}
+				  	<div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="item_category" class="control-label additem">Category: </label>
+						<div class="col-sm-10">
+					        <select class="form-control" id="item_category" name="item_category" onchange="doAction({{partner.id}});">
+					       		<option disabled selected>Please Select</option>
+					        	{%for category in item_categories%}
+								<option value="{{category.item_category}}">{{category.item_category}}</option>
+								{%endfor%}
+				        	</select>
+					    </div>
+					</div>
+					<div class = "form-group col-xs-1 col-md-1 control-field">
+						<label for="item_type" class="control-label additem">Type: </label>
+						<div class="col-sm-10">
+					        <select class="form-control" id="item_type" name="item_type" onchange="doAction({{partner.id}});">
+					        	<option disabled selected>Please Select</option>
+								<option value="VEG">Veg</option>
+								<option value="Non-Veg">Non-Veg</option>
+				        	</select>
+					    </div>
+					</div>
+					<div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="item_name" class="control-label additem">Item Name: </label>
+						<div class="col-sm-10">
+					        <select class="form-control" id="item_name" name = "item_name" onchange="doAction({{partner.id}});">
+					        	<option disabled selected>Please Select</option>
+					        	{% for item in items %}
+									<option value="{{item.item_name}}">{{item.item_name}}</option>
+								{%endfor%}
+				        	</select>
+					    </div>
+					</div>
+					<div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="item_name" class="control-label additem">Item SubName: </label>
+						<div class="col-sm-10">
+					        <select class="form-control" id="item_subname" name = "item_subname" onchange="doAction({{partner.id}});">
+					        	<option disabled selected>Please Select</option>
+					        	{% for item in items %}
+									<option value="{{item.item_subname}}">{{item.item_name}}-{{item.item_subname}}</option>
+								{%endfor%}
+				        	</select>
+					    </div>
+					</div>
+					<div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="price" class="control-label additem">Current price: </label>
+						<div class="col-sm-10">
+					        <input type="Number" class="form-control" id="price" placeholder="" name="current_price">
+					    </div>
+					</div>
+					<div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="price" class="control-label additem">Expected price: </label>
+						<div class="col-sm-10">
+					        <input type="Number" class="form-control" id="price" placeholder="" name="expected_price">
+					    </div>
+					</div>				
+				  	<button type="submit" class="btn btn-default col-xs-1 col-md-1">Add</button>
+				</form>
+			</div></br>
+
+			<table class = "table table-striped">
+				<thead>
+					<tr>
+						<th>Category Name</th>
+						<th>Item Type</th>
+						<th>Item Name</th>
+						<th>Current Price</th>
+						<th>Expected Price</th>
+						<th>Delete</th>
+					</tr>
+				</thead>
+				<tbody>
+					{%for item in partner_items%}
+						<tr>
+							<td>{{item.item.item_category}}</td>
+							<td>{{item.item.item_type}}</td>
+							<td>{{item.item.item_name}}-{{item.item.item_subname}}</td>
+							<td>{{item.item.price}}</td>
+							<td>{{item.expected_price}}</td>
+							<td><a href="/myadmin/deletepartneritem/{{item.id}}/" class="glyphicon glyphicon-remove"></a></td>
+						</tr>
+					{%endfor%}
+				</tbody>
+			</table>
+		</div>
+	</div>
+{%endblock content%}

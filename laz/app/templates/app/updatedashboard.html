@@ -1,0 +1,766 @@
+{% load harishtags %}
+<ul class="nav nav-tabs">
+	<li class="active" id="activeorder"><a href="#activeorders" data-toggle="tab" aria-expanded="true">Active Orders ({{active_orders.count}})</a></li>
+	<li class=""><a href="#dispatchedorders" data-toggle="tab" aria-expanded="false">Dispatched Orders ({{dispatched_orders.count}})</a></li>
+	<li class=""><a href="#completedorders" data-toggle="tab" aria-expanded="false">Completed Orders ({{orders_completed.count}})</a></li>
+	<li class=""><a href="#cancelledorders" data-toggle="tab" aria-expanded="false">Cancelled Orders ({{cancelled_orders.count}})</a></li>
+	<li class=""><a href="#forthcomingorders" data-toggle="tab" aria-expanded="false">Forthcoming Orders ({{forthcoming_orders.count}})</a></li>
+	<li class=""><a href="#exceptionorders" data-toggle="tab" aria-expanded="false">Exception Orders ({{exception_orders.count}})</a></li>
+	<li class="" id="searchorder"><a href="#ordersearch" data-toggle="tab" aria-expanded="false">Order Search</a></li>
+</ul>
+<div id="myTabContent" class="tab-content" style="background-color:#ffffff;">
+	<div class="tab-pane fade active in" id="activeorders">
+		<table class = "table table-bordered">
+			<thead>	
+				<tr class="heading-row">
+					<th class = "text-center">ORDER #</th>
+					<th class = "text-center">BOOKED/DELIVERY</th>
+					<th class = "text-center">ASSIGNED</th>
+					<th class = "text-center">ACCEPTED</th>
+					<th class = "text-center">DISPATCHED</th>
+					<th class = "text-center">DELIVERED</th>
+					<th class = "text-center" style="display: none;">PAID</th>
+					<th class = "text-center">X</th>
+					<th class = "text-center">SOURCE</th>
+					<th class = "text-center">CONTACT PERSON</th>
+					<th class = "text-center">COST (₹)</th>
+				</tr>
+			</thead>
+			<tbody>
+				{%for order in active_orders%}
+					<tr>
+
+					<th class="text-center" style="vertical-align:middle;">
+						<a class="order-num" target="_blank" href="/myadmin/orderdetail/{{order.order_number}}/">{{order.order_number}}</a><br><br>
+						<button align="center" type="button" class="btn btn-success btn-sm" onclick="printorder({{order.order_number}});"><span class="glyphicon glyphicon-print"></span></button> 	
+					</th>
+
+					<th id = "timer{{order.order_number}}" class="text-center" style="vertical-align:middle;">
+						{{order.placed_at}} /<br>
+						{{order.expected_at}}<br>
+						{% if order.get_timediff %}
+							<div id="{{order.order_number}}" class="text-center timer" data-countdown="{{order.expected_at|date:'m/d/Y h:i A'}}"></div>
+						{%else%}
+							<div class= "text-danger text-center timer" id="{{order.order_number}}" data-countup="{{order.expected_at|date:'m/d/Y h:i A'}}"></div>
+						{%endif%}
+					</th>
+
+					{% if order.branch_assigned == "" %}
+						<th class="text-center" style="vertical-align:middle;">
+							<form class = "form" method = "post" action = "/myadmin/orderaddbranch/{{order.order_number}}/">	
+							{%csrf_token%}
+							<select name = "branch" class="form-control" style="background: transparent;">
+								{%for branch in branches%}
+									<option value = "{{branch.branch}}" default>{{branch.branch}}</option>
+								{%endfor%}
+							</select><br><br>
+							<button type = "submit" class = "btn btn-primary btn-sm">assign</button>
+							</form>
+						</th>
+						<th></th>
+						<th></th>
+						<th></th>
+						<!-- <th></th> -->
+					{%else%}
+						<th class="text-center" style="vertical-align:middle;">
+							{{order.branch_assigned_at|date:"d M, f a"}} {{order.branch_assigned}}</th>
+						{% if order.accepted_by == "" %}
+							<th class="text-center" style="vertical-align:middle;">
+								{% if request.session.admin.role == 'branchuser' or request.session.admin.role == 'admin' %}
+									{% if order.onlinepay_status == 'success' or order.onlinepay_status == 'NA' %}
+									<button onclick="acceptorder({{order.order_number}});" class="btn btn-primary btn-sm">Accepted</button><br><br>
+									{% else %}
+									<h5 class="text-danger">Incomplete Pay ( {{order.onlinepay_status|title}} )</h5>
+									{% endif %}
+								{% endif %}
+							</th>
+							<th></th>
+							<th></th>
+							<!-- <th></th> -->
+						{%else%}
+							<th class="text-center" style="vertical-align:middle;">
+								{{order.accepted_at|date:"d M, f a"}}
+							</th>
+							{% if order.dispatched_with == "" %}
+								<th class="text-center" style="vertical-align:middle;">	
+									{% if request.session.admin.role == 'branchuser' or request.session.admin.role == 'admin' %}
+									<select name = "del" style="background: transparent;" class="form-control" id="dispatch{{order.order_number}}" required>
+										<option value="" selected>Please select a delivery boy</option>
+										{%for del in deliveryboys%}
+											<option value = "{{del.first_name}} {{del.last_name}} {{del.mobile}}" default>{{del.first_name}} {{del.last_name}} {{del.mobile}}</option>
+										{%endfor%}
+									</select><br><br>
+									<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+									<button type = "submit" class = "btn btn-primary btn-sm" onclick="dispatchorder({{order.order_number}});">assign</button>
+									{% endif %}	
+								</th>
+								<th></th>
+								<!-- <th></th> -->
+							{% else %}
+								<th class="text-center" style="vertical-align:middle;">
+									{{order.dispatched_with}}, {{order.dispatched_at|date:"d M, f a"}} <br><br>
+									{% if request.session.admin.role == 'branchuser' or request.session.admin.role == 'admin' %}
+									{% if not order.delivery_type == 'Branch Pickup' %}
+									<select name = "del" style="background: transparent;" class="form-control" id="dispatch{{order.order_number}}" required>
+										<option value="" selected>Please select a delivery boy</option>
+										{%for del in deliveryboys%}
+											<option value = "{{del.first_name}} {{del.last_name}} {{del.mobile}}" default>{{del.first_name}} {{del.last_name}} {{del.mobile}}</option>
+										{%endfor%}
+									</select><br><br>
+									<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+									<button type = "submit" class = "btn btn-primary btn-sm" onclick="dispatchorder({{order.order_number}});">assign</button>
+									{% endif %}
+									{% endif %}
+								</th>
+								{% if order.delivered_at == None %}
+									<th class="text-center" style="vertical-align:middle;">
+										<a class = "btn btn-primary btn-sm" href = "/myadmin/orderdelivered/{{order.order_number}}">Delivered</a>
+									</th>
+									<!-- <th></th> -->
+								{% else %}
+									<th class="text-center" style="vertical-align:middle;">{{order.delivered_at}}</th>
+									<th style="display: none;"><br><br>{{order.paid_at}}</th>
+								{% endif %}
+							{%endif%}
+						{%endif%}
+					{%endif%}
+
+					<th style="vertical-align:middle;">
+						{% if request.session.admin.role == 'admin' %}
+						<a href="#" data-href="/myadmin/ordercancelled/{{order.order_number}}/" class="glyphicon glyphicon-remove" data-toggle="modal" data-target="#cancel-order"></a> <br/>
+						{% endif %}
+					</th>
+					<th style="vertical-align:middle;">{{order.source}}</th>
+					<th>
+						{{order.customer_name|title}}-{{order.customer_mobile}}<br>
+						{{order.delivery_type}}-{{order.payment_mode}} {{order.onlinepay_status|title}}<br>
+						<hr>
+						{{order.address}}
+						<hr>
+						{{order.special_comment}}<br>
+						<br>
+						{% if order.delivery_type == 'Dining' %}
+							No. Of People for Dining: {{order.no_of_people}}
+						{% endif %}<br>
+					</th>
+					<th>
+						<table style="margin:0px;" class = "table table-bordered">
+							<tbody>
+								<tr><td>TOT</td><td>{{order.subtotal}}</td></tr>
+								<tr><td>eWA</td><td>{{order.e_wallet}}</td></tr>
+								<tr><td>DIS</td><td>{{order.discount_rs}}</td></tr>
+								<tr><td>STA</td><td>{{order.service_tax_rs}}</td></tr>
+								<tr><td>VAT</td><td>{{order.vat_rs}}</td></tr>
+								<tr><td>SCH</td><td>{{order.service_charge_rs}}</td></tr>
+								<tr><td>DCH</td><td>{{order.delivery_charge}}</td></tr>
+								<tr><td>GTA</td><td>{{order.grand_total}}</td></tr>
+							</tbody>
+						</table>
+					</th>
+					</tr>
+				{%endfor%}
+			</tbody>
+		</table>
+	</div>
+
+	<div class="tab-pane fade" id="dispatchedorders">
+		<table class = "table table-bordered">
+			<thead>	
+				<tr class="heading-row">
+					<th class = "text-center">ORDER #</th>
+					<th class = "text-center">BOOKED/DELIVERY</th>
+					<th class = "text-center">ASSIGNED</th>
+					<th class = "text-center">ACCEPTED</th>
+					<th class = "text-center">DISPATCHED</th>
+					<th class = "text-center">DELIVERED</th>
+					<th class = "text-center" style="display: none;">PAID</th>
+					<th class = "text-center">X</th>
+					<th class = "text-center">SOURCE</th>
+					<th class = "text-center">CONTACT PERSON</th>
+					<th class = "text-center">COST (₹)</th>
+				</tr>
+			</thead>
+			<tbody>
+				{%for order in dispatched_orders%}
+					<tr>
+
+					<th class="text-center" style="vertical-align:middle;">
+						<a class="order-num" target="_blank" href="/myadmin/orderdetail/{{order.order_number}}/">{{order.order_number}}</a><br><br>
+						<button align="center" type="button" class="btn btn-success btn-sm" onclick="printorder({{order.order_number}});"><span class="glyphicon glyphicon-print"></span></button> 	
+					</th>
+
+					<th id = "timer{{order.order_number}}" class="text-center" style="vertical-align:middle;">
+						{{order.placed_at}} /<br>
+						{{order.expected_at}}<br>
+						{% if order.get_timediff %}
+							<div id="d{{order.order_number}}" class="text-center timer" data-countdown="{{order.expected_at|date:'m/d/Y h:i A'}}"></div>
+						{%else%}
+							<div class= "text-danger text-center timer" id="d{{order.order_number}}" data-countup="{{order.expected_at|date:'m/d/Y h:i A'}}"></div>
+						{%endif%}
+					</th>
+
+					<th class="text-center" style="vertical-align:middle;">
+						{{order.branch_assigned_at|date:"d M, f a"}} {{order.branch_assigned}}
+					</th>
+
+					<th class="text-center" style="vertical-align:middle;">
+						{{order.accepted_at|date:"d M, f a"}}
+					</th>
+
+					<th class="text-center" style="vertical-align:middle;">
+						{{order.dispatched_with}}, {{order.dispatched_at|date:"d M, f a"}} <br><br>
+						{% if request.session.admin.role == 'branchuser' or request.session.admin.role == 'admin' %}
+						{% if not order.delivery_type == 'Branch Pickup' %}
+						<select name = "del" style="background: transparent;" class="form-control" id="dispatch{{order.order_number}}" required>
+							<option value="" selected>Please select a delivery boy</option>
+							{%for del in deliveryboys%}
+								<option value = "{{del.first_name}} {{del.last_name}} {{del.mobile}}" default>{{del.first_name}} {{del.last_name}} {{del.mobile}}</option>
+							{%endfor%}
+						</select><br><br>
+						<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+						<button type = "submit" class = "btn btn-primary btn-sm" onclick="dispatchorder({{order.order_number}});">assign</button>
+						{% endif %}
+						{% endif %}
+					</th>
+					{% if order.delivered_at == None %}
+						<th class="text-center" style="vertical-align:middle;">
+							<a class = "btn btn-primary btn-sm" href = "/myadmin/orderdelivered/{{order.order_number}}">Delivered</a>
+						</th>
+						<!-- <th></th> -->
+					{% else %}
+						<th class="text-center" style="vertical-align:middle;">{{order.delivered_at}}</th>
+						<th style="display: none;"><br><br>{{order.paid_at}}</th>
+					{% endif %}
+					
+
+					<th style="vertical-align:middle;">
+						{% if request.session.admin.role == 'admin' %}
+						<a href="#" data-href="/myadmin/ordercancelled/{{order.order_number}}/" class="glyphicon glyphicon-remove" data-toggle="modal" data-target="#cancel-order"></a> <br/>
+						{% endif %}
+					</th>
+					<th style="vertical-align:middle;">{{order.source}}</th>
+					<th>
+						{{order.customer_name|title}}-{{order.customer_mobile}}<br>
+						{{order.delivery_type}}-{{order.payment_mode}} {{order.onlinepay_status|title}}<br>
+						<hr>
+						{{order.address}}
+						<hr>
+						{{order.special_comment}}<br>
+						<br>
+						{% if order.delivery_type == 'Dining' %}
+							No. Of People for Dining: {{order.no_of_people}}
+						{% endif %}<br>
+					</th>
+					<th>
+						<table style="margin:0px;" class = "table table-bordered">
+							<tbody>
+								<tr><td>TOT</td><td>{{order.subtotal}}</td></tr>
+								<tr><td>eWA</td><td>{{order.e_wallet}}</td></tr>
+								<tr><td>DIS</td><td>{{order.discount_rs}}</td></tr>
+								<tr><td>STA</td><td>{{order.service_tax_rs}}</td></tr>
+								<tr><td>VAT</td><td>{{order.vat_rs}}</td></tr>
+								<tr><td>SCH</td><td>{{order.service_charge_rs}}</td></tr>
+								<tr><td>DCH</td><td>{{order.delivery_charge}}</td></tr>
+								<tr><td>GTA</td><td>{{order.grand_total}}</td></tr>
+							</tbody>
+						</table>
+					</th>
+					</tr>
+				{%endfor%}
+			</tbody>
+		</table>
+	</div>
+
+	<div class="tab-pane fade" id="completedorders">
+		<table class = "table table-bordered">
+			<thead>	
+				<tr class="heading-row">
+					<th class = "text-center">ORDER #</th>
+					<th class = "text-center">BOOKED/DELIVERY</th>
+					<th class = "text-center">ASSIGNED</th>
+					<th class = "text-center">ACCEPTED</th>
+					<th class = "text-center">DISPATCHED</th>
+					<th class = "text-center">DELIVERED</th>
+					<th class = "text-center" style="display: none;">PAID</th>
+					<th class = "text-center">X</th>
+					<th class = "text-center">SOURCE</th>
+					<th class = "text-center">CONTACT PERSON</th>
+					<th class = "text-center">COST (₹)</th>
+				</tr>
+			</thead>
+			<tbody>
+				{%for order in orders_completed%}
+					<tr>
+					<th class="text-center" style="vertical-align:middle;">
+						<a class="order-num" target="_blank" href="/myadmin/orderdetail/{{order.order_number}}/">{{order.order_number}}</a>
+					</th>
+					<th class="text-center" style="vertical-align:middle;">
+						{{order.placed_at}} /<br>
+						{{order.delivered_at}}<br>
+						{% if order.expected_at > order.delivered_at %}
+							<span class="timer">{{order.delivered_at|timesince:order.expected_at|upto}}</span>
+						{%else%}
+							<span class= "text-danger timer">-{{order.expected_at|timesince:order.delivered_at|upto}}</span>
+						{%endif%}
+					</th>
+					<th class="text-center" style="vertical-align:middle;">{{order.branch_assigned_at|date:"d M, f a"}} {{order.branch_assigned}}</th>
+					<th class="text-center" style="vertical-align:middle;">{{order.accepted_at|date:"d M, f a"}}</th>
+					<th class="text-center" style="vertical-align:middle;">
+						{{order.dispatched_with}}, {{order.dispatched_at|date:"d M, f a"}}
+					</th>
+					<th class="text-center" style="vertical-align:middle;">{{order.delivered_at|date:"d M, f a"}}</th>
+					<th style="display: none;">{{order.paid_at|date:"d M, f a"}}</th>
+					<th style="vertical-align:middle;">Cant Cancel</th>
+					<th style="vertical-align:middle;">{{order.source}}</th>
+					<th>
+						{{order.customer_name|title}}-{{order.customer_mobile}}<br>
+						{{order.delivery_type}}-{{order.payment_mode}} {{order.onlinepay_status|title}}<br>
+						<hr>
+						{{order.address}}
+						<hr>
+						{{order.special_comment}}<br>
+						<br>
+						{% if order.delivery_type == 'Dining' %}
+							No. Of People for Dining: {{order.no_of_people}}
+						{% endif %}<br>
+					</th>
+					<th>
+						<table class = "table table-bordered">
+							<tbody>
+								<tr><td>TOT</td><td>{{order.subtotal}}</td></tr>
+								<tr><td>eWA</td><td>{{order.e_wallet}}</td></tr>
+								<tr><td>DIS</td><td>{{order.discount_rs}}</td></tr>
+								<tr><td>STA</td><td>{{order.service_tax_rs}}</td></tr>
+								<tr><td>VAT</td><td>{{order.vat_rs}}</td></tr>
+								<tr><td>SCH</td><td>{{order.service_charge_rs}}</td></tr>
+								<tr><td>DCH</td><td>{{order.delivery_charge}}</td></tr>
+								<tr><td>GTA</td><td>{{order.grand_total}}</td></tr>
+							</tbody>
+						</table>
+					</th>
+					</tr>
+				{%endfor%}
+			</tbody>
+		</table>
+	</div>
+
+	<div class="tab-pane fade" id="cancelledorders">
+		<table class = "table table-bordered">
+			<thead>	
+				<tr class="heading-row">
+					<th class = "text-center">ORDER #</th>
+					<th class = "text-center">BOOKED/DELIVERY</th>
+					<th class = "text-center">ASSIGNED</th>
+					<th class = "text-center">ACCEPTED</th>
+					<th class = "text-center">DISPATCHED</th>
+					<th class = "text-center">DELIVERED</th>
+					<th class = "text-center" style="display: none;">PAID</th>
+					<th class = "text-center">X</th>
+					<th class = "text-center">SOURCE</th>
+					<th class = "text-center">CONTACT PERSON</th>
+					<th class = "text-center">COST (₹)</th>
+				</tr>
+			</thead>
+			<tbody>
+				{%for order in cancelled_orders%}
+					<tr>
+					<th class="text-center" style="vertical-align:middle;">
+						<a class="order-num" target="_blank" href="/myadmin/orderdetail/{{order.order_number}}/">{{order.order_number}}</a>
+					</th>
+					<th class="text-center" style="vertical-align:middle;">
+						{{order.placed_at}} /<br>
+						{{order.expected_at}}<br>
+					</th>
+					<th class="text-center" style="vertical-align:middle;">{{order.branch_assigned_at|date:"d M, f a"}} {{order.branch_assigned}}</th>
+					<th class="text-center" style="vertical-align:middle;">{{order.accepted_at|date:"d M, f a"}}</th>
+					<th class="text-center" style="vertical-align:middle;">
+						{{order.dispatched_with}}, {{order.dispatched_at|date:"d M, f a"}}
+					</th>
+					<th class="text-center" style="vertical-align:middle;">{{order.delivered_at|date:"d M, f a"}}</th>
+					<th style="display: none;">{{order.paid_at|date:"d M, f a"}}</th>
+					<th style="vertical-align:middle;">Cancelled</th>
+					<th style="vertical-align:middle;">{{order.source}}</th>
+					<th>
+						{{order.customer_name|title}}-{{order.customer_mobile}}<br>
+						{{order.delivery_type}}-{{order.payment_mode}} {{order.onlinepay_status|title}}<br>
+						<hr>
+						{{order.address}}
+						<hr>
+						{{order.special_comment}}<br>
+						<br>
+						{% if order.delivery_type == 'Dining' %}
+							No. Of People for Dining: {{order.no_of_people}}
+						{% endif %}<br>
+					</th>
+					<th>
+						<table class = "table table-bordered">
+							<tbody>
+								<tr><td>TOT</td><td>{{order.subtotal}}</td></tr>
+								<tr><td>eWA</td><td>{{order.e_wallet}}</td></tr>
+								<tr><td>DIS</td><td>{{order.discount_rs}}</td></tr>
+								<tr><td>STA</td><td>{{order.service_tax_rs}}</td></tr>
+								<tr><td>VAT</td><td>{{order.vat_rs}}</td></tr>
+								<tr><td>SCH</td><td>{{order.service_charge_rs}}</td></tr>
+								<tr><td>DCH</td><td>{{order.delivery_charge}}</td></tr>
+								<tr><td>GTA</td><td>{{order.grand_total}}</td></tr>
+							</tbody>
+						</table>
+					</th>
+					</tr>
+				{%endfor%}
+			</tbody>
+		</table>
+	</div>
+
+	<div class="tab-pane fade" id="forthcomingorders">
+		<table class = "table table-bordered">
+			<thead>	
+				<tr class="heading-row">
+					<th class = "text-center">ORDER #</th>
+					<th class = "text-center">BOOKED/DELIVERY</th>
+					<th class = "text-center">ASSIGNED</th>
+					<th class = "text-center">ACCEPTED</th>
+					<th class = "text-center">DISPATCHED</th>
+					<th class = "text-center">DELIVERED</th>
+					<th class = "text-center" style="display: none;">PAID</th>
+					<th class = "text-center">X</th>
+					<th class = "text-center">SOURCE</th>
+					<th class = "text-center">CONTACT PERSON</th>
+					<th class = "text-center">COST (₹)</th>
+				</tr>
+			</thead>
+			<tbody>
+				{%for order in forthcoming_orders%}
+					<tr>
+
+					<th class="text-center" style="vertical-align:middle;">
+						<a class="order-num" target="_blank" href="/myadmin/orderdetail/{{order.order_number}}/">{{order.order_number}}</a>
+					</th>
+
+					<th id = "timer{{order.order_number}}" class="text-center" style="vertical-align:middle;">
+						{{order.placed_at}} /<br>
+						{{order.expected_at}}<br>
+						<div id="f{{order.order_number}}" class="text-center timer" data-countdown="{{order.expected_at|date:'m/d/Y h:i A'}}"></div>
+					</th>
+
+					{% if order.branch_assigned == "" %}
+						<th class="text-center" style="vertical-align:middle;">
+							<form class = "form" method = "post" action = "/myadmin/orderaddbranch/{{order.order_number}}/">	
+							{%csrf_token%}
+							<select name = "branch" class="form-control" style="background: transparent;">
+								{%for branch in branches%}
+									<option value = "{{branch.branch}}" default>{{branch.branch}}</option>
+								{%endfor%}
+							</select><br><br>
+							<button type = "submit" class = "btn btn-primary btn-sm">assign</button>
+							</form>
+						</th>
+						<th></th>
+						<th></th>
+						<th></th>
+						<!-- <th></th> -->
+					{%else%}
+						<th class="text-center" style="vertical-align:middle;">{{order.branch_assigned_at|date:"d M, f a"}} {{order.branch_assigned}}</th>
+						{% if order.accepted_by == "" %}
+							<th class="text-center" style="vertical-align:middle;">
+								{% if request.session.admin.role == 'branchuser' or request.session.admin.role == 'admin' %}
+									{% if order.onlinepay_status == 'success' or order.onlinepay_status == 'NA' %}
+									<button onclick="acceptorder({{order.order_number}});" class="btn btn-primary btn-sm">Accepted</button><br><br>
+									{% else %}
+									<h5 class="text-danger">Incomplete Pay ( {{order.onlinepay_status|title}} )</h5>
+									{% endif %}
+								{% endif %}
+							</th>
+							<th></th>
+							<th></th>
+							<!-- <th></th> -->
+						{%else%}
+							<th class="text-center" style="vertical-align:middle;">
+								{{order.accepted_at|date:"d M, f a"}}
+							</th>
+							{% if order.dispatched_with == "" %}
+								<th class="text-center" style="vertical-align:middle;">	
+									{% if request.session.admin.role == 'branchuser' or request.session.admin.role == 'admin' %}
+									<select name = "del" style="background: transparent;" class="form-control" id="dispatch{{order.order_number}}" required>
+										<option value="" selected>Please select a delivery boy</option>
+										{%for del in deliveryboys%}
+											<option value = "{{del.first_name}} {{del.last_name}} {{del.mobile}}" default>{{del.first_name}} {{del.last_name}} {{del.mobile}}</option>
+										{%endfor%}
+									</select><br><br>
+									<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+									<button type = "submit" class = "btn btn-primary btn-sm" onclick="dispatchorder({{order.order_number}});">assign</button>
+									{% endif %}	
+								</th>
+								<th></th>
+								<!-- <th></th> -->
+							{% else %}
+								<th class="text-center" style="vertical-align:middle;">
+									{{order.dispatched_with}}, {{order.dispatched_at|date:"d M, f a"}}<br><br>
+									{% if request.session.admin.role == 'branchuser' or request.session.admin.role == 'admin'%}
+									{% if not order.delivery_type == 'Branch Pickup' %}
+									<select name = "del" style="background: transparent;" class="form-control" id="dispatch{{order.order_number}}" required>
+										<option value="" selected>Please select a delivery boy</option>
+										{%for del in deliveryboys%}
+											<option value = "{{del.first_name}} {{del.last_name}} {{del.mobile}}" default>{{del.first_name}} {{del.last_name}} {{del.mobile}}</option>
+										{%endfor%}
+									</select><br><br>
+									<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+									<button type = "submit" class = "btn btn-primary btn-sm" onclick="dispatchorder({{order.order_number}});">assign</button>
+									{% endif %}
+									{% endif %}
+								</th>
+								{% if order.delivered_at == None %}
+									<th class="text-center" style="vertical-align:middle;"><a class = "btn btn-primary btn-sm" href = "/myadmin/orderdelivered/{{order.order_number}}">Delivered</a></th>
+									<!-- <th></th> -->
+								{% else %}
+									<th class="text-center" style="vertical-align:middle;">{{order.delivered_at}}</th>
+									<th style="display: none;">{{order.paid_at}}</th>
+								{% endif %}
+							{%endif%}
+						{%endif%}
+					{%endif%}
+
+					
+					<th style="vertical-align:middle;">
+						{% if request.session.admin.role == 'admin' %}
+						<a href="#" data-href="/myadmin/ordercancelled/{{order.order_number}}/" class="glyphicon glyphicon-remove" data-toggle="modal" data-target="#cancel-order"></a> <br/>
+						{% endif %}
+					</th>
+					<th style="vertical-align:middle;">{{order.source}}</th>
+					<th>
+						{{order.customer_name|title}}-{{order.customer_mobile}}<br>
+						{{order.delivery_type}}-{{order.payment_mode}} {{order.onlinepay_status|title}}<br>
+						<hr>
+						{{order.address}}
+						<hr>
+						{{order.special_comment}}<br>
+						<br>
+						{% if order.delivery_type == 'Dining' %}
+							No. Of People for Dining: {{order.no_of_people}}
+						{% endif %}<br>
+					</th>
+					<th>
+						<table class = "table table-bordered">
+							<tbody>
+								<tr><td>TOT</td><td>{{order.subtotal}}</td></tr>
+								<tr><td>eWA</td><td>{{order.e_wallet}}</td></tr>
+								<tr><td>DIS</td><td>{{order.discount_rs}}</td></tr>
+								<tr><td>STA</td><td>{{order.service_tax_rs}}</td></tr>
+								<tr><td>VAT</td><td>{{order.vat_rs}}</td></tr>
+								<tr><td>SCH</td><td>{{order.service_charge_rs}}</td></tr>
+								<tr><td>DCH</td><td>{{order.delivery_charge}}</td></tr>
+								<tr><td>GTA</td><td>{{order.grand_total}}</td></tr>
+							</tbody>
+						</table>
+					</th>
+					</tr>
+				{%endfor%}
+			</tbody>
+		</table>
+	</div>
+
+	<div class="tab-pane fade" id="exceptionorders">
+		<table class = "table table-bordered">
+			<thead>	
+				<tr class="heading-row">
+					<th class = "text-center">ORDER #</th>
+					<th class = "text-center">BOOKED/DELIVERY</th>
+					<th class = "text-center">ASSIGNED</th>
+					<th class = "text-center">ACCEPTED</th>
+					<th class = "text-center">DISPATCHED</th>
+					<th class = "text-center">DELIVERED</th>
+					<th class = "text-center" style="display: none;">PAID</th>
+					<th class = "text-center">X</th>
+					<th class = "text-center">SOURCE</th>
+					<th class = "text-center">CONTACT PERSON</th>
+					<th class = "text-center">COST (₹)</th>
+				</tr>
+			</thead>
+			<tbody>
+				{%for order in exception_orders%}
+					<tr>
+
+					<th class="text-center" style="vertical-align:middle;">
+						<a class="order-num" target="_blank" href="/myadmin/orderdetail/{{order.order_number}}/">{{order.order_number}}</a>
+						<br><br>
+						<button align="center" type="button" class="btn btn-success btn-sm" onclick="printorder({{order.order_number}});"><span class="glyphicon glyphicon-print"></span></button>
+					</th>
+
+					<th id = "timer{{order.order_number}}" class="text-center" style="vertical-align:middle;">
+						{{order.placed_at}} /<br>
+						{{order.expected_at}}<br>
+						<div class= "text-danger text-center timer" id="{{order.order_number}}" data-countup="{{order.expected_at|date:'m/d/Y h:i A'}}"></div>
+					</th>
+
+					{% if order.branch_assigned == "" %}
+						<th class="text-center" style="vertical-align:middle;">
+							<form class = "form" method = "post" action = "/myadmin/orderaddbranch/{{order.order_number}}/">	
+							{%csrf_token%}
+							<select name = "branch" class="form-control" style="background: transparent;">
+								{%for branch in branches%}
+									<option value = "{{branch.branch}}" default>{{branch.branch}}</option>
+								{%endfor%}
+							</select><br><br>
+							<button type = "submit" class = "btn btn-primary btn-sm">assign</button>
+							</form>
+						</th>
+						<th></th>
+						<th></th>
+						<th></th>
+						<!-- <th></th> -->
+					{%else%}
+						<th class="text-center" style="vertical-align:middle;">{{order.branch_assigned_at|date:"d M, f a"}} {{order.branch_assigned}}</th>
+						{% if order.accepted_by == "" %}
+							<th class="text-center" style="vertical-align:middle;">
+								{% if request.session.admin.role == 'branchuser' or request.session.admin.role == 'admin' %}
+									{% if order.onlinepay_status == 'success' or order.onlinepay_status == 'NA' %}
+									<button onclick="acceptorder({{order.order_number}});" class="btn btn-primary btn-sm">Accepted</button><br><br>
+									{% else %}
+									<h5 class="text-danger">Incomplete Pay ( {{order.onlinepay_status|title}} )</h5>
+									{% endif %}
+								{% endif %}
+							</th>
+							<th></th>
+							<th></th>
+							<!-- <th></th> -->
+						{%else%}
+							<th class="text-center" style="vertical-align:middle;">
+								{{order.accepted_at|date:"d M, f a"}}
+							</th>
+							{% if order.dispatched_with == "" %}
+								<th class="text-center" style="vertical-align:middle;">	
+									{% if request.session.admin.role == 'branchuser' or request.session.admin.role == 'admin' %}
+									<select name = "del" style="background: transparent;" class="form-control" id="dispatch{{order.order_number}}" required>
+										<option value="" selected>Please select a delivery boy</option>
+										{%for del in deliveryboys%}
+											<option value = "{{del.first_name}} {{del.last_name}} {{del.mobile}}" default>{{del.first_name}} {{del.last_name}} {{del.mobile}}</option>
+										{%endfor%}
+									</select><br><br>
+									<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+									<button type = "submit" class = "btn btn-primary btn-sm" onclick="dispatchorder({{order.order_number}});">assign</button>
+									{% endif %}	
+								</th>
+								<th></th>
+								<!-- <th></th> -->
+							{% else %}
+								<th class="text-center" style="vertical-align:middle;">
+									{{order.dispatched_with}}, {{order.dispatched_at|date:"d M, f a"}}<br><br>
+									{% if request.session.admin.role == 'branchuser' or request.session.admin.role == 'admin'%}
+									{% if not order.delivery_type == 'Branch Pickup' %}
+									<select name = "del" style="background: transparent;" class="form-control" id="dispatch{{order.order_number}}" required>
+										<option value="" selected>Please select a delivery boy</option>
+										{%for del in deliveryboys%}
+											<option value = "{{del.first_name}} {{del.last_name}} {{del.mobile}}" default>{{del.first_name}} {{del.last_name}} {{del.mobile}}</option>
+										{%endfor%}
+									</select><br><br>
+									<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+									<button type = "submit" class = "btn btn-primary btn-sm" onclick="dispatchorder({{order.order_number}});">assign</button>
+									{% endif %}
+									{% endif %}
+								</th>
+								{% if order.delivered_at == None %}
+									<th class="text-center" style="vertical-align:middle;"><a class = "btn btn-primary btn-sm" href = "/myadmin/orderdelivered/{{order.order_number}}">Delivered</a></th>
+									<!-- <th></th> -->
+								{% else %}
+									<th class="text-center" style="vertical-align:middle;">{{order.delivered_at}}</th>
+									<th style="display: none;">{{order.paid_at}}</th>
+								{% endif %}
+							{%endif%}
+						{%endif%}
+					{%endif%}
+					
+					<th style="vertical-align:middle;">
+						{% if request.session.admin.role == 'admin' %}
+						<a id="cancel{{order.order_number}}" href="#" data-href="/myadmin/ordercancelled/{{order.order_number}}/" class="glyphicon glyphicon-remove" data-toggle="modal" data-target="#cancel-order"></a> <br/>
+						{% endif %}
+					</th>
+					<th style="vertical-align:middle;">{{order.source}}</th>
+					<th>
+						{{order.customer_name|title}}-{{order.customer_mobile}}<br>
+						{{order.delivery_type}}-{{order.payment_mode}} {{order.onlinepay_status|title}}<br>
+						<hr>
+						{{order.address}}
+						<hr>
+						{{order.special_comment}}<br>
+						<br>
+						{% if order.delivery_type == 'Dining' %}
+							No. Of People for Dining: {{order.no_of_people}}
+						{% endif %}<br>
+					</th>
+					<th>
+						<table class = "table table-bordered">
+							<tbody>
+								<tr><td>TOT</td><td>{{order.subtotal}}</td></tr>
+								<tr><td>eWA</td><td>{{order.e_wallet}}</td></tr>
+								<tr><td>DIS</td><td>{{order.discount_rs}}</td></tr>
+								<tr><td>STA</td><td>{{order.service_tax_rs}}</td></tr>
+								<tr><td>VAT</td><td>{{order.vat_rs}}</td></tr>
+								<tr><td>SCH</td><td>{{order.service_charge_rs}}</td></tr>
+								<tr><td>DCH</td><td>{{order.delivery_charge}}</td></tr>
+								<tr><td>GTA</td><td>{{order.grand_total}}</td></tr>
+							</tbody>
+						</table>
+					</th>
+					</tr>
+				{%endfor%}
+			</tbody>
+		</table>
+	</div>
+
+	<div class="tab-pane fade" id="ordersearch">
+		<div class=" row search-order" style="margin-left:0px;margin-right:5px;width:100%;">
+			<table class = "table table-bordered">
+				<thead>
+					<tr>
+						<td>
+							<input type = "text" id="sorder_number" style="background:transparent;" class="form-control" name="order_number" placeholder="order number"/>		
+						</td>
+						<td>
+							<input type = "text" id="scustomer_name" style="background:transparent;" class = "form-control" name="customer_name" placeholder = "Customer Name"/>		
+						</td>
+						<td>
+							<input type = "text" id="scustomer_mobile" style="background:transparent;" class = "form-control" name="customer_mobile" placeholder = "Customer Mobile"/>		
+						</td>
+						<td>
+							<input type = "date" id="sdel_date" style="background:transparent;" class = "form-control" name="del_date" placeholder = "Delivery Date"/>
+						</td>
+						<td>
+							<select name ="del_boy" class ="form-control" id="sdel_boy" style="background:transparent;">
+								<option value = "all" default>all del boys</option>
+								{%for deli in deliveryboys%}
+									<option value = "{{deli.first_name}} {{deli.last_name}} {{deli.mobile}}">{{deli.first_name}} {{deli.last_name}}</option>
+								{%endfor%}
+							</select>
+						</td>
+						<td>
+							<select name="payment_mode" id="spayment_mode" class="form-control" style="background:transparent;">
+								<option value = "all" default>all payment modes</option>
+								{% for paymentmode in paymentmodes %}
+									<option value="{{paymentmode.payment_mode}}">{{paymentmode.payment_mode}}</option>
+								{% endfor %}
+							</select>
+						</td>
+						<td>
+							<input type = "button" value = "search" class = "btn btn-danger" onclick="searchorders();" />		
+						</td>
+					</tr>	
+				</thead>
+			</table>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	$(function() { 
+	    // for bootstrap 3 use 'shown.bs.tab', for bootstrap 2 use 'shown' in the next line
+	    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+	        // save the latest tab; use cookies if you like 'em better:
+	        localStorage.setItem('lastTab', $(this).attr('href'));
+	    });
+
+	    // go to the latest tab, if it exists:
+	    var lastTab = localStorage.getItem('lastTab');
+	    if (lastTab) {
+	        $('[href="' + lastTab + '"]').tab('show');
+	    }
+	});
+</script>

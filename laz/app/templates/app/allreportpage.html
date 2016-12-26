@@ -1,0 +1,57 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<style type="text/css">
+		.report-option {
+			padding: 60px; 
+			width: 100%; 
+			height: 100%; 
+			font-size: 40px;
+		}
+	</style>
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-signal"></span>&nbsp;&nbsp;&nbsp;All Reports
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<div class = "row">
+				<div class = "col-sm-4">
+					<a class = "btn btn-primary glyphicon glyphicon-th-list report-option" href = "/datereport/"><br><h4>Date Wise report</h4></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-primary glyphicon glyphicon-th-list report-option" href = "/deliveryboyreport/"><br><h4>Delivery boy report</h4></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-primary glyphicon glyphicon-th-list report-option" href = "/menusellreport"><br><h4>Menu sell report</h4></a>
+				</div>
+			</div>
+			<div class="row" style="margin-top: 20px">
+				<div class = "col-sm-4">
+					<a class = "btn btn-primary glyphicon glyphicon-th-list report-option" href = "/singledayreport/"><br><h4>Single Day report</h4></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-primary glyphicon glyphicon-th-list report-option" href = "/singledayreport/counterorder/"><br><h4>Day report for counter orders</h4></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-primary glyphicon glyphicon-th-list report-option" href = "/report/counterexpense/"><br><h4>Counter Expenses</h4></a>
+				</div>
+			</div>
+			<div class="row" style="margin-top: 20px">
+				<div class = "col-sm-4">
+					<a class = "btn btn-primary glyphicon glyphicon-th-list report-option" href = "/report/delboypayment/"><br><h4>Delivery Boy Payments</h4></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-primary glyphicon glyphicon-th-list report-option" href = "/report/countercollection/"><br><h4>Counter Collection</h4></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-primary glyphicon glyphicon-th-list report-option" href = "/duecreditinfo/"><br><h4>Due Credit Info</h4></a>
+				</div>
+			</div>
+		</div>
+	</div>
+{%endblock content%}

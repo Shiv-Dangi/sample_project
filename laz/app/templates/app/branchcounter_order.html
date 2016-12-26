@@ -1,0 +1,259 @@
+<script type="text/javascript">
+	// control cursor for add items to the cart
+	$(document).on('keyup', 'input', 'select', function(e) {
+		if(e.keyCode == 13) {
+			if (e.target.id !== 'quantity'){
+				var inputs = $(e.target).parents(".additem").eq(0).find(":input:visible:not([readonly]):enabled"),
+		   idx = inputs.index(e.target);
+		       if (idx == inputs.length - 1) {
+		          inputs[0].select()
+		       } else {
+		          inputs[idx + 1].focus();
+		          inputs[idx + 1].select();
+		       }
+			}
+			else{
+				$("#item").focus();
+			}
+		}
+	});
+	// autofocus on item-description
+	$( document ).ready(function() {
+		if ('{{order.bill_print}}' != 'None'){
+			setTimeout(function() { $('span[id=vacatetable_btn]').focus() }, 800);
+		} else {
+			setTimeout(function() { $('input[name=item-description]').focus() }, 800);
+		}
+		
+	});
+</script>
+<style type="text/css">
+
+	body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper{
+		display: none;
+	}
+
+	.active-table {
+		background-color:#10462f;
+		color:#ffffff;
+	}
+	hr {
+		margin-top: 5px;
+		margin-bottom: 5px;
+	}
+	.table-function {
+		border: 1px solid #000;
+		padding-top: 1%;
+	}
+
+	.fixedHeight {
+		max-height: 400px;
+		overflow-x: auto;
+	}
+
+</style>
+<!-- css for make item-description table to scrollable -->
+<style type="text/css">
+	table.scroll {
+	    width: 100%; /* 140px * 5 column + 16px scrollbar width */
+	    /*border-spacing: 0;*/
+	    /*border: 2px solid black;*/
+	}
+
+	table.scroll tbody,
+	table.scroll thead tr,
+	table.scroll tfoot tr { display: block; }
+
+	table.scroll tbody {
+	    max-height: 200px;
+	    min-height: 200px;
+	    overflow-y: auto;
+	    /*overflow-x: hidden;*/
+	}
+
+	table.scroll tbody td,
+	table.scroll tfoot td,
+	table.scroll thead th {
+	    width: 500px;
+	    /*border-right: 1px solid white;*/
+	}
+
+	table.scroll thead th:last-child {
+	   /* width: 156px;  140px + 16px scrollbar width */
+	}
+
+	thead tr th,
+	tfoot tr td { 
+	    height: 30px;
+	    line-height: 30px;
+	    /*text-align: left;*/
+	}
+
+	/*tbody { border-top: 2px solid black; }*/
+
+	tbody td:last-child, tfoot td:last-child, thead th:last-child {
+	    border-right: none !important;
+	}
+</style>
+
+<div class="row" style="margin-left: 2px; margin-right: 20px;">
+	<!-- <div id='loadingmessage' class="text-center" style='display:none'>
+	  <img src='/static/app/img/loading.gif'/>
+	</div> -->
+
+	<!-- table row -->
+		<div class="row text-center" style="background-color: #10462f; border: 1px solid #fff;">
+			<div class="col-sm-6 col-md-6">
+				<h5 style="color: #fff;">Branch Counter Order</h5>	
+			</div>
+			<div class="col-sm-6 col-md-6">
+				{% if table.order_number == "" %}
+					<h5 style="color: #fff;">
+						<a href="#" onclick="createtableorder();" style="color: #fff;">
+							Create New Order
+						</a>
+					</h5>
+				{% else %}
+					<h5 style="color: #fff;">Order No. : {{table.order_number}}</h5>		
+				{% endif %}
+			</div>
+		</div>
+	<!-- end of table row -->
+
+	{% if order %}
+
+	<!-- add item row -->
+		<div class="row" style="margin-top: 5px;">
+			<table class="table table-borderd" style="margin-bottom:0px;border:1px;">
+				{% if not order.bill_print %}
+				<!-- <thead class="jumbotron" style="background:#d2e28b;">
+					<tr>
+						<th width="5%">S.No.</th>
+						<th width="60%">Item Description</th>
+						<th width="10%" class="text-center">Quantity</th>
+						<th width="10%" class="text-center">Price</th>
+						<th width="10%" class="text-center">Total</th>
+						<th width="5%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;X</th>
+						<th>Add</th>
+					</tr>
+				</thead> -->
+				<tbody>
+					<tr class="additem">
+						<td width="5%"><input type="text" class="form-control" style="background:transparent;"  value="" readonly/></td>
+			            <td width="60%"><input type="text" class="form-control" style="background:transparent;" id="item" name = "item-description" placeholder = "Item Description"  value="" /></td>
+			            <td width="10%">
+			            	<input class="input-control form-control text-center" id="quantity" style="background:transparent;" name="quantity" oninput="calculate()" onKeyDown="if(event.keyCode==13) addordercart('{{order.order_number}}')" value="1" />
+			            </td>
+			            <td width="10%">
+			            	<input class="input-control form-control text-center" style="background:transparent;" id="price" name="price" oninput="calculate()" readonly />
+			            </td>
+			            <input id="item_code" name="item_code" type="hidden" />
+			            <input id="item_subname" name="item_subname" type="hidden" />
+			            <input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+			            <td width="10%"><input style="background:transparent;" class="input-control text-center form-control" id="total" readonly /></td>
+			            <td width="5%"><input type="text" class="form-control" style="background:transparent;"  value="" readonly/></td>
+					</tr>
+				</tbody>
+				{% endif %}
+			</table>
+		</div>
+	<!-- end of add item row -->
+
+	<div class="item-description">
+		{% include "app/item_description.html" %}
+	</div>
+
+	<!-- table vacate row -->
+		{% if not order.bill_print == None %}
+			<div class="row text-center" style="border: 1px solid #fff; padding-top: 10px;">
+				<div class="form-group">
+		    		<a class="btn btn-primary" style="display:none;" id="vacatetblbtn" href="/myadmin_bcounter/finaltableorder/{{order.order_number}}/">Vacate Table</a>
+		    		<span class="btn btn-primary" style="display:none;" id="vacatetable_btn" onclick="vacatetable_with_neworder();">Vacate and New</span>
+        		</div>
+			</div>
+		{% endif %}
+	<!-- end of table vacate row -->
+	{% endif %}
+</div>
+
+<!-- autocomplete js for add item into cart -->
+<script type="text/javascript">
+
+	function vacatetable_with_neworder(){
+		$.get('/myadmin_bcounter/finaltableorder/{{order.order_number}}/', function(data){
+			}).done(function(){
+				createtableorder();
+			});
+	}
+
+	function updatediscountandtax() {
+		var order_number = "{{order.order_number}}";
+		var comment_text = document.getElementById('commentbox').value;
+		var discount_percent = document.getElementById('discount_percent').value;	
+		var service_tax_percent = document.getElementById('service_tax_percent').value;
+		var vat_percent = document.getElementById('vat_percent').value;
+		var service_charge_percent = document.getElementById('service_charge_percent').value;
+		// var distance_in_km = document.getElementById('distance_in_km').value;
+		$.post("/myadmin/updatecdisandtax/",{"order_number":order_number,"discount_percent":discount_percent,"service_tax_percent":service_tax_percent,"vat_percent":vat_percent,"service_charge_percent":service_charge_percent,"comment_text":comment_text},function(data){
+			if(data['status'] == 'success')
+			{
+				$('#discount_rs').val(data['discount_rs']);
+				$('#service_tax_rs').val(data['service_tax_rs']);
+				$('#vat_rs').val(data['vat_rs']);
+				$('#service_charge_rs').val(data['service_charge_rs']);
+				$('#delivery_charge').val(data['delivery_charge']);
+				$('#grand_total').val(data['grand_total']);
+			};
+		});
+	}
+
+    $(function() {
+      $("#item").autocomplete({
+            autoFocus: true,
+            source: function( request, response ) {
+            $.ajax({
+              url: "/ajaxcheckitem_outside/"+ request.term,
+              success: function( data ) {
+                response( JSON.parse(data) );
+              },
+              error: function(data) {
+              	console.log(data);
+              }
+            });
+          },
+        minLength: 1,
+        focus: function( event, ui ) {
+            $( ".autocomplete-field" ).val( ui.item.item_name );
+            return false;
+          },
+        select: function( event, ui ) {
+            $( "#item" ).val(ui.item.item_code + "-" + ui.item.item_name + "-" + ui.item.item_subname);
+            $( "#price" ).val( ui.item.item_price );
+            $( "#item_code" ).val( ui.item.item_code );
+            $( "#item_subname" ).val( ui.item.item_subname );
+
+            return false;
+          }
+      }).autocomplete( "instance" )._renderItem = function( ul, item ) {
+          return $( "<li>" )
+            .append( "<a>" + item.item_code + "-" + item.item_name + "-" + item.item_subname + "</a>" )
+            .appendTo( ul );
+        };
+    });
+
+    $(document).ready(function(){
+    	$('#item').autocomplete("widget").addClass("fixedHeight");
+    })
+
+    // function to check customer existense on input mobile number
+	$('#customer_number').on('input', function() {
+	    var mobileno = $(this).val()
+	    $.post("/ajaxcheckcustomer/", {"mobile": mobileno}, function(data){
+	    	if(data['status'] == "pass")
+	    	{
+	    		$('#customer_name').val(data['name']);
+	    		$('#fororderno').text('Congratulations this is your ' + data['no'] + ' order');
+	    	};
+		});
+	});
+</script>

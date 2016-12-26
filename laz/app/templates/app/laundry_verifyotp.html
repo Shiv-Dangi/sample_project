@@ -1,0 +1,27 @@
+{% extends "app/laundry_customerendbase.html" %}
+{%block title%}LHDINDIA LAUNDRY | LAUNDRY SERVICES IN BHOPAL | ONLINE LAUNDRY IN BHOPAL | GET CLOTHES WASHED ONLINE{%endblock title%}
+
+{% block content %}
+
+<div class="container">
+	<div class="row">
+		<div class="col l3"></div>
+		<div class="col s12 l6">
+			<form action="/laundry/otpverify/" method="post">
+	            {%csrf_token%}
+	            <div class="input-field">
+	              <input type="text" name="otp" size="6" id="otp" placeholder="OTP" required>
+	              <div class="center-align">
+		              <button class="waves-effect waves-teal light-blue btn-flat" type="submit" style="width:50%;color:#ffffff;">Submit</button>
+		          </div>
+	            </div>
+	        </form>
+	        {% if 'otpinvalid' in request.session %}
+	       	<h6 align="center">Incorrect OTP. Please try again.</h6>
+	        {% endif %}
+		</div>
+		<div class="col l3"></div>
+	</div>
+</div>
+
+{% endblock content %}

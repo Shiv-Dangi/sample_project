@@ -1,0 +1,229 @@
+{%load staticfiles%}
+{%if 'cart' in request.session or 'partner' in request.session %}
+	<h5 class="toggle-title">My Cart</h5>
+	<ul class="list-unstyled" style="padding:5px;margin:5px;">
+		{%for key1,value1 in request.session.cart.items%}
+		{%if key1 != 'totalcost'%}
+			{%for k,v in value1.items%}
+				{%if k != 'name'%}
+				<li>
+					<p><b>{{v.quantity}}</b> x {{value1.name}} {{v.subname}}
+						<span class="icon-link">
+							<i class="fa fa-minus" onclick="subtractcart('{{key1}}','{{v.subname}}')"></i>
+							<i class="fa fa-plus" onclick = "addcart('{{key1}}','{{v.subname}}')"></i>
+						</span><br>
+					</p><br>
+					<p class="price" style="color:#10462f;"><b>₹ {{v.price}}</b></p>
+				</li>
+				{%endif%}
+			{%endfor%}
+		{%endif%}
+		{%endfor%}
+		<li>
+			<p>Sub-Total:</p>
+			<p class="price-total">₹&nbsp;{{request.session.cart.totalcost}}</p>
+		</li>
+		<li>
+			<p>VAT (5%)</p>
+			{% if 'offer' in request.session %}
+			<p class="price-total" id="vat_amount">5%</p>
+			<script type="text/javascript">
+				var vat_amount = ({{request.session.cart.totalcost_actual}} * 5 / 100);
+				document.getElementById('vat_amount').innerHTML = "<b>₹ "+vat_amount+"</b>";
+			</script>
+			{% endif %}
+			{% if 'offer' not in request.session %}
+			<p class="price-total" id="vat_amount">5%</p>
+			<script type="text/javascript">
+				var vat_amount = ({{request.session.cart.totalcost}} * 5 / 100);
+				document.getElementById('vat_amount').innerHTML = "<b>₹ "+vat_amount+"</b>";
+			</script>
+			{% endif %}
+		</li>
+		
+		{% if 'user' in request.session and request.session.user.e_wallet > 0 %}
+			{% if 'ewallet' not in request.session %}
+				<li>
+					<p><input type="checkbox" id="wallet-checkbox"/></p>
+					<p class="price-total">
+						<a onclick="ewalletused()">
+							{% if 'offer' in request.session %}
+								{% if request.session.cart.grandtotal_actual > request.session.user.e_wallet %}
+									Pay Rs {{request.session.user.e_wallet}} from e-wallet
+								{% else %}
+									Pay Rs {{request.session.cart.grandtotal_actual}} from e-wallet
+								{% endif %}
+							{% else %}
+								{% if request.session.cart.grandtotal > request.session.user.e_wallet %}
+									Pay Rs {{request.session.user.e_wallet}} from e-wallet
+								{% else %}
+									Pay Rs {{request.session.cart.grandtotal}} from e-wallet
+								{% endif %}
+							{% endif %}
+						</a>
+					</p>
+				</li>
+			{% else %}
+				<li>
+					<p><a class="btn-success btn-group-sm" onclick="ewalletremove()">Remove</a></p>
+					<p class="price-total">
+						Rs {{request.session.ewallet}} used from e-wallet
+					</p>
+				</li>
+			{% endif %}
+		{% endif %}
+
+		<!-- {% if 'partner' in request.session and request.session.partner.e_wallet > 0 %}
+			{% if 'ewallet' not in request.session %}
+				<li>
+					<p><input type="checkbox" class="form-control" id="wallet-checkbox"/></p>
+					<p class="price-total" onclick="ewalletused()">
+						{% if request.session.cart.grandtotal > request.session.partner.e_wallet %}
+							Pay Rs {{request.session.partner.e_wallet}} from e-wallet
+						{% else %}
+							Pay Rs {{request.session.cart.grandtotal}} from e-wallet
+						{% endif %}
+					</p>
+				</li>
+			{% else %}
+				<li>
+					<p class="price-total">
+						{% if request.session.cart.grandtotal|add:request.session.partner.e_wallet > request.session.partnrt.e_wallet %}
+						Rs {{request.session.partner.e_wallet}} used from e-wallet
+						{% else %}
+							Rs {{request.session.cart.grandtotal|add:request.session.partner.e_wallet}} used from e-wallet
+						{% endif %}
+					</p>
+				</li>
+			{% endif %}
+		{% endif %} -->
+
+		{% if 'partner' not in request.session %}
+			{% if 'offer' not in request.session or request.session.offer_coupon %}
+				<br>
+				<li>
+					<p><input type="text" name="coupon-code" id="coupon-code" placeholder="Coupon?"></p>
+					<p class="price-total">
+						<a onclick = "couponapply()">Apply</a>
+					</p>
+					{% if 'coupon_discount' in request.session and 'coupon' in request.session %}
+						<span class= "text-danger">Coupon for {{request.session.coupon_discount}} discount is applied!</span>
+					{%endif%}
+					{% if 'couponinvalid' in request.session %}
+						<span class= "text-danger">*Invalid Coupon</span>
+					{%endif%}
+				</li>
+			{% endif %}
+		{% endif %}
+
+		<li>
+			<p>LHD Wallet Amount</p>
+			{% if 'ewallet' in request.session %}
+				<p class="price-total">₹ {{request.session.ewallet}}</p>
+			{% else %}
+				<p class="price-total">₹ 0</p>
+			{% endif %}
+		</li>
+
+		<li>
+			<p>Total</p>
+			{% if 'offer' in request.session %}
+				<p class="price-total">₹&nbsp;{{request.session.cart.grandtotal_actual}}</p>
+			{% else %}
+				<p class="price-total">₹&nbsp;{{request.session.cart.grandtotal}}</p>
+			{% endif %}
+		</li>
+	</ul>
+	{%if 'user' in request.session or 'partner' in request.session %}
+	<div class="checkout">
+		<a class="btn btn-default-red" href="/checkout/"><i class="fa fa-shopping-cart"></i>Checkout</a>
+	</div>
+	{% else %}
+	<div class="checkout">
+		<a class="btn btn-default-red" href = "#" data-toggle = "modal" data-target = "#userlogin"><i class="fa fa-shopping-cart"></i>Checkout</a>
+	</div>
+	{% endif %}
+{%else%}
+	{%if 'offer' in request.session%}
+		<p align="center" style="padding:20px;margin-top:20%;font-size:1.2em;">Hi, you've chosen <b>{{request.session.offer_day}}'s {{request.session.offer_time}}</b> Menu from <b>{{offer.offer_name}}</b>.<br><br> Please select items from menu for adding them in your cart.<br><br>
+		{% if request.session.offer_time == 'Lunch' %}
+			Your order will be <b>delivered on coming {{request.session.offer_day}} between 11 am and 1 pm</b>.
+		{% else %}
+			Your order will be <b>delivered on coming {{request.session.offer_day}} between 5 pm and 7 pm</b>.
+		{% endif %}
+		</p>
+	{%else%}
+		<h4 align="center" style="font-family: 'Bowlby One SC', cursive; color:#ed3237;">ONGOING OFFERS<span class="glyphicon glyphicon-arrow-down"></span></h4>
+		{% if offers %}
+		<ul class="list-unstyled">
+			{%for offer in offers%}
+			<li>
+				{% if offer.get_timediff %}
+					<p><img src="{{offer.offer_image}}" style = "height:100%; width:100%;" \></p>
+					<h4 align="center" style="color:#10462f;"><b>{{offer.offer_name|title}}</b></h4>
+					<h5 style="margin:2px;padding:2px;">{{offer.description}}</h5>
+					<div id="offerid{{offer.id}}" class="text-center timer" data-countdown="{{offer.start_datetime|date:'m/d/Y h:i A'}}"></div>
+				{%else%}
+					<a data-toggle="modal" data-target="#offer_modal" data-offer='{{offer.id}}'>
+						<p><img src="{{offer.offer_image}}" style = "height:100%; width:100%;" \></p>
+						<p align="center">Click Here</p>
+						<h4 align="center" style="color:#10462f;"><b>{{offer.offer_name|title}}</b></h4>
+						<h5 style="margin:2px;padding:2px;">{{offer.description}}</h5>
+						<div class= "text-center timer" style="color:#10462f;" id="offerid{{offer.id}}" data-countup="{{offer.end_datetime|date:'m/d/Y h:i A'}}"></div>
+					</a>
+				{%endif%}
+			</li>
+			{%endfor%}
+		</ul>
+		{% else %}
+		<p align="left" style="padding:20px;margin-top:20%;font-size:1.2em;">
+			Dear Patron,<br><br>
+			We welcome you to LHDINDIA. We are determined to bring the best to you.<br><br>
+			<b>Follow this space for latest offers and discounts.</b><br><br>
+			<i>-Team lhdindia</i>
+			<!-- <i>Beware of surprises</i> &#9786;<br> -->
+		</p>
+		{% endif %}
+	{%endif%}
+{%endif%}
+
+<!-- js for timers -->
+	<script src = "{% static 'app/js/countdown.min.js' %}"></script>
+	<script type="text/javascript">
+		setInterval(function() {
+			$('[data-countup]').each(function(){
+				var $this = $(this), finalDate = $(this).data('countup');
+				var timespan = countdown(new Date(finalDate), new Date());
+			    var div = document.getElementById($(this).attr('id'));
+			    div.innerHTML = "<br><br><h3><b>ENDS IN: " + timespan.hours + ":" + timespan.minutes + ":" + timespan.seconds + "</b></h3>"
+			});
+		}, 1000);
+		setInterval(function() {
+			$('[data-countdown]').each(function(){
+				var $this = $(this), finalDate = $(this).data('countdown');
+				var timespan = countdown(new Date(finalDate));
+			    var div = document.getElementById($(this).attr('id'));
+			    div.innerHTML = "<br><br><h3><b>STARTS IN: " + timespan.hours + ":" + timespan.minutes + ":" + timespan.seconds + "</b></h3>"
+			});
+		}, 1000);
+	</script>
+
+<!-- Offer-Modal -->
+<div id="offer_modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- offer detail are fetched from offer_detail.html -->
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+	$('#offer_modal').on('show.bs.modal', function (event) {
+	  var button = $(event.relatedTarget) // Button that triggered the modal
+	  var offer_id = button.data('offer') // Extract info from data-* attributes
+	  var modal = $(this)
+	  $.post("/get_offerdata/",{"offer_id":offer_id},function(data){
+		modal.find(".modal-content").html(data);
+	  });
+	})
+</script>

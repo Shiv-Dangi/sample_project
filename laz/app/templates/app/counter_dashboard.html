@@ -1,0 +1,447 @@
+{% extends "app/baseadmin.html" %}
+{% load harishtags %}
+{% load staticfiles %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<style type="text/css">
+		.counter-dashboard {
+			margin: 2.5%;
+			font-size: small;
+			font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
+			font-weight: normal;
+			color: #000000;
+		}
+		.heading-row > th {
+			background-color: #10452f;
+			color: #ffffff;
+			font-family:"Courier New", Courier, monospace;
+			font-size:small;
+		}
+		.additional-function {
+			border: 1px solid #fff;
+			width: 185px;
+		}
+	</style>
+
+	<!-- modal for view the order detail -->
+		<div class="modal fade" id="view-order" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+		  <div class="modal-dialog modal-lg" role="document">
+		    <div class="modal-content">
+		    <!-- modal header -->
+		      <div class="modal-header text-center">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="exampleModalLabel">Order Detail</h4>
+		      </div>
+		      <!-- end of modal header -->
+		      <div class="modal-body orderinfo">
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		<script type="text/javascript">
+			$('#view-order').on('show.bs.modal', function (e) {
+			  var button = $(e.relatedTarget) // Button that triggered the modal
+			  var modal = $(this)
+			  var order_number = button.data('id')
+			  var url = '/myadmin/orderinfo/' + order_number + '/'
+			  $.get(url ,function(data){
+					$(".orderinfo").html(data);
+				})
+			})
+		</script>
+	<!-- end of the order view modal -->
+
+	<!-- modal for adding expense -->
+		<div class="modal fade" id="addtodayexpense" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		    <!-- modal header -->
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="exampleModalLabel">Enter Expense Detail</h4>
+		      </div>
+		      <!-- end of modal header -->
+		      <!-- modal body -->
+		      <div class="modal-body">
+		      	<div class="form-horizontal">
+		      		<form class="form-horizontal" method="post" action="/myadmin/addtodayexpense/">
+		      			{% csrf_token %}
+		      			<div class="form-group">
+				          	<label for="table_number" class="col-sm-3 control-label">Expense For: </label>
+				          	<div class="col-sm-9">
+				          		<input type="text" class="form-control" name="expense_for" required />
+				          	</div>
+				          </div>
+				          <div class="form-group">
+				            <label for="table_name" class="col-sm-3 control-label">Amount: </label>
+				            <div class="col-sm-9">
+				            	<input type="Number" class="form-control" name="amount" required />
+				            </div>
+				          </div>
+				          <input name="url" value="{{request.path}}" type="hidden" />
+				          <div class="form-group text-center">
+				          	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				          	<input class = "btn btn-primary" type = "submit"  value = "submit" />
+				          </div>
+		      		</form>
+		      	</div>
+		      </div>
+		      <!-- end of modal body -->
+		    </div>
+		  </div>
+		</div>
+	<!-- end of addexpense modal -->
+
+	<!-- modal for add delivery boy expense -->
+		<div class="modal fade" id="paydeliveryboy" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		    <!-- modal header -->
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="exampleModalLabel">Pay Delivery Boy</h4>
+		      </div>
+		      <!-- end of modal header -->
+		      <!-- modal body -->
+		      <div class="modal-body">
+		      	<div class="form-horizontal">
+		      		<form class="form-horizontal" method="post" action="/myadmin/paydeliveryboy/">
+		      			{% csrf_token %}
+		      			<div class="form-group">
+				          	<label for="table_number" class="col-sm-3 control-label">Delivery Boy: </label>
+				          	<div class="col-sm-9">
+				          		<select name = "delivery_boy" required class="form-control">
+									<option value = "" default>Please select a delivery boy</option>
+									{%for deli in deliveryboys%}
+										<option value = "{{deli.loginid}}">{{deli.first_name}} {{deli.last_name}}</option>
+									{%endfor%}
+								</select>
+				          	</div>
+				          </div>
+				          <div class="form-group">
+				            <label for="table_name" class="col-sm-3 control-label">Amount: </label>
+				            <div class="col-sm-9">
+				            	<input type="Number" class="form-control" name="amount" required />
+				            </div>
+				          </div>
+				          <input name="url" value="{{request.path}}" type="hidden" />
+				          <div class="form-group text-center">
+				          	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				          	<input class = "btn btn-primary" type = "submit"  value = "submit" />
+				          </div>
+		      		</form>
+		      	</div>
+		      </div>
+		      <!-- end of modal body -->
+		    </div>
+		  </div>
+		</div>
+	<!-- end of paydeliveryboy modal -->
+
+	<!-- modal for show today's expenses -->
+		<div class="modal fade" id="viewtodayexpense" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		    <div class="modal-dialog">
+		        <div class="modal-content">
+		            <div class="modal-header">
+		                Today's Expenses
+		                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		            </div>
+		            <div class="modal-body">
+		                <table class = "table table-bordered">
+		                	<thead>
+		                		<th>S. NO.</th>
+		                		<th>Expense For</th>
+		                		<th>Amount</th>
+		                	</thead>
+		                	<tbody>
+	                			{% for expense in today_expenses%}
+	                			<tr>
+	                				<td>{{forloop.counter}}</td>
+	                				<td>{{expense.expense_for}}</td>
+	                				<td>{{expense.amount}}</td>
+	                			</tr>
+	                			{% endfor %}
+	                			<tr>
+	                				<th colspan="2">Total</th>
+	                				<th>{{today_expense_total.amount__sum}}</th>
+	                			</tr>
+		                	</tbody>
+		                </table>
+		            </div>
+		            <div class="modal-footer">
+		            	<button class="btn btn-primary" data-dismiss="modal">Close</button>
+		            </div>
+		        </div>
+		    </div>
+		</div>
+	<!-- end of show today's expense modal -->
+
+	<!-- modal for show today's expenses of delivery boy -->
+		<div class="modal fade" id="viewdelboyexpense" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		    <div class="modal-dialog">
+		        <div class="modal-content">
+		            <div class="modal-header">
+		                Delivery Boy Payments
+		                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		            </div>
+		            <div class="modal-body">
+		                <table class = "table table-bordered">
+		                	<thead>
+		                		<th>S. NO.</th>
+		                		<th>Delivery Boy</th>
+		                		<th>Amount</th>
+		                	</thead>
+		                	<tbody>
+	                			{% for expense in delboy_payments%}
+	                			<tr>
+	                				<td>{{forloop.counter}}</td>
+	                				<td>{{expense.delivery_boy}}</td>
+	                				<td>{{expense.amount}}</td>
+	                			</tr>
+	                			{% endfor %}
+	                			<tr>
+	                				<th colspan="2">Total</th>
+	                				<th>{{delboy_payment_total.amount__sum}}</th>
+	                			</tr>
+		                	</tbody>
+		                </table>
+		            </div>
+		            <div class="modal-footer">
+		            	<button class="btn btn-primary" data-dismiss="modal">Close</button>
+		            </div>
+		        </div>
+		    </div>
+		</div>
+	<!-- end of show today's expense of delivery boy modal -->
+
+	<!-- modal for show Collection from delivery boy -->
+		<div class="modal fade" id="collecttodelboy" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		    <div class="modal-dialog">
+		        <div class="modal-content">
+		            <div class="modal-header">
+		                Collection from Belivery Boys
+		                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		            </div>
+		            <div class="modal-body">
+		            	<div class = "form-inline">
+							<label>Date</label>
+							<input type = "date" class="form-control" style="width:auto;" id="collectiondate"/>
+							<button class="btn btn-primary" onclick="collectiondata();">search</button>
+						</div>
+						<div class="delboycollections">
+							{% include "app/delboycollection.html" %}
+						</div>
+		            </div>
+		            <div class="modal-footer">
+		            	<button class="btn btn-primary" data-dismiss="modal">Close</button>
+		            </div>
+		        </div>
+		    </div>
+		</div>
+		<script type="text/javascript">
+			function collectiondata() {
+				var date = $('#collectiondate').val();
+				var url = '/myadmin/counter/collectiondata/';
+				$.post(url, {'date': date}, function(data){
+					$(".delboycollections").html(data);
+				});
+			}
+
+			function collectfromdboy(del_boy){
+				var date = $('#collectiondate').val();
+				var url = '/myadmin/counter/amountcollected/';
+				$.post(url, {'date': date, 'del_boy': del_boy},function(){
+
+				}).done(function(){
+					$.post('/myadmin/counter/collectiondata/', {'date': date}, function(data){
+						$(".delboycollections").html(data);
+					});
+				});
+			}
+		</script>
+	<!-- end of show collection from delivery boy modal -->
+
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class= "row counter-dashboard">
+		<div class="col-sm-10 col-md-10 dashboard">
+			{% include "app/updatecounterdashboard.html" %}
+		</div>
+
+
+		<div class="col-sm-2 col-md-2" style="background:#10462f;color:#ffffff;padding-left:15px;">
+			<br>
+			<div class="additional-function text-center" style="border-width:0px;">
+				<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#addtodayexpense"  style="width: 190px;background:transparent;border-color:#ffffff;border-width:1px;">Add Today's Expense</a>
+			</div>
+			<div class="additional-function text-center" style="margin-top: 10px;border-width:0px;">
+				<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#paydeliveryboy"  style="width: 190px;background:transparent;border-color:#ffffff;border-width:1px;">Pay a Delivery Boy</a>
+			</div>
+			<div class="additional-function text-center" style="margin-top: 10px;border-width:0px;">
+				<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#viewtodayexpense"  style="width: 190px;background:transparent;border-color:#ffffff;border-width:1px;">View Today's Expenses</a>
+			</div>
+			<div class="additional-function text-center" style="margin-top: 10px;border-width:0px;">
+				<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#viewdelboyexpense"  style="width: 190px;background:transparent;border-color:#ffffff;border-width:1px;">Delivery Boy Payments</a>
+			</div>
+			<div class="additional-function text-center" style="margin-top: 10px;border-width:0px;">
+				<a href="#" class="btn btn-primary" data-toggle="modal" data-target="#collecttodelboy"  style="width: 190px;background:transparent;border-color:#ffffff;border-width:1px;">Collect from DelBoy</a>
+			</div>
+			<div class="additional-function text-center" style="margin-top: 10px;border-width:0px;">
+				<!-- <table class = "table table-bordered">
+                	<thead>
+                		<th>Pay Mode</th>
+                		<th>Amount</th>
+                	</thead>
+                	<tbody>
+            			{% for key, value in payment_received.items%}
+	            			{% if key != 'total' %}
+	            			<tr>
+	            				<td>{{key}}</td>
+	            				<td>{{value.grand_total__sum}}</td>
+	            			</tr>
+	            			{% endif %}
+            			{% endfor %}
+                	</tbody>
+                	<tfoot>
+                		<th>Total</th>
+                		<th>{{payment_received.total.grand_total__sum}}</th>
+                	</tfoot>
+                </table> -->
+			</div>
+		</div>
+	</div>
+	<div class="footer navbar-fixed-bottom" style="background-color:#10452f;">
+		<div class="row">
+			<div class="col-sm-11">
+				<div class="pull-left" style="padding-top: 5px;font-size:small;">
+					Welcome, {{request.session.admin.name}}-lhdhakeem&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					{% now "j-F-Y" %} -> 
+					{%for key, value in today_orders.items%}
+						{{key|title}}-({{value}})|
+					{%endfor%}
+				</div>
+			</div>
+			<div class="col-sm-1">
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		// function for executeing add customer information modal 
+		// $('#addcustomerinfo').on('show.bs.modal', function (e) {
+		//   var button = $(e.relatedTarget) // Button that triggered the modal
+		//   var modal = $(this)
+		//   modal.find('.submitcusinfo').attr('id', $(e.relatedTarget).data('id'));
+		//   modal.find('#customer_number').val('');
+		//   modal.find('#customer_name').val('');
+		//   modal.find('#fororderno').text('');
+		// })
+
+		// function to add customer information with a order
+		function addcustomerinfo (order_number){
+			var customer_number = $('#customer_number'+order_number).val();
+			var customer_name = $('#customer_name'+order_number).val();
+			var url = "/myadmin/addcustomerinfo/";
+			$.post(url, {'order_number':order_number, 'customer_number':customer_number, 'customer_name':customer_name}, function(data){
+				$('#addcustomerinfo').modal('hide');
+			}).done(function(){
+				$.get('/myadmin/updatecounterdashboard/',function(data){
+					$(".dashboard").html(data);
+				})
+			});
+		}
+
+		// function for skip button of customer column of dashboard
+		function skipcustomerinfo(order_number){
+			var customer_number = 'skipped';
+			var customer_name = 'skipped';
+			var url = "/myadmin/addcustomerinfo/";
+			$.post(url, {'order_number':order_number, 'customer_number':customer_number, 'customer_name':customer_name}, function(data){
+				$('#addcustomerinfo').modal('hide');
+			}).done(function(){
+				$.get('/myadmin/updatecounterdashboard/',function(data){
+					$(".dashboard").html(data);
+				})
+			});	
+		}
+
+		// function for print button below order number on dashboard
+		function printcounterorder(order_number){
+			url = '/myadmin/printcounterorder/' + order_number + '/';
+			var printWindow = window.open(url, '_blank');
+			printWindow.onload = function() {
+			    var isIE = /(MSIE|Trident\/|Edge\/)/i.test(navigator.userAgent);
+			    if (isIE) {
+
+			        printWindow.print();
+			        setTimeout(function () { printWindow.close(); }, 100);
+
+			    } else {
+
+			        setTimeout(function () {
+			            printWindow.print();
+			            var ival = setInterval(function() {
+			                printWindow.close();
+			                clearInterval(ival);
+			            }, 200);
+			        }, 500);
+			    }
+			}
+		}
+
+		// function for bill print button of bashboard
+		function printbill(order_number){
+			var post_url = "/myadmin/billprint/"+order_number+"/";
+			$.post(post_url, function(data){}).done(function(){
+				$.get('/myadmin/updatecounterdashboard/',function(data){
+					$(".dashboard").html(data);
+				})
+			});
+			printcounterorder(order_number);
+		}
+
+		// function to assign a waiter to a table.
+		function assignwaiter(order_number){
+			var order_id = 'assignw' + order_number;
+			var waiter = document.getElementById(order_id).value;
+			var url = "/myadmin/assignwaiter/";
+			$.post(url, {'waiter':waiter, 'order_number':order_number}, function(data){
+				
+			}).done(function(){
+				$.get('/myadmin/updatecounterdashboard/',function(data){
+					$(".dashboard").html(data);
+				})
+			});
+		}
+
+		// function to add a payment mode to an order
+		function addpaymode(order_number) {
+			var order_id = "paymode" + order_number
+			var payment_mode = document.getElementById(order_id).value;
+			var url = "/myadmin/addpaymode/";
+			$.post(url, {'payment_mode':payment_mode, 'order_number':order_number}, function(data){
+				
+			}).done(function(){
+				$.get('/myadmin/updatecounterdashboard/',function(data){
+					$(".dashboard").html(data);
+				})
+			});
+		}
+
+		// function for update dashboard in every 20 second
+		setInterval(ajaxCall, 20000);
+		function ajaxCall() {
+			$.ajax({
+				url : "/myadmin/updatecounterdashboard/",
+				type: "get",
+	        	success : function(data){
+	        		$(".dashboard").html(data);
+	        	},
+	        	error: function(data){
+		            console.log('errors');
+		        }
+	        });
+		};
+	</script>
+{%endblock content%}

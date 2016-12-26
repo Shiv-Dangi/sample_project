@@ -1,0 +1,63 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Counter Expense Collection Report
+		  </div>
+		</div>
+		<style>
+			.whutwhut{
+				-webkit-appearance: menulist-button;
+			   	height: 42px;
+			   	width: 120px;
+			}
+			input[type="date"]::-webkit-inner-spin-button{
+			    display: none;
+			}
+		</style>
+		<div class = "jumbotron">
+			<form class = "form-inline" method = "post" action = "/report/searchcountercollection/">
+				{%csrf_token%}
+				<div class = "form-group">
+					<label>Date</label>
+				</div>
+				<div class = "form-group">
+					<input type = "date" class = "form-control" style = "width:auto;" name = "date"/>
+				</div>
+				<div class = "form-group">
+					<input type = "submit" value = "search" class = "btn btn-danger"/>
+				</div>
+			</form>
+		</div>
+
+		<h5><b>Date Expense Collection Report:- {{date_expense.0.date|date:"d-M-Y"}}</b></h5>
+		<div class="">
+			{% if date_expense %}
+				<table class = "table table-bordered del_boyreport_table">
+					<tr>
+						<th>s.no</th>
+						<th>Expense Collection For</th>
+						<th>Amount</th>
+					</tr>
+				{%for expense in date_expense %}
+					<tr>
+						<td>{{forloop.counter}}</td>
+						<td>{{expense.collection_for}}</td>
+						<td>{{expense.amount}}</td>
+					</tr>
+				{%endfor%}
+					<tr>	
+						<th colspan="2">TOTAL:</th>
+						<th>{{date_expense_total.amount__sum}}</th>
+					</tr>
+				</table>
+			{% endif %}
+		</div>
+	</div>
+
+{%endblock content%}

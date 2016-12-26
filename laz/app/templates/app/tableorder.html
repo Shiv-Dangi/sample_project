@@ -1,0 +1,383 @@
+<script type="text/javascript">
+	// control cursor for add items to the cart
+
+	$(document).on('keyup', 'input', 'select', function(e) {
+		if(e.keyCode == 13) {
+  				if($('#item').val()==''){
+          			e.preventDefault();
+          			return false;
+  				}	
+			if (e.target.id !== 'select_table'){
+				if (e.target.id !== 'quantity'){
+					var inputs = $(e.target).parents(".additem").eq(0).find(":input:visible:not([readonly]):enabled"),
+			   idx = inputs.index(e.target);
+			       if (idx == inputs.length - 1) {
+			          inputs[0].select()
+			       } else {
+			          inputs[idx + 1].focus();
+			          inputs[idx + 1].select();
+			       }
+				}
+				else{
+					$("#item").focus();
+				}
+			}
+		}
+	});
+
+	// autofocus on item-description
+	$( document ).ready(function() {
+		if ('{{order.bill_print}}' != 'None'){
+			setTimeout(function() { $('select[name=payment-mode]').focus() }, 1500);
+		} else {
+			setTimeout(function() { $('input[name=item-description]').focus() }, 500);
+			// setTimeout(function() { $('select[name=waiterdropdown]').focus() }, 800);
+		}
+		// if('{{order.bill_print}}' != 'None')
+		// 	setTimeout(function() { $('select[name=payment-mode]').focus() }, 1500);
+	});
+</script>
+<style type="text/css">
+
+	body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper{
+		display: none;
+	}
+
+	.active-table {
+		background-color:#10462f;
+		color:#ffffff;
+	}
+	hr {
+		margin-top: 5px;
+		margin-bottom: 5px;
+	}
+	.table-function {
+		border: 1px solid #000;
+		padding-top: 1%;
+	}
+
+	.fixedHeight {
+		max-height: 400px;
+		overflow-x: auto;
+	}
+
+	{% if not active_table %}
+		body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1){
+			display: none
+		}
+	{% endif %}
+
+</style>
+<!-- css for make item-description table to scrollable -->
+<style type="text/css">
+	table.scroll {
+	    width: 100%; /* 140px * 5 column + 16px scrollbar width */
+	    /*border-spacing: 0;*/
+	    /*border: 2px solid black;*/
+	}
+
+	table.scroll tbody,
+	table.scroll thead tr,
+	table.scroll tfoot tr { display: block; }
+
+	table.scroll tbody {
+		min-height: 250px;
+	    max-height: 250px;
+	    overflow-y: auto;
+	    /*overflow-x: hidden;*/
+	}
+
+	table.scroll tbody td,
+	table.scroll tfoot td,
+	table.scroll thead th {
+	    width: 500px;
+	    /*border-right: 1px solid white;*/
+	}
+
+	table.scroll thead th:last-child {
+	   /* width: 156px;  140px + 16px scrollbar width */
+	}
+
+	thead tr th,
+	tfoot tr td { 
+	    height: 30px;
+	    line-height: 30px;
+	    /*text-align: left;*/
+	}
+
+	/*tbody { border-top: 2px solid black; }*/
+
+	tbody td:last-child, tfoot td:last-child, thead th:last-child {
+	    border-right: none !important;
+	}
+</style>
+
+<div class="row" style="margin-left: 2px; margin-right: 20px;">
+	<!-- <div id='loadingmessage' class="text-center" style='display:none'>
+	  <img src='/static/app/img/loading.gif'/>
+	</div> -->
+
+	<!-- table selection row -->
+		<div class="row" style="background:transparent;">
+				<div class="table-number col-sm-4 text-center">
+					<input type="Number" class="form-control text-center" style="width:50%;margin-left:35%;background:transparent;" name="select-table" id="select_table" placeholder="Enter table number" />
+					<script type="text/javascript">
+						$("#select_table").keyup(function(event){
+						    if(event.keyCode == 13){
+						    	var table_number = document.getElementById('select_table').value;
+						    	$.post("/myadmin/select_table/",{"table_number":table_number},function(data){
+									if(data['status'] == 'success'){
+										if (data['order_number']){
+											tableorder(table_number);	
+										} 
+										else{
+											createtableorder(table_number);
+										}
+									}
+									else{
+										alert('please enter a valid table number');
+									}
+								});	
+						    }
+						});
+					</script>
+					<!-- <select onchange="tableorder(this.value);" style="background:transparent;" >
+						{%for tbl in table_dropdown%}
+						<option value="{{tbl.table_number}}" {%if tbl == table %}selected{%endif%}>{{tbl}}</option>
+						{%endfor%}
+					</select> -->
+				</div>
+				<div class="col-sm-2 text-center">
+					<h4><b>{{order.table_no}}</b></h4>
+				</div>
+				<div class="col-sm-2 text-center">
+					<h4><b>Order: {{order.order_number}}</b></h4>
+				</div>
+				<div class="col-sm-4 text-center">
+					{% if request.session.admin.role == 'admin' %}
+					<h4>Branch: <b>{{request.session.admin.branch}}
+					<button type="button" class="btn glyphicon glyphicon-pencil" style="background:#d2e28b;padding:0px;" data-toggle="modal" data-target="#branchModal"></button>
+					</b></h4>
+					{% else %}
+					<h4>Branch: <b>{{request.session.admin.branch}}</b></h4>
+					{% endif %}
+				</div>
+		 	
+		 	{% if order %}
+			<div class="col-sm-2 col-md-2"><h5 style="margin:0px;">Waiter :</h5></div>
+			<div class="col-sm-4 col-md-4">
+				<div class="row wrapper">
+					{% if not table.table_number == 0 %}
+						<div class="row">
+							{% if request.session.admin.role == 'branchuser' or request.session.admin.role == 'admin' or request.session.admin.role == 'billinguser'%}
+								<select style="background: transparent;" name="waiterdropdown" id="assignw{{order.order_number}}" onchange="assignwaiter({{order.order_number}}, {{table.table_number}});">
+									{% if order.assigned_waiter == none %}<option value="" selected>Please select a waiter</option>{% endif %}
+									{%for waiter in waiters%}
+										<option value = "{{waiter.userid}}" {% if order.assigned_waiter == waiter %}selected{% else %}default{% endif %}>{{waiter}}</option>
+									{%endfor%}
+								</select>
+							{% endif %}
+	                        {% if order.assigned_waiter != none and order.assigned_at %}
+	                            <div style="text-align: center; margin-top: 0px;">
+									{{order.assigned_waiter}} -  {{order.assigned_at}} 
+									<button onclick="editWaiter()">
+										<span class="glyphicon glyphicon-edit"></span>
+									</button>
+							    </div>
+	                        {% endif %}
+							{% if order.assigned_waiter != none%}
+								<script>
+									$('select[name=waiterdropdown]').css({'display': 'none'});
+									$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper > div:nth-child(1) > div > div').css({'display': 'inline-block'});
+								</script>
+							{% endif %}
+						</div>
+					{% endif %}
+				</div>
+			</div>
+			{% endif %}
+	 			
+		</div>
+	<!-- end of table selection row -->
+
+	{% if order %}
+	<!-- add item row -->
+		<div class="row" style="margin-top: 5px;">
+			<table class="table table-borderd" style="margin-bottom:0px;border:1px;">
+				{% if not order.bill_print %}
+				<!-- <thead class="jumbotron" style="background:#d2e28b;">
+					<tr>
+						<th width="5%">S.No.</th>
+						<th width="60%">Item Description</th>
+						<th width="10%" class="text-center">Quantity</th>
+						<th width="10%" class="text-center">Price</th>
+						<th width="10%" class="text-center">Total</th>
+						<th width="5%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;X</th>
+						<th>Add</th>
+					</tr>
+				</thead> -->
+				<tbody>
+					<tr class="additem">
+						<td width="5%"><input type="text" class="form-control" style="background:transparent;"  value="" readonly/></td>
+			            <td width="60%"><input type="text" class="form-control" style="background:transparent;" id="item" name = "item-description" placeholder = "Item Description"  value="" /></td>
+			            <td width="10%">
+			            	<input class="input-control form-control text-center" placeholder = "Qty" id="quantity" style="background:transparent;" name="quantity" oninput="calculate()" onKeyDown="if(event.keyCode==13) addordercart('{{order.order_number}}')" value="1" />
+			            </td>
+			            <td width="10%">
+			            	<input class="input-control form-control text-center" placeholder = "Price" style="background:transparent;" id="price" name="price" oninput="calculate()" readonly />
+			            </td>
+			            <input id="item_code" name="item_code" type="hidden" />
+			            <input id="item_subname" name="item_subname" type="hidden" />
+			            <input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+			            <td width="10%"><input style="background:transparent;" placeholder = "Total" class="input-control text-center form-control" id="total" readonly /></td>
+			            <td width="5%"><input type="text" placeholder = "X" class="form-control" style="background:transparent;"  value="" readonly/></td>
+					</tr>
+				</tbody>
+				{% endif %}
+			</table>
+		</div>
+	<!-- end of add item row -->
+
+	<div class="item-description">
+		{% include "app/item_description.html" %}
+	</div>
+
+	<!-- table vacate row -->
+		{% if not order.bill_print == None %}
+			<div class="row text-center" style="border: 1px solid #fff; padding-top: 10px;">
+				<div class="form-group">
+					{#{% if table.table_number == 0 %}#}
+						{#<script>window.location.href = "/myadmin_counter/finaltableorder/{{order.order_number}}/";</script>#}
+					{#{% else %}#}
+			    		<a class="btn btn-primary" id="vacatetblbtn" style="display:none;" href="/myadmin_counter/finaltableorder/{{order.order_number}}/">Vacate Table</a>
+					{#{% endif %}#}
+        		</div>
+			</div>
+		{% endif %}
+	<!-- end of table vacate row -->
+	{% else %}
+	<div style="margin-top:500px;"></div>
+	{% endif %}
+
+	<!-- table row -->
+		<div class="row" style="background-color: #10462f; border: 1px solid #fff;">
+			{%for tble in tables %}
+				{% if forloop.counter == 13 or forloop.counter == 25%}
+					<div class="col-sm-12"> <hr style="margin-left: -15px; margin-right: -15px;"> </div>
+				{% endif %}
+				{% if tble.order_number == "" %}
+					<div class="col-sm-1 col-md-1">
+						<a href="#" onclick="createtableorder({{tble.table_number}});" style="color: #fff;">
+							{%if tble.table_number == 0 %} 
+								counter
+							{% else %}
+								<h6 style="margin:0px;">{{tble.table_name}}</h6>
+							{% endif %}
+						</a>
+					</div>
+				{% else %}
+					<div class="col-sm-1 col-md-1">
+						{% if tble == table %}
+							<a href="#" id="{{tble.table_number}}" onclick="tableorder(this.id);" style="color: #1E90FF;">
+							{%if tble.table_number == 0 %} 
+								counter
+							{% else %}
+								<h6 style="margin:0px;">{{tble.table_name}}</h6>
+							{% endif %}
+							</a>
+						{% else %}
+							<a href="#" id="{{tble.table_number}}" onclick="tableorder(this.id);" style="color: #32CD32;">
+							{%if tble.table_number == 0 %} 
+								Counter
+							{% else %}
+								<h6 style="margin:0px;">{{tble.table_name}}</h6>
+							{% endif %}
+							</a>
+						{% endif %}
+					</div>
+				{% endif %}
+			{%endfor%}
+		</div>
+	<!-- end of table row -->
+</div>
+
+<!-- autocomplete js for add item into cart -->
+<script type="text/javascript">
+
+	{% if active_table %}
+		$(document).ready = function () {
+			$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1) option[value={{active_table_number.table_number}}]').prop('selected', true);
+		}
+	{% endif %}
+
+	function updatediscountandtax() {
+		var order_number = "{{order.order_number}}";
+		var comment_text = document.getElementById('commentbox').value;
+		var discount_percent = document.getElementById('discount_percent').value;	
+		var service_tax_percent = document.getElementById('service_tax_percent').value;
+		var vat_percent = document.getElementById('vat_percent').value;
+		var service_charge_percent = document.getElementById('service_charge_percent').value;
+		// var distance_in_km = document.getElementById('distance_in_km').value;
+		$.post("/myadmin/updatecdisandtax/",{"order_number":order_number,"discount_percent":discount_percent,"service_tax_percent":service_tax_percent,"vat_percent":vat_percent,"service_charge_percent":service_charge_percent,"comment_text":comment_text},function(data){
+			if(data['status'] == 'success')
+			{
+				$('#discount_rs').val(data['discount_rs']);
+				$('#service_tax_rs').val(data['service_tax_rs']);
+				$('#vat_rs').val(data['vat_rs']);
+				$('#service_charge_rs').val(data['service_charge_rs']);
+				$('#delivery_charge').val(data['delivery_charge']);
+				$('#grand_total').val(data['grand_total']);
+			};
+		});
+	}
+
+    $(function() {
+      $("#item").autocomplete({
+            autoFocus: true,
+            source: function( request, response ) {
+            $.ajax({
+              url: "/ajaxcheckitem_counter/"+ request.term,
+              success: function( data ) {
+                response( JSON.parse(data) );
+              },
+              error: function(data) {
+              	console.log(data);
+              }
+            });
+          },
+        minLength: 1,
+        focus: function( event, ui ) {
+            $( ".autocomplete-field" ).val( ui.item.item_name );
+            return false;
+          },
+        select: function( event, ui ) {
+            $( "#item" ).val(ui.item.item_code + "-" + ui.item.item_name + "-" + ui.item.item_subname);
+            $( "#price" ).val( ui.item.item_price );
+            $( "#item_code" ).val( ui.item.item_code );
+            $( "#item_subname" ).val( ui.item.item_subname );
+
+            return false;
+          }
+      }).autocomplete( "instance" )._renderItem = function( ul, item ) {
+          return $( "<li>" )
+            .append( "<a>" + item.item_code + "-" + item.item_name + "-" + item.item_subname + "</a>" )
+            .appendTo( ul );
+        };
+    });
+
+    $(document).ready(function(){
+    	$('#item').autocomplete("widget").addClass("fixedHeight");
+    })
+
+    // function to check customer existense on input mobile number
+	$('#customer_number').on('input', function() {
+	    var mobileno = $(this).val()
+	    $.post("/ajaxcheckcustomer/", {"mobile": mobileno}, function(data){
+	    	if(data['status'] == "pass")
+	    	{
+	    		$('#customer_name').val(data['name']);
+	    		$('#fororderno').text('Congratulations this is your ' + data['no'] + ' order');
+	    	};
+		});
+	});
+</script>

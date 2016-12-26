@@ -1,0 +1,77 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color: #10452f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Pickup-Drop Slots
+		  </div>
+		</div>
+		<div class = "jumbotron row">
+			{% if 'slot_code_exists' in request.session %}
+				<h5>Slot Code Already Exists</h5>
+			{% endif %}
+			{% if 'end_less_than_start' in request.session %}
+				<h5>End time cannot be less than start time... Please check!</h5>
+			{% endif %}
+			<div class="row">
+				<form class = "form" method = "post" action = "/laundry/setuppickupdropslots/">
+					{% csrf_token %}
+					<div class = "form-group">
+						<div class="col-sm-2">
+					        <input type="text" class="form-control" id="slot_code" placeholder="Slot Code" name = "slot_code" required>
+					    </div>
+					</div>
+					<div class = "form-group">
+						<div class="col-sm-2">
+					        <select class="form-control" id="pickup_or_drop" name="pickup_or_drop">
+					        	<option value="Pickup">Pickup</option>
+					        	<option value="Drop">Drop</option>
+					        </select>
+					    </div>
+					</div>
+					<div class = "form-group">
+						<div class="col-sm-2">
+					        <input type="time" class="form-control" id="slot_begins_at" placeholder="Begin At" name = "slot_begins_at" required>
+					    </div>
+					</div>
+					<div class = "form-group">
+						<div class="col-sm-2">
+					        <input type="time" class="form-control" id="slot_ends_at" placeholder="End At" name = "slot_ends_at" required>
+					    </div>
+					</div>
+				    <div class="form-group">
+				      <div class="col-sm-2" style="margin-top:5px;">
+				        <button type="submit" class="btn btn-primary">Submit</button>
+				      </div>
+				    </div>
+				</form>
+			</div><br><br>
+			<table class = "table table-striped col-sm-12">
+				<thead>
+					<tr>
+						<th>Slot Code</th>
+						<th>Pickup/Drop</th>
+						<th>Begins At</th>
+						<th>Ends At</th>
+						<th>Delete</th>
+					</tr>
+				</thead>
+				<tbody>
+				{% for slot in slots%}
+					<tr>
+						<td>{{slot.slot_code}}</td>
+						<td>{{slot.pickup_or_drop}}</td>
+						<td>{{slot.slot_begins_at}}</td>
+						<td>{{slot.slot_ends_at}}</td>
+						<td><a href="/laundry/deletepickupdropslot/{{slot.slot_code}}/" class="glyphicon glyphicon-remove"></a></td>
+					</tr>
+				{%endfor%}
+				</tbody>
+			</table>
+		</div>
+	</div>
+{%endblock content%}

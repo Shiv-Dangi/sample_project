@@ -1,0 +1,206 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<style type="text/css">
+		.additem {
+			padding-left: 22px;
+		}
+		.control-field {
+			padding-left: 0px;
+			padding-right: 0px;
+		}
+		.btn {
+			margin-top: 25px
+		}
+	</style>
+
+	<!-- modal for editing the table information -->
+		<div class="modal fade" id="edittableinfo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="exampleModalLabel">Edit Table Detail</h4>
+		      </div>
+		      <div class="modal-body">
+		        <form class = "form-horizontal" method = "post" action = "/myadmin/edittable/">
+		        	{% csrf_token %}
+		          <div class="form-group">
+		          	<label for="branch_name" class="col-sm-3 control-label">Branch Name </label>
+		          	<div class="col-sm-9">
+		          		<select class="form-control" name="branch_name" id="branch_name" required>
+		          			<option value=""></option>
+							{% for branch in branches %}
+							<option value="{{branch.branch}}">{{branch.branch}}</option>}
+							{% endfor %}
+						</select>
+		          	</div>
+		          </div>
+		          <div class="form-group">
+		          	<label for="table_number" class="col-sm-3 control-label">Table Number </label>
+		          	<div class="col-sm-9">
+		          		<input type="text" class="form-control" id="table_number" name="table_number" required />
+		          	</div>
+		          </div>
+		          <div class="form-group">
+		            <label for="table_name" class="col-sm-3 control-label">Table Name </label>
+		            <div class="col-sm-9">
+		            	<input type="text" class="form-control" id="table_name" name="table_name" required />
+		            </div>
+		          </div>
+		          <div class="form-group">
+		            <label for="max_occupy" class="col-sm-3 control-label">Max occupy </label>
+		            <div class="col-sm-9">
+		            	<input type="text" class="form-control" id="max_occupy" name="max_occupy" required />
+		            </div>
+		          </div>
+		          <div class = "form-group">
+						<label for="waiter" class="col-sm-3 control-label">Waiter </label>
+						<div class="col-sm-9">
+							<select class="form-control" name="waiter" id="waiter" required>
+								<option value=""></option>
+								{% for waiter in waiter_list %}
+									<option value="{{waiter.id}}">{{waiter}}</option>}
+								{% endfor %}
+							</select>
+					    </div>
+					</div>
+		          <div class="form-group">
+		            <label for="is_active" class="col-sm-3 control-label">Is Active </label>
+		            <div class="col-sm-9">
+		            	<input type="checkbox" class="form-control" id="is_active" name="is_active" value="1" />
+		            </div>
+		          </div>
+		          <input name="table_id" id="tableid" type="hidden"></input>
+		          <input name="url" value="{{request.path}}" type="hidden"></input>
+		          <div class="form-group text-center">
+		          	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		            <button type="submit" class="btn btn-primary">Save</button>
+		          </div>
+		        </form>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+
+		<script type="text/javascript">
+			$('#edittableinfo').on('show.bs.modal', function (event) {
+			  var button = $(event.relatedTarget) // Button that triggered the modal
+			  var table = button.data('id') // Extract info from data-* attributes
+			  var table_number = button.data('number')
+			  var table_name = button.data('name')
+			  var max_occupy = button.data('occupy')
+			  var waiter = button.data('waiter')
+			  var is_active = button.data('active')
+			  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+			  var modal = $(this)
+			  modal.find('#tableid').val(table);
+			  modal.find('#table_number').val(table_number);
+			  modal.find('#table_name').val(table_name);
+			  modal.find('#waiter').val(waiter);
+			  modal.find('#max_occupy').val(max_occupy);
+			  if (is_active == 'True'){
+			  	modal.find('#is_active').prop('checked', true);
+			  } else {
+			  	modal.find('#is_active').prop('checked', false);
+			  }
+			})
+		</script>
+	<!-- end of the modal -->
+
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class= "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-align-justify"></span>&nbsp;&nbsp;&nbsp;Manage Tables
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<div>Add New Table</div></br>
+			<div class="row additemform">
+				<form method = "post" action ="/myadmin/addnewtable/" enctype="multipart/form-data">
+				  	{% csrf_token %}
+				  	<div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="branch_name" class="control-label additem">Branch Name </label>
+						<div class="col-sm-10">
+							<select class="form-control" name="branch_name">
+								{% for branch in branches %}
+								<option value="{{branch.branch}}">{{branch.branch}}</option>}
+								{% endfor %}
+							</select>
+					    </div>
+					</div>
+				  	<div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="table_number" class="control-label additem">Table Number </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" placeholder="Table Number" name="table_number" required />
+					    </div>
+					</div>
+					<div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="table_name" class="control-label additem">Table Name </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" placeholder="Table Name" name="table_name" required />
+					    </div>
+					</div>
+					<div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="max_occupy" class="control-label additem">Max occupy </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" placeholder="max occupy" name="max_occupy" required />
+					    </div>
+					</div>
+					<div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="waiter" class="control-label additem">Waiter </label>
+						<div class="col-sm-10">
+							<select class="form-control" name="waiter">
+								{% for waiter in waiter_list %}
+									<option value="{{waiter.id}}">{{waiter}}</option>}
+								{% endfor %}
+							</select>
+					    </div>
+					</div>
+					<div class = "form-group col-xs-1 col-md-1 control-field">
+						<label for="is_active" class="control-label additem">Is_active </label>
+						<div class="col-sm-10">
+					        <input type="checkbox" class="form-control" name="is_active" value="1" />
+					    </div>
+					</div>
+					<input name="url" value="{{request.path}}" type="hidden"></input>
+				  	<button type="submit" class="btn btn-default col-xs-1 col-md-1">Add</button>
+				</form>
+			</div></br>
+
+			<table class = "table table-striped">
+				<thead>
+					<tr>
+						<th>Branch Name</th>
+						<th>Table Number</th>
+						<th>Table Name</th>
+						<th>Waiter</th>
+						<th>Max occupy</th>
+						<th>Is Active</th>
+						<th>Edit</th>
+						<th>Delete</th>
+					</tr>
+				</thead>
+				<tbody>
+					{%for table in tables %}
+						<tr>
+							<td>{{table.branch_name}}</td>
+							<td>{{table.table_number}}</td>
+							<td>{{table.table_name}}</td>
+							<td>{{table.waiter}}</td>
+							<td>{{table.max_occupy}}</td>
+							<td>{{table.is_active}}</td>
+							<td>
+								<a class="glyphicon glyphicon-pencil" data-id="{{table.id}}" data-number="{{table.table_number}}" data-name="{{table.table_name}}" data-occupy="{{table.max_occupy}}" data-waiter="{{table.waiter.id}}" data-active="{{table.is_active}}" data-toggle="modal" data-target="#edittableinfo"></a>
+							</td>
+							<td><a href="/myadmin/removetable/{{table.id}}/" class="glyphicon glyphicon-remove"></a></td>
+						</tr>
+					{%endfor%}
+				</tbody>
+			</table>
+		</div>
+	</div>
+{%endblock content%}

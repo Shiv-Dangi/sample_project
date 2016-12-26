@@ -1,0 +1,102 @@
+{%if 'cart' in data%}
+<h3 align="center" class="text-danger"><b>My Cart</b></h3>
+<hr style="width:100%;">
+<a href="/checkoutpage/" class="text-center">
+	<button type="button" class="btn btn-success" name="checkout" id="checkout" style="width:100%;"><span class="glyphicon glyphicon-shopping-cart"></span>&nbsp;&nbsp;&nbsp;&nbsp;<b>Checkout</b></button>
+</a>
+{%for key1,value1 in data.cart.items%}
+{%if key1 != 'totalcost'%}
+<h4><b>{{value1.name|title}}</b></h4>
+<table class = "table table-striped">
+	<thead>
+		<tr>
+			<div class="row">
+				<div class="col-sm-4 text-center">Type</div>
+				<div class="col-sm-2 text-center">(₹)</div>
+				<div class="col-sm-2"></div>
+				<div class="col-sm-2 text-center">Qty</div>
+				<div class="col-sm-2"></div>
+			</div>
+			<!-- <td>Type</td>
+			<td>(₹)</td>
+			<td></td>
+			<td>Qty</td>
+			<td></td> -->
+		</tr>
+	</thead>
+	<tbody>
+		{%for k,v in value1.items%}
+		{%if k != 'name'%}
+		<tr>
+			<div class="row">
+				<div class="col-sm-4 text-center"><b>{{v.subname}}</b></div>
+				<div class="col-sm-2 text-center"><b>{{v.price}}</b></div>
+				<div class="col-sm-2 text-center"><button class="btn btn-sm plusminus" onclick = "subtractcart('{{key1}}','{{v.subname}}')"><span class = "glyphicon glyphicon-minus"></span></button></div>
+				<div class="col-sm-2 text-center"><b>{{v.quantity}}</b></div>
+				<div class="col-sm-2 text-center"><button class="btn btn-sm plusminus" onclick = "addcart('{{key1}}','{{v.subname}}')"><span class = "glyphicon glyphicon-plus"></span></button></div>
+			</div>
+			<!-- <td><b>{{v.subname}}</b></td>
+			<td><b>{{v.price}}</b></td>
+			<td><button class="btn btn-sm plusminus" onclick = "subtractcart('{{key1}}','{{v.subname}}')"><span class = "glyphicon glyphicon-minus"></span></button></td>
+			<td><b>{{v.quantity}}</b></td>
+			<td><button class="btn btn-sm plusminus" onclick = "addcart('{{key1}}','{{v.subname}}')"><span class = "glyphicon glyphicon-plus"></span></button></td> -->
+		</tr>
+		{%endif%}
+		{%endfor%}
+	</tbody>
+</table>
+{%endif%}
+{%endfor%}
+<div class="row">
+	<div class="col-sm-4">
+		<h5 class="text-success"><b>Sub-total: </b></h5>
+	</div>
+	<div class="col-sm-8 text-right">
+		<h5><b>₹&nbsp;{{data.cart.totalcost}}</b></h5>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-4">
+		<h5 class="text-success"><b>VAT: </b></h5>
+	</div>
+	<div class="col-sm-8 text-right">
+		<h5><b>5%</b></h5>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-7 form-group">
+		<input type="text" name="coupon-code" class="form-control" id="coupon-code" placeholder="Have a Coupon?">
+	</div>
+	<div class="col-sm-3">
+		<button type="button" class="btn btn-danger">Apply</button>
+	</div>
+	<div class="col-sm-1"></div>
+</div>
+<div class="row">
+	<div class="col-sm-9">
+		<h5>e-Wallet Amount: </h5>
+	</div>
+	<div class="col-sm-3 text-right">
+		<h5>₹ 0</h5>
+	</div>
+</div>
+<hr style="width:100%;">
+<div class="row">
+	<div class="col-sm-1"></div>
+	<div class="col-sm-6">
+		<h3 class="text-info"><b>Total: </b></h3>
+	</div>
+	<div class="col-sm-4 text-right">
+		<h3><b>₹&nbsp;{{data.cart.grandtotal}}</b></h3>
+	</div>
+	<div class="col-sm-1"></div>
+</div>
+<hr style="width:100%;">
+<a href="/checkoutpage/" class="text-center">
+	<button type="button" class="btn btn-success" name="checkout" id="checkout" style="width:100%;"><span class="glyphicon glyphicon-shopping-cart"></span>&nbsp;&nbsp;&nbsp;&nbsp;<b>Checkout</b></button>
+</a>
+{%else%}
+<h3 align="center"><b>Offers</b></h3>
+<hr style="width:100%;">
+(Coming Soon)
+{%endif%}

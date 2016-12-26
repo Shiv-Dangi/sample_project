@@ -1,0 +1,70 @@
+<table class = "table table-bordered">
+	<thead>
+		<tr>
+			<td>
+				<input type = "text" id="sorder_number" class="form-control" name="order_number" placeholder="order number"/>		
+			</td>
+			<td>
+				<input type = "text" id="scustomer_name" class = "form-control" name="customer_name" placeholder = "Customer Name"/>		
+			</td>
+			<td>
+				<input type = "text" id="scustomer_mobile" class = "form-control" name="customer_mobile" placeholder = "Customer Mobile"/>		
+			</td>
+			<td>
+				<input type = "date" id="sdel_date" class = "form-control" name="del_date" placeholder = "Delivery Date"/>
+			</td>
+			<td>
+				<select name ="del_boy" class ="form-control" id="sdel_boy">
+					<option value = "all" default>all del boys</option>
+					{%for deli in deliveryboys%}
+						<option value = "{{deli.first_name}} {{deli.last_name}} {{deli.mobile}}">{{deli.first_name}} {{deli.last_name}}</option>
+					{%endfor%}
+				</select>
+			</td>
+			<td>
+				<select name="payment_mode" id="spayment_mode" class="form-control">
+					<option value = "all" default>all payment modes</option>
+					<option value = "cod">cod</option>
+					<option value = "online">online</option>
+					<option value = "sodexo">sodexo meal pass</option>
+					<option value = "credit">credit</option>
+				</select>
+			</td>
+			<td>
+				<input type = "button" value = "search" class = "btn btn-danger" onclick="searchorders();" />		
+			</td>
+		</tr>	
+	</thead>
+</table>
+<div class = "">
+	{% if ords%}
+	<table class = "table table-bordered" style="margin-bottom: 50px;">
+		<tr>
+			<th>s.no</th>
+			<th>order no</th>
+			<th>total</th>
+			<th>discount</th>
+			<th>wallet dis.</th>
+			<th>vat</th>
+			<th>s.tax</th>
+			<th>s.charge</th>
+			<th>del.charge</th>
+			<th>grand total</th>
+		</tr>
+	{%for ord in ords%}
+		<tr>
+			<td>{{forloop.counter}}</td>
+			<td><a href="/myadmin/orderdetail/{{ord.order_number}}/">{{ord.order_number}}</a></td>
+			<td>{{ord.subtotal}}</td>
+			<td>{{ord.discount_rs}}</td>
+			<td>{{ord.e_wallet}}</td>
+			<td>{{ord.vat_rs}}</td>
+			<td>{{ord.service_tax_rs}}</td>
+			<td>{{ord.service_charge_rs}}</td>
+			<td>{{ord.delivery_charge}}</td>
+			<td>{{ord.grand_total}}</td>
+		</tr>
+	{%endfor%}
+	</table>
+	{%endif%}
+</div>

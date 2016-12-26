@@ -1,0 +1,314 @@
+{% extends "app/baseadmin.html" %}
+{% load staticfiles %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<link rel = "stylesheet" href = "{% static 'app/css/jquery.datetimepicker.css' %}" />
+	<script type="text/javascript" src="{% static 'app/js/jquery.datetimepicker.full.js' %}"></script>
+	<!-- modal for restricted areas -->
+		<div class="modal fade" id="restricted-area" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		    <div class="modal-dialog">
+		        <div class="modal-content">
+		            <div class="modal-header">
+		                Restricted Areas
+		                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		            </div>
+		            <div class="modal-body">
+		                <table class = "table table-bordered">
+		                	<thead>
+		                		<th>S. NO.</th>
+		                		<th>Restricted Area</th>
+		                	</thead>
+		                	<tbody>
+	                			{% for area in restrictareas%}
+	                			<tr>
+	                				<td>{{forloop.counter}}</td>
+	                				<td>{{area.restricted_areas}}</td>
+	                			</tr>
+	                			{% endfor %}
+		                	</tbody>
+		                </table>
+		            </div>
+		            <div class="modal-footer">
+		            	<button class="btn btn-primary" data-dismiss="modal">Close</button>
+		            </div>
+		        </div>
+		    </div>
+		</div>
+	<!-- end of modal -->
+
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default" style="background-color:#10452f;color:#ffffff;">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-signal"></span>&nbsp;&nbsp;&nbsp;Create Order
+		  </div>
+		</div>
+		<div class = "jumbotron" style="background:transparent;border-style:solid;border-color:#000000;border-width:1px;">
+			<div class = "row">
+			<form class = "form neworder" id="neworder-form" method ="post" action = "/myadmin/placeneworder/">
+				{%csrf_token%}
+				<div class="col-sm-5">
+					<label for="currentdatetime">Order Date - Time:</label>
+					<h4 id="currentdatetime"></h4>
+					<script>
+						setInterval(function updatedatetime() {
+							var d = new Date();
+							document.getElementById("currentdatetime").innerHTML = d.toString().substr(4,17);
+							return updatedatetime;
+						}(), 60000);
+					</script>
+					<br>
+					<label for="expctddatetime">Expected Delivery Date - Time:</label>
+					<input type="text" id="expectddatetime" class="form-control" name="expecteddatetime" style="background:transparent;" />
+					<script type="text/javascript">
+						jQuery('#expectddatetime').datetimepicker({
+							format:'Y-m-d H:i',
+							step:15,
+							allowTimes:[ '8:00','8:15','8:30','8:45','9:00','9:15','9:30','9:45','10:00','10:15','10:30','10:45','11:00','11:15','11:30','11:45', '12:00','12:15','12:30','12:45','13:00','13:15','13:30','13:45','14:00','14:15','14:30','14:45', '15:00','15:15','15:30','15:45', '16:00','16:15','16:30','16:45','17:00','17:15','17:30','17:45','18:00','18:15','18:30','18:45','19:00','19:15','19:30','19:45','20:00','20:15','20:30','20:45','21:00','21:15','21:30','21:45','22:00','22:15','22:30','22:45','23:00'],
+						});
+					</script>
+					<br>
+					<label for="ordersource">Order Source Information:</label>
+					<select id="ordersource" class="form-control" name = "source" style="background:transparent;" required>
+						<option value="" selected>Please select order source</option>
+						{% for source in order_source %}
+							<option value="{{source.source}}">{{source.source}}</option>
+						{% endfor %}
+					</select>
+					<br>
+					<label for="deliverytype">Delivery Type Information:</label>
+					<select id="deliverytype" class="form-control" name = "deltype" style="background:transparent;" required onchange="setrequiedtoaddress();">
+						<option value="" selected>Please select Delivery Type</option>
+					  	<option value="Home Deliverly">Home Delivery</option>
+					  	<option value="Branch Pickup">Branch Pickup</option>
+					  	<option value="Dining">Dining</option>
+					  	<option value="Outside Dining">Outside Dining</option>
+					  	<option value="Room Service">Room Service</option>
+					</select>
+					<br>
+					<label for="payment-mode">Payment Mode:</label>
+					<!-- <select id="payment-mode" class="form-control" style="background:transparent;" name = "payment_mode" required>
+						<option value="" selected>Please select payment mode</option>
+						{% for paymentmode in paymentmodes %}
+							<option value="{{paymentmode.payment_mode}}">{{paymentmode.payment_mode}}</option>
+						{% endfor %}
+					</select> -->
+					<select id="payment-mode" class="form-control" style="background:transparent;" name = "payment_mode" required>
+					</select>
+					<br>
+					<label for="referenceno">Reference Number (optional):</label>
+					<input id="referenceno" type="text" class="form-control" style="background:transparent;" name="ref_number" />
+				</div>
+				<div class="col-sm-7">
+					<label for = "phone">Contact Number:</label>
+					<input pattern = "[0-9]{10}" style="background:transparent;" class = "form-control" type = "text" id = "phone" placeholder = "Contact Number" required title="enter a 10 digit mobile number" name = "mobile" onkeypress='return event.charCode >= 48 && event.charCode <= 57'/>
+					<br>
+					<label for = "altphone">Alternate Contact Number:</label>
+					<input pattern = "[0-9]{10}" style="background:transparent;" class = "form-control" type = "text" name = "alt_mobile" id = "altphone" placeholder = "Alternate Contact Number" title="enter a 10 digit mobile number" onkeypress='return event.charCode >= 48 && event.charCode <= 57'/>
+					<br>
+					<label for="name">Name:</label>
+					<input type="text" id="name" class="form-control" style="background:transparent;" placeholder="Customer's Name" name = "name" required />
+					<br>
+					<a href="http://maps.google.com/maps?saddr=23.232624,77.433324&amp;ll=" target="_blank">Search Address on Google Maps</a>
+					<a href="#" class="pull-right btn btn-primary btn-sm" data-toggle="modal" data-target="#restricted-area">Restricted Areas</a>
+					<div id="dynamictextarea">
+						<label id="lblresult"></label>
+						<label for="address1">Address1</label>
+						<input type="radio" id="radio1" name="orderaddress" value="1" onclick="validateaddress();" checked /><br>
+					    <input id="txtautocomplete1" class="form-control" style="background:transparent;" onFocus="geolocate()" type="text" placeholder="Enter Locality" onkeyDown="doNext(this);" />
+						<textarea class="form-control" style="background:transparent;" name ="address1" id = "address1" required></textarea>
+					</div>
+					<input class="pull-right" type="button" value="Add another address" onClick="addnewaddress('dynamictextarea');" /><br>
+				</div>
+				<div align="center">
+					<input type="submit"  class="btn btn-success submitbtn" value="Create Order"/>
+					<h4 id = "fororderno"></h4>
+				</div>
+			</div>
+			</form>
+		</div>
+	</div>
+	<script type="text/javascript">
+	    $('#ordersource').on('change', function(){
+		    $('#payment-mode').html('');
+		    if($('#ordersource').val()=='Call Center'){
+		        $('#payment-mode').append('<option value="Cash on Delivery">Cash on Delivery</option><option value="Online Pay">Online Pay</option>');
+		    }else{
+		        $('#payment-mode').append('<option value="Online Pay">Online Pay</option>');
+		    }
+		});
+	</script>
+	<style type="text/css">
+		input[type=number]::-webkit-inner-spin-button, 
+		input[type=number]::-webkit-outer-spin-button { 
+		  -webkit-appearance: none; 
+		  margin: 0; 
+		}
+	</style>
+	<script type="text/javascript">
+		var counter = 2;
+		var limit = 4;
+
+		function setrequiedtoaddress(){
+			var delivery_type = document.getElementById('deliverytype').value;
+			if (delivery_type == 'Branch Pickup'){
+				document.getElementById('address1').required = false;
+			}
+		}
+
+		// disable create order button after one click
+		$(document).ready(function () {
+		    $("#neworder-form").submit(function () {
+		        $(".submitbtn").attr("disabled", true);
+		        return true;
+		    });
+		});
+
+		function addnewaddress(divName){
+			if(counter==limit) {
+				alert("You can not add more than 3 address");
+			}
+			else {
+				var newdiv = document.createElement('div');
+          		newdiv.innerHTML = "<label for='address'>Address"+counter+"</label><input type='radio' id='radio"+counter+"' name='orderaddress' onclick='validateaddress();' value='"+counter+"' /><input class='form-control' type='text' id='txtautocomplete"+counter+"' placeholder='Enter Locality' style='background:transparent;' onFocus='geolocate()' onkeyDown='doNext(this);'/><textarea class='form-control' style='background:transparent;' name='address"+counter+"' id = 'address"+counter+"'></textarea>";
+          		document.getElementById(divName).appendChild(newdiv);
+          		counter++;
+          		initAutocomplete();
+			}
+		}
+
+		function validateaddress(){
+			var delivery_type = document.getElementById('deliverytype').value;
+			var address1 = document.getElementById('address1');
+			var address2 = document.getElementById('address2');
+			var address3 = document.getElementById('address3');
+			address1.required = false;
+			if (address2 != null){
+				address2.required = false;
+			}
+			if (address3 != null){
+				address3.required = false;
+			}
+			if (delivery_type != 'Branch Pickup'){
+				if (document.getElementById("radio1").checked == true) {
+					address1.required = true;
+			    }
+			    else if (document.getElementById("radio2").checked == true) {
+			    	address2.required = true;
+			    }
+			    else if (document.getElementById("radio3").checked == true) {
+			    	address3.required = true;
+			    }
+			    else {
+			        // DO NOTHING
+			    }
+			}
+		}
+
+		function doNext(el){                   
+		  $(el).keypress(function(e) {
+			    if (e.which == 13) {
+			        $(this).next('textarea').focus();
+			        e.preventDefault();
+			    }
+			});
+		}
+
+		$('#phone').on('input', function() { 
+		    var mobileno = $(this).val()
+		    $.post("/ajaxcheckcustomer/", {"mobile": mobileno}, function(data){
+		    	if(data['status'] == "pass")
+		    	{
+		    		$('#name').val(data['name']);
+		    		$('#address1').val(data['address1']);
+		    		if ('address2' in data){
+		    			addnewaddress('dynamictextarea');
+		    			$('#address2').val(data['address2']);
+		    		}
+		    		if ('address3' in data){
+		    			addnewaddress('dynamictextarea');
+		    			$('#address3').val(data['address3']);
+		    		}
+		    		$('#fororderno').text('Congratulations this is your ' + data['no'] + ' order');
+		    	};
+			});
+		});
+	</script>
+	
+	<!-- google api autocomplete -->
+	<script>
+	  var placeSearch, autocomplete, autocomplete2, autocomplete3;
+	  var componentForm = {
+	    street_number: 'short_name',
+	    route: 'long_name',
+	    locality: 'long_name',
+	    administrative_area_level_1: 'short_name',
+	    country: 'long_name',
+	    postal_code: 'short_name'
+	  };
+
+	  function initAutocomplete() {
+	  	// for address1
+		autocomplete = new google.maps.places.Autocomplete(
+        	(document.getElementById('txtautocomplete1')),
+        	{types: ['geocode']}
+        );
+        autocomplete.addListener('place_changed', function() {
+		    fillInAddress(autocomplete, "1");
+		});
+
+        // for address2
+        txtautocomplete2 = document.getElementById('txtautocomplete2')
+        if (txtautocomplete2 != null){
+        	autocomplete2 = new google.maps.places.Autocomplete(
+	        	(document.getElementById('txtautocomplete2')),
+	        	{types: ['geocode']}
+	        );
+	        autocomplete2.addListener('place_changed', function() {
+			    fillInAddress(autocomplete2, "2");
+			});
+        }
+
+        // for address3
+        txtautocomplete3 = document.getElementById('txtautocomplete3')
+        if (txtautocomplete3 != null){
+        	autocomplete3 = new google.maps.places.Autocomplete(
+	        	(document.getElementById('txtautocomplete3')),
+	        	{types: ['geocode']}
+	        );
+	        autocomplete3.addListener('place_changed', function() {
+			    fillInAddress(autocomplete3, "3");
+			});
+        }
+	  }
+
+	  function fillInAddress(autocomplete, unique) {
+	    // Get the place details from the autocomplete object.
+	    var place = autocomplete.getPlace();
+	    document.getElementById('address'+unique).value = '';
+	    document.getElementById('address'+unique).value = place.formatted_address;
+	   }
+	   // google.maps.event.addDomListener(window, "load", initAutocomplete);
+	  function geolocate() {
+	    if (navigator.geolocation) {
+	      navigator.geolocation.getCurrentPosition(function(position) {
+	        var geolocation = {
+	          lat: position.coords.latitude,
+	          lng: position.coords.longitude
+	        };
+	        var circle = new google.maps.Circle({
+	          center: geolocation,
+	          radius: position.coords.accuracy
+	        });
+	        autocomplete.setBounds(circle.getBounds());
+	      });
+	    }
+	  }
+	</script>
+
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDyqfwXczf568eszNn7Ux2CfzxreXpNf6A&libraries=places&callback=initAutocomplete"
+	    async defer>
+	</script>
+{%endblock content%}

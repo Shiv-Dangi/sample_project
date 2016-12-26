@@ -1,0 +1,45 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color: #10452f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Admin
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<a href = "/myadmin/adduserpage/" class = "btn btn-default pull-right">Create new User</a><br>
+			<table class = "table table-striped">
+			<thead>
+			<tr>
+				<th>First_Name</th>
+				<th>Last_Name</th>
+				<th>LoginId</th>
+				<th>Password</th>
+				<th>Mobile</th>
+				<th>Is_login_enable</th>
+				<th>Is_active</th>
+				<th>Action</th>
+			</tr>
+			</thead>
+			<tbody>
+			{% for admin in admins%}
+				<tr>
+					<td>{{admin.first_name}}</td>
+					<td>{{admin.last_name}}</td>
+					<td>{{admin.loginid}}</td>
+					<td>{{admin.password}}</td>
+					<td>{{admin.mobile}}</td>
+					<td>{{admin.is_login_enable}}</td>
+					<td>{{admin.is_active}}</td>
+					<td><a href="/myadmin/edituserpage/{{admin.loginid}}/" class="glyphicon glyphicon-pencil"></a></td>
+				</tr>
+			{%endfor%}
+			</tbody>
+			</table>
+		</div>
+	</div>
+{%endblock content%}

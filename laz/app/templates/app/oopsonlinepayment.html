@@ -1,0 +1,29 @@
+{% extends "app/customerend_base.html" %}
+{% load harishtags %}
+{%load staticfiles%}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block mainbody%}
+
+<div class="container" style="min-height:500px;">
+	<div class="row text-center" style="padding-top:40px;">
+		<div class="col-sm-2"></div>
+		<div class="col-sm-8">
+			<h2><b> OOPS! Something went wrong... </b></h2>
+			<br>
+			<h3>Order No. : {{request.session.order_number}}
+			<h4>Your online payment were not successfully received.</h4>
+			<br>
+			<h4>You will be redirected to our homepage in 10 seconds...</h4>
+			<br>
+		</div>
+		<div class="col-sm-2"></div>
+	</div>
+</div>
+
+<script>
+  window.setTimeout(function(){
+    window.location.href = "/";
+  }, 10000);
+</script>
+
+{% endblock %}

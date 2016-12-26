@@ -1,0 +1,42 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color: #10452f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Manage Restricted Areas
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<div class="row" style="margin-top: 20px">
+				<form class = "form-horizontal" method = "post" action = "/myadmin/addrestrictedarea/" enctype="multipart/form-data">
+					{% csrf_token %}
+					<div class = "form-group">
+						<label for="area" class="col-sm-2 control-label">Add New Area: </label>
+						<div class="col-sm-8">
+					        <input type="text" class="form-control" name = "area">
+					    </div>
+					    <input name="url" value="{{request.path}}" type="hidden" />
+					    <div class="col-sm-2">
+				            <button type="submit" class="btn btn-primary">Add</button>
+				        </div>
+					</div>
+				</form>
+				<table class = "table table-striped">
+					<tbody>
+					{% for area in rareas %}
+						<tr>
+							<td>{{forloop.counter}}</td>
+							<td>{{area.restricted_areas}}</td>
+							<td><a href="/myadmin/removerestrictedarea/{{area.id}}/" class="glyphicon glyphicon-trash"></a></td>
+						</tr>
+					{%endfor%}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+{%endblock content%}

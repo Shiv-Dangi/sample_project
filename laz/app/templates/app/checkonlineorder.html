@@ -1,0 +1,30 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<br><br><br><br>
+	<div class = "container">
+		<div class = "jumbotron text-center">
+			<h3><b>Enter Order Number</b></h3><br><br>
+			<form class = "form-horizontal" method = "post" action = "/myadmin/checkonlineorder/">
+				{% csrf_token %}
+				<div class = "form-group">
+					<div class="col-sm-4 col-sm-offset-4">
+				        <input type="text" class="form-control" placeholder="order number" name ="order_number">
+				    </div>
+				</div>
+				<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+				<div class="form-group">
+			        <button type="submit" class="btn btn-primary">Search</button>
+			    </div>
+			    <div class = "forerrors">
+					{% if 'orderdoesnotexist' in request.session %}
+						<p class= "text-danger"><b>Order Does not exist.</b></p>
+					{% endif%}
+            	</div>
+			</form>
+		</div>
+	</div>
+{%endblock content%}

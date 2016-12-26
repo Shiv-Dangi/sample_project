@@ -1,0 +1,131 @@
+
+		<div class = "">
+
+			<div id="printableArea" class="printablediv">
+			    <div class="row table-responsive" style="margin-left: 5px;">
+					<table class = "table table-bordered" border="1 px">
+						<tbody>
+							<tr>
+								<td>
+									<b>LAZEEZ HAKEEM DELIVERY</b><br/>
+									Bhopal, Madhya Pradesh, India<br/>
+									0755 6222227<br/>
+									support@lhdindia.com<br/>
+									<b>Service Tax No.:</b>AAUPH6905KSD001<br/>
+									<b>VAT No.:</b>23864007086
+								</td>
+								<td>
+									<b>Customer</b><br/>
+									{{order.customer.customer_name|title}}<br/>
+									{{order.customer.customer_number}}<br/>
+									<b>Payment Mode :</b>{{order.payment_mode}}
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<b>Order Number :</b>{{order.order_number}}
+								</td>
+								<td>
+									<b>Order Date :</b>{{order.ordered_at}}
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<!--Item description-->
+				<div class="row" style="margin-left: 5px;">
+					<table class = "table table-bordered iteminfo">
+						<thead class="jumbotron">
+							<tr>
+								<th>S.No.</th>
+								<th>Item Description</th>
+								<th>Quantity</th>
+								<th>Price</th>
+								<th>Total</th>
+							</tr>
+						</thead>
+						<tbody>
+							{%for item in ordered_items%}
+								<tr>
+									<td>{{forloop.counter}}</td>
+									<td>
+										{% if item.quantity ==  0%}
+											<strike>{{item.name}}-{{item.subname}}</strike>
+										{% else %}
+											{{item.name}}-{{item.subname}}
+										{%endif%}
+									</td>
+									<td>{{item.quantity}}</td>
+									<td>{{item.price}}</td>
+									<td>{% widthratio item.quantity 1 item.price|add:"0" %}</td>
+								</tr>
+							{%endfor%}
+						</tbody>
+						<tfoot class="jumbotron">
+							<tr>
+								<td colspan="2">Sub Total</td>
+								<td></td>
+								<td></td>
+								<td colspan="2">{{order.subtotal}}</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+				<!--cart info-->
+				<div class="row" style="margin-left: 5px;">
+					<label>Order Summary</label>
+					<div class="table-responsive">
+						<table class = "table table-bordered">
+							<thead>
+								<tr>
+									<th colspan="3">Sub Total</th>
+									<th>{{order.subtotal}}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% if order.discount_percent|add:"0" > 0 %}
+								<tr>
+									<td>Discount(%)</td>
+									<td>{{order.discount_percent}}</td>
+									<td>Discount(Rs)</td>
+									<td>{{order.discount_rs}}</td>
+								</tr>
+								{% endif %}
+								{% if order.service_tax_percent|add:"0" > 0 %}
+								<tr>
+									<td>Service Tax(%)</td>
+									<td>{{order.service_tax_percent}}</td>
+									<td>Service Tax(Rs)</td>
+									<td>{{order.service_tax_rs}}</td>
+								</tr>
+								{% endif %}
+								{% if order.vat_percent|add:"0" > 0 %}
+								<tr>
+									<td>VAT(%)</td>
+									<td>{{order.vat_percent}}</td>
+									<td>VAT(Rs)</td>
+									<td>{{order.vat_rs}}</td>
+								</tr>
+								{% endif %}
+								{% if order.service_charge_percent|add:"0" > 0 %}
+								<tr>
+									<td>Service Charge(%)</td>
+									<td>{{order.service_charge_percent}}</td>
+									<td>Service Charge(Rs)</td>
+									<td>{{order.service_charge_rs}}</td>
+								</tr>
+								{% endif %}
+							</tbody>
+							<tfoot>
+								<tr>
+									<th colspan="3">Grand Total</th>
+									<th>{{order.grand_total}}</th>
+								</tr>
+							</tfoot>
+						</table>
+					</div>
+				</div>
+			</div>
+
+		</div>

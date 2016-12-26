@@ -1,0 +1,53 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color: #10452f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class= "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-align-justify"></span>&nbsp;&nbsp;&nbsp;Offers
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<a href = "/myadmin/addofferpage/" class = "btn btn-default pull-right">Create Offer</a>
+			<table class = "table table-striped">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Photo</th>
+						<th>Offer Name</th>
+						<th>Applicable On</th>
+						<th>Offer Date</th>
+						<th>Start Time</th>
+						<th>End Time</th>
+						<th>Is Active</th>
+						<th>Setup</th>
+						<th>Edit</th>
+						<th>Delete</th>
+					</tr>
+				</thead>
+				<tbody>
+					{%for offer in offers%}
+						<tr>
+							<td>{{forloop.counter}}</td>
+							<td><img src ="{{offer.offer_image}}" style = "height:100px;width:100px;" \></td>
+							<td>{{offer.offer_name}}</td>
+							<td>{{offer.applicable_on}}</td>
+							<td>{{offer.offer_date}}</td>
+							<td>{{offer.start_time}}</td>
+							<td>{{offer.end_time}}</td>
+							<td>{{offer.is_active}}</td>
+							<td><a href="/myadmin/applicationsetup/offermenu/{{offer.id}}/" class="glyphicon glyphicon-pencil"></a></td>
+							<td><a href="/myadmin/editofferpage/{{offer.id}}/" class="glyphicon glyphicon-pencil"></a>
+							</td>
+							<td><a href="/myadmin/deleteoffer/{{offer.id}}/" class="glyphicon glyphicon-trash"></a>
+							</td>
+						</tr>
+					{%endfor%}
+				</tbody>
+			</table>
+		</div>
+	</div>
+{%endblock content%}

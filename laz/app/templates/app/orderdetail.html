@@ -1,0 +1,890 @@
+{% extends "app/baseadmin.html" %}
+{% load staticfiles %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<link rel = "stylesheet" href = "{% static 'app/css/jquery-ui.min.css' %}" />
+	<style type="text/css">
+		tbody
+		{
+		    counter-reset: Serial;           /* Set the Serial counter to 0 */
+		}
+		.iteminfo tbody tr td:first-child:before
+		{
+		  counter-increment: Serial;      /* Increment the Serial counter */
+		  content: counter(Serial); /* Display the counter */
+		}
+	</style>
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div><br>
+	<div class = "container">
+		<div class="panel panel-default" style="background-color:#10452f;color:#ffffff;">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-signal"></span>&nbsp;&nbsp;&nbsp;Order Details
+		    <span class="pull-right">Order No:{{order.order_number}}&nbsp;&nbsp;&nbsp;</span>
+		  </div>
+		</div>
+		<div class = "container">
+			<!--Order progress bar-->
+			<div class="row">
+				<ul class="wizard">         
+				    <li class="{% if order.order_status == 'just placed'%}active{% endif %}">
+				    	<span>1</span>Booked {{order.placed_at|date:"d M, f a"}}
+				    </li>
+				    <li class="{% if order.order_status == 'assigned to branch'%}active{% endif %}">
+				    	<span>2</span>Assigned {{order.branch_assigned_at|date:"d M, f a"}}
+				    </li>
+				    <li class="{% if order.order_status == 'accepted'%}active{% endif %}">
+				    	<span>3</span>Accepted {{order.accepted_at|date:"d M, f a"}}
+				    </li>
+				    <li class="{% if order.order_status == 'dispatched'%}active{% endif %}">
+				    	<span>4</span>Dispatched {{order.dispatched_at|date:"d M, f a"}}
+				    </li>
+				    <li class="{% if order.order_status == 'delivered'%}active{% endif %}">
+				    	<span>5</span>Delivered {{order.delivered_at|date:"d M, f a"}}
+				    </li>
+				    <li class="{% if order.order_status == 'paid'%}active{% endif %}">
+				    	<span>6</span>Paid {{order.paid_at|date:"d M, f a"}}
+				    </li>
+				</ul>
+				<style type="text/css">
+					/*## Wizard ##*/
+					.wizard { width: 100%; margin: 0; padding: 0; background: #F5F5F5; height: 10px; -webkit-border-radius: 5px; border-radius: 5px; -webkit-box-shadow: inset 0px 1px 0px 0px #CCC; box-shadow: inset 0px 1px 0px 0px #CCC; list-style: none; margin-bottom: 40px; margin-top: 25px; }
+					.wizard li { display: table-cell; width: 1%; float: none; text-align: center; }
+					.wizard li span { display: block; width: 30px; height: 25px; background: #F5F5F5; text-align: center; color: #999; margin: auto; margin-top: -10px; padding-top: 5px; font-size: 1.1em; font-weight: bold; -webkit-border-radius:15px; border-radius: 15px; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15); -webkit-text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15); box-shadow: inset 0px 1px 0px 0px rgba(0, 0, 0, 0.15); -webkit-box-shadow: inset 0px 1px 0px 0px rgba(0, 0, 0, 0.15); }
+					.wizard li.active span { background: #0088CC; color: #FFF; }
+				</style>
+			</div>
+
+			<!--Dispatch order form-->
+			<div class="row" style="margin-top: 25px">
+				{% if order.delivered_at == None %}
+					{% if order.order_status == "just placed" %}
+						{% if request.session.admin.role == 'callcenteroperator' or request.session.admin.role == 'admin' or request.session.admin.role == 'billinguser' %}
+						<form class = "form" method = "post" action = "/myadmin/orderaddbranch/{{order.order_number}}/">
+							{%csrf_token%}
+							<div class = "form-group col-xs-4 col-md-4">
+						        <select name = "branch" class="form-control" style="background:transparent;">
+									{%for branch in branches%}
+										<option value = "{{branch.branch}}" default>{{branch.branch}}</option>
+									{%endfor%}
+								</select>
+							</div>
+							<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+							<button type="submit" style="background: #10452f;" class="btn btn-default col-xs-2 col-md-2">Assign to Branch</button>
+						</form>
+						{% endif %}
+						{% if request.session.admin.role == 'admin' %}
+						<div class="form-group col-xs-2 col-md-2">
+							<a href="/myadmin/ordercancelled/{{order.order_number}}" style="background: #10452f;" class="btn btn-default">Cancel Order</a>	
+						</div>
+						{% endif %}
+					{% endif %}
+
+					{% if order.order_status == "assigned to branch" %}
+						{% if request.session.admin.role == 'callcenteroperator' or request.session.admin.role == 'admin' %}
+						<form class = "form" method = "post" action = "/myadmin/orderaddbranch/{{order.order_number}}/">
+							{%csrf_token%}
+							<div class = "form-group col-xs-4 col-md-4">
+						        <select name = "branch" class="form-control" style="background:transparent;">
+									{%for branch in branches%}
+										<option value = "{{branch.branch}}" default>{{branch.branch}}</option>
+									{%endfor%}
+								</select>
+							</div>
+							<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+							<button type="submit" class="btn btn-default col-xs-2 col-md-2" style="background: #10452f;">Assign to Branch</button>
+						</form>
+						{% endif %}
+						{% if request.session.admin.role == 'branchuser' or request.session.admin.role == 'admin' %}
+						<div class="form-group col-xs-2 col-md-2">
+							<a href="/myadmin/orderaccepted/{{order.order_number}}/" class="btn btn-default">Accept Order</a>	
+						</div>	
+						{% endif %}
+						{% if request.session.admin.role == 'admin' %}
+						<div class="form-group col-xs-2 col-md-2">
+							<a href="/myadmin/ordercancelled/{{order.order_number}}" class="btn btn-default" style="background: #10452f;">Cancel Order</a>	
+						</div>
+						{% endif %}
+					{% endif %}
+
+					{% if order.order_status == "accepted" and not order.dispatched_with == "Branch Pickup" %}
+						{% if request.session.admin.role == 'branchuser' or request.session.admin.role == 'admin' %}
+						<form class = "form" method="post" action = "/myadmin/orderadddel/{{order.order_number}}/">
+							{%csrf_token%}
+							<div class = "form-group col-xs-4 col-md-4">
+						        <select class="form-control" name = "del" style="background:transparent;">
+						        	{%for del in deliveryboys%}
+									<option value = "{{del.first_name}} {{del.last_name}} {{del.mobile}}">{{del.first_name}} {{del.last_name}} {{del.mobile}}</option>
+									{%endfor%}
+					        	</select>
+							</div>
+							<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+							<button type="submit" class="btn btn-default col-xs-2 col-md-2" style="background: #10452f;">Dispatch Order</button>
+						</form>
+						{% endif %}
+						{% if request.session.admin.role == 'admin' %}
+						<div class="form-group col-xs-2 col-md-2">
+							<a href="/myadmin/ordercancelled/{{order.order_number}}" class="btn btn-default" style="background: #10452f;">Cancel Order</a>	
+						</div>
+						{% endif %}
+					{% endif %}
+
+					{% if order.order_status == "dispatched" or order.dispatched_with == "Branch Pickup" %}
+						{% if request.session.admin.role == 'branchuser' or request.session.admin.role == 'admin' and not order.dispatched_with == 'Branch Pickup' %}
+						<form class = "form" method="post" action = "/myadmin/orderadddel/{{order.order_number}}/">
+							{%csrf_token%}
+							<div class = "form-group col-xs-4 col-md-4">
+						        <select class="form-control" name = "del" style="background:transparent;">
+						        	{%for del in deliveryboys%}
+									<option value = "{{del.first_name}} {{del.last_name}} {{del.mobile}}">{{del.first_name}} {{del.last_name}} {{del.mobile}}</option>
+									{%endfor%}
+					        	</select>
+							</div>
+							<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+							<button type="submit" class="btn btn-default col-xs-2 col-md-2" style="background: #10452f;">Dispatch Order</button>
+						</form>
+						{% endif %}
+						{% if not request.session.admin.role == 'callcenteroperator' %}
+						<div class="form-group col-xs-2 col-md-2">
+							<a href="/myadmin/orderdelivered/{{order.order_number}}" class="btn btn-default" style="background: #10452f;">Order Delivered</a>
+						</div>
+						{% endif %}
+						{% if request.session.admin.role == 'admin' %}
+						<div class="form-group col-xs-2 col-md-2">
+							<a href="/myadmin/ordercancelled/{{order.order_number}}" class="btn btn-default" style="background: #10452f;">Cancel Order</a>	
+						</div>
+						{% endif %}
+					{% endif %}
+				{% endif %}
+				
+				<div class="form-group col-xs-2 col-md-2">
+					<input type="button" onclick="printDiv('printableArea')" class="btn btn-default" style="background: #10452f;" value="Print Order" id="printbtn" />
+				</div>
+			</div>
+			
+
+		<!--For Order Printing -->
+			<style type="text/css" media="print">
+				.printablediv table tr td {
+				  font-size: x-small;
+				}
+				.printablediv table tr th {
+				  font-size: small;
+				}
+			</style>
+			<div id="printableArea" class="printablediv" style="display:none;">
+			    <div class="row table-responsive" style="margin-left: 5px;">
+					<table class = "table table-bordered" border="1 px">
+						<tbody>
+							<tr>
+								<td>
+									<b>LAZEEZ HAKEEM DELIVERY</b><br/>
+									Bhopal, Madhya Pradesh, India<br/>
+									0755 6222227<br/>
+									support@lhdindia.com<br/>
+									<b>Service Tax No.:</b>AAUPH6905KSD001<br/>
+									<b>VAT No.:</b>23864007086
+								</td>
+								<td>
+									<b>BUYER</b><br/>
+									{{order.customer_name|title}}<br/>
+									{{order.customer_mobile}}<br/>
+									{{order.address}}<br/>
+									({{order.special_comment}})<br>
+									<b>Payment Mode :</b>{{order.payment_mode}}
+
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<b>Order Number :</b>{{order.order_number}}<br/>
+									<b>Order Date :</b>{{order.placed_at}}<br>
+								</td>
+								<td>
+									<b>Delivery Type :</b>{{order.delivery_type}}<br/>
+									<b>Delivery Date :</b>{{order.delivered_at|default_if_none:order.expected_at}}<br>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<!--Item description-->
+				<div class="row" style="margin-left: 5px;">
+					<table class = "table table-bordered iteminfo">
+						<thead class="jumbotron">
+							<tr>
+								<th>S.No.</th>
+								<th>Item Description</th>
+								<th>Quantity</th>
+								<th>Price</th>
+								<th>Total</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% if order.offer_from_web == "True" %}
+								{%for item in ordered_items%}
+									<tr>
+										<td>{{forloop.counter}}</td>
+										<td>{{item.name}}-{{item.subname}}</td>
+										<td>{{item.quantity}}</td>
+										<td>{{item.price_actual}}</td>
+										<td>{% widthratio item.quantity 1 item.price_actual %}</td>
+									</tr>
+								{%endfor%}
+							{% else %}
+								{%for item in ordered_items%}
+									<tr>
+										<td>{{forloop.counter}}</td>
+										<td>{{item.name}}-{{item.subname}}</td>
+										<td>{{item.quantity}}</td>
+										<td>{{item.price}}</td>
+										<td>{% widthratio item.quantity 1 item.price %}</td>
+									</tr>
+								{%endfor%}
+							{% endif %}
+						</tbody>
+						<tfoot class="jumbotron">
+							<tr>
+								<td colspan="2">Sub Total</td>
+								<td></td>
+								<td></td>
+								<td colspan="2">{{order.subtotal}}</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+				<!--cart info-->
+				<div class="row" style="margin-left: 5px;">
+					<label>Order Summary</label>
+					<div class="table-responsive">
+						<table class = "table table-bordered">
+							<thead>
+								<tr>
+									<th colspan="3">Sub Total</th>
+									<th>{{order.subtotal}}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% if order.discount_percent|add:"0" > 0 %}
+								<tr>
+									<td>Discount(%)</td>
+									<td>{{order.discount_percent}}</td>
+									<td>Discount(Rs)</td>
+									<td>{{order.discount_rs}}</td>
+								</tr>
+								{% endif %}
+								{% if order.service_tax_percent|add:"0" > 0 %}
+								<tr>
+									<td>Service Tax(%)</td>
+									<td>{{order.service_tax_percent}}</td>
+									<td>Service Tax(Rs)</td>
+									<td>{{order.service_tax_rs}}</td>
+								</tr>
+								{% endif %}
+								{% if order.vat_percent|add:"0" > 0 %}
+								<tr>
+									<td>VAT(%)</td>
+									<td>{{order.vat_percent}}</td>
+									<td>VAT(Rs)</td>
+									<td>{{order.vat_rs}}</td>
+								</tr>
+								{% endif %}
+								{% if order.service_charge_percent|add:"0" > 0 %}
+								<tr>
+									<td>Service Charge(%)</td>
+									<td>{{order.service_charge_percent}}</td>
+									<td>Service Charge(Rs)</td>
+									<td>{{order.service_charge_rs}}</td>
+								</tr>
+								{% endif %}
+								{% if order.delivery_charge|add:"0" > 0 %}
+									<tr>
+										<td colspan="3">Delivery Charge</td>
+										<td>{{order.delivery_charge}}</td>
+									</tr>
+								{%endif%}
+								{% if order.e_wallet|add:"0" > 0 %}
+								<tr>
+									<td colspan="2"></td>
+									<td>e-Wallet</td>
+									<td>{{order.e_wallet}}</td>
+								</tr>
+								{% endif %}
+							</tbody>
+							<tfoot>
+								<tr>
+									<th colspan="3">Grand Total</th>
+									<th>{{order.grand_total}}</th>
+								</tr>
+								{% if order.advance_pay > 0 %}
+								<tr>
+									<td colspan="3">Advance Amount</td>
+									<td>{{order.advance_pay}}</td>
+								</tr>
+								<tr>
+									<td colspan="3">Balance Amount</td>
+									<td>{{order.balance_amount}}</td>
+								</tr>
+								{% endif %}
+							</tfoot>
+						</table>
+					</div>
+				</div>
+			</div>
+			<script>
+				function printDiv(divName) {
+				    var printContents = document.getElementById(divName).innerHTML;
+				    var originalContents = document.body.innerHTML;
+
+				    document.body.innerHTML = printContents;
+
+				    window.print();
+
+				    document.body.innerHTML = originalContents;
+				}
+			</script>
+
+		<!--End of For Order Printing-->
+
+			<!--Order basic Information-->
+			<div class="row table-responsive" style="margin-top: 25px">
+				<table class = "table table-bordered" border="1 px">
+					<tbody>
+						<tr>
+							<td>
+								<b>LAZEEZ HAKEEM DELIVERY</b><br/>
+								Bhopal, Madhy Pradesh, India<br/>
+								0755 6222227<br/>
+								support@lhdindia.com<br/>
+								<b>Service Tax No.:</b>AAUPH6905KSD001<br/>
+								<b>VAT No.:</b>23864007086
+							</td>
+							<td>
+								<b>BUYER</b><br/>
+								{{order.customer_name|title}}<br/>
+								{{order.customer_mobile}}<br/>
+								{{order.address}}<br/>
+								<b>Payment Mode :</b>{{order.payment_mode}}
+								{% if order.payment_mode == "Online Pay" and order.onlinepay_status != "success" %}
+									<a href="/send_sms_at_callcenter/{{order.order_number}}">Online Pay SMS</a>
+								{% endif %}
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<b>Order Number :</b>{{order.order_number}} &nbsp
+									<a href="#" data-toggle = "modal" data-target = "#editorder">Edit</a> <br/>
+								<b>Order Date :</b>{{order.placed_at}}
+							</td>
+							<td>
+								<b>Delivery Type :</b>{{order.delivery_type}}
+								{%if order.delivery_type == 'Dining'%}
+									<b>Number of People :</b>{{order.no_of_people}}
+								{%endif%}<br/>
+								<b>Delivery Date :</b>{{order.delivered_at|default_if_none:order.expected_at}}
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<b>ORDER</b><br>
+								<b>Status :</b> {{order.order_status}}<br>
+								<b>Status Change (By/On) :</b> <br>
+								<b>Source :</b> {{order.source}}<br>
+								<b>Ref. Number :</b>
+							</td>
+							<td>
+								<b>Branch :</b> {{order.branch_assigned}}<br>
+								<b>Assigned (By/On) :</b> abc/{{branch_assigned_at}}<br>
+								<b>Accepted (By/On) :</b> {{order.accepted_by}}/{{order.accepted_at|default_if_none:""}}<br>
+								<b>Payment Mode :</b>{{order.payment_mode}} <br>
+								<b>Delivery Boy :</b>{{order.dispatched_with|title}}
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<!--add item to cart-->
+			{% if order.dispatched_with == "" and order.ordered_items != "" %}
+			<div class="row">
+				<table class="table table-borderd">
+					<thead class="jumbotron">
+						<tr>
+							<th>Item Description</th>
+							<th>Quantity</th>
+							<th>Price</th>
+							<th>Total</th>
+							<th>Add</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr class="additem">
+				            <td><input type="text" id="item" name = "item-description" style="background:transparent;" placeholder = "Item Description" autofocus="autofocus" value="" /></td>
+				            <td>
+				            	<input class="input-control" id="quantity" style="background:transparent;" name="quantity" oninput="calculate()" onKeyDown="if(event.keyCode==13) addordercart()" value="1" />
+				            </td>
+				            <td>
+				            	<input class="input-control" style="background:transparent;" id="price" name="price" oninput="calculate()" readonly />
+				            </td>
+				            <input id="item_code" name="item_code" type="hidden" />
+				            <input id="item_subname" name="item_subname" type="hidden" />
+				            <input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+				            <td><input style="background:transparent;" class="input-control" id="total" readonly /></td>
+				            <td>
+				            	<button type="submit" onclick="addordercart()"><span class = "glyphicon glyphicon-plus"></span></button>
+				            </td>
+						</tr>
+					</tbody>
+				</table>	
+			</div>
+			{% endif %}
+
+			<div class="updateorderdetail">
+				<!--Item description-->
+				<div class="row">
+					<table class = "table table-bordered iteminfo">
+						<thead class="jumbotron">
+							<tr>
+								<th>S.No.</th>
+								<th>Item Description</th>
+								<th>Quantity</th>
+								<th>Price</th>
+								<th>Total</th>
+								{% if order.dispatched_with == "" %}
+									<th>Delete</th>
+								{%endif%}
+							</tr>
+						</thead>
+						<tbody>
+							{% if order.offer_from_web == "True" %}
+								{%for item in ordered_items%}
+									<tr>
+										<td></td>
+										<td>{{item.name}}-{{item.subname}}</td>
+										<td>{{item.quantity}}</td>
+										<td>{{item.price_actual}}</td>
+										<td>{% widthratio item.quantity 1 item.price_actual %}</td>
+										{% if order.dispatched_with == "" %}
+										<td><div class="col-sm-2 text-center"><button class="btn btn-sm plusminus" onclick = "subtractordercart('{{item.item_code}}','{{item.subname}}', '{{item.quantity}}')"><span class = "glyphicon glyphicon-minus"></span></button></div></td>
+										{%endif%}
+									</tr>
+								{%endfor%}
+							{% else %}
+								{%for item in ordered_items%}
+									<tr>
+										<td></td>
+										<td>{{item.name}}-{{item.subname}}</td>
+										<td>{{item.quantity}}</td>
+										<td>{{item.price}}</td>
+										<td>{% widthratio item.quantity 1 item.price %}</td>
+										{% if order.dispatched_with == "" %}
+										<td><div class="col-sm-2 text-center"><button class="btn btn-sm plusminus" onclick = "subtractordercart('{{item.item_code}}','{{item.subname}}', '{{item.quantity}}')"><span class = "glyphicon glyphicon-minus"></span></button></div></td>
+										{%endif%}
+									</tr>
+								{%endfor%}
+							{% endif %}
+						</tbody>
+						<tfoot class="jumbotron">
+							<tr>
+								<td colspan="2">Sub Total</td>
+								<td></td>
+								<td></td>
+								<td colspan="2">{{order.subtotal}}</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+
+				<!--discount and tax info-->
+				<div class="row jumbotron" style="background: transparent;">
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label for="comment">Remark/Comments</label>
+							<textarea style="background:transparent;" class="form-control" rows="7" id="commentbox" oninput="updatediscountandtax()" {% if not order.dispatched_with == "" %}readonly{%endif%}>
+								{{order.special_comment}}
+							</textarea>
+						</div>
+					</div>
+					<div class="col-sm-6 table-responsive">
+						<table class = "table table-bordered">
+							<thead>
+								<tr>
+									<th colspan="3">Sub Total</th>
+									<th>{{order.subtotal}}</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>Discount(%)</td>
+									<td><input class="input-control" style="background:transparent;" id="discount_percent" type="Number" step=0.01 value="{{order.discount_percent}}" oninput="updatediscountandtax()" 
+									{% if not order.dispatched_with == "" %}readonly{%endif%} /></td>
+									<td>Discount(Rs)</td>
+									<td><input class="input-control" style="background:transparent;" id="discount_rs" type="Number" value="{{order.discount_rs}}" oninput="editdisandtax()" {% if not order.dispatched_with == "" %}readonly{%endif%} /></td>
+								</tr>
+								<tr>
+									<td>Service Tax(%)</td>
+									<td>
+										<input class="input-control" style="background:transparent;" id="service_tax_percent" type="Number" step=0.01 value="{{order.service_tax_percent}}" oninput="updatediscountandtax()" {% if not order.dispatched_with == "" %}readonly{%endif%} />
+									</td>
+									<td>Service Tax(Rs)</td>
+									<td><input class="input-control" style="background:transparent;" id="service_tax_rs" type="Number" value="{{order.service_tax_rs}}" oninput="editdisandtax()" {% if not order.dispatched_with == "" %}readonly{%endif%} /></td>
+								</tr>
+								<tr>
+									<td>VAT(%)</td>
+									<td><input class="input-control" style="background:transparent;" id="vat_percent" type="Number" step=0.01 value="{{order.vat_percent}}" oninput="updatediscountandtax()" 
+									{% if not order.dispatched_with == "" %}readonly{%endif%} /></td>
+									<td>VAT(Rs)</td>
+									<td><input class="input-control" style="background:transparent;" id="vat_rs" type="Number" value="{{order.vat_rs}}" oninput="editdisandtax()" {% if not order.dispatched_with == "" %}readonly{%endif%} /></td>
+								</tr>
+								<tr>
+									<td>Service Charge(%)</td>
+									<td>
+										<input class="input-control" style="background:transparent;" id="service_charge_percent" type="Number" step=0.01 value="{{order.service_charge_percent}}" oninput="updatediscountandtax()" {% if not order.dispatched_with == "" %}readonly{%endif%} />
+									</td>
+									<td>Service Charge(Rs)</td>
+									<td><input class="input-control" style="background:transparent;" id="service_charge_rs" type="Number" value="{{order.service_charge_rs}}" oninput="editdisandtax()" {% if not order.dispatched_with == "" %}readonly{%endif%} /></td>
+								</tr>
+								<tr>
+									<td>Distance in km</td>
+									<td>
+										<input class="input-control" style="background:transparent;" id="distance_in_km" type="Number" step=0.01  oninput="updatediscountandtax()" {% if not order.dispatched_with == "" %}readonly{%endif%} />
+									</td>
+									<td>Delivery Charge</td>
+									<td><input class="input-control" style="background:transparent;" id="delivery_charge" type="Number" value="{{order.delivery_charge}}" readonly /></td>
+								</tr>
+								{% if order.e_wallet|add:"0" > 0 %}
+								<tr>
+									<td colspan="2"></td>
+									<td>e-Wallet</td>
+									<td><input class="input-control" value="{{order.e_wallet}}" readonly /></td>
+								</tr>
+								{% endif %}
+								<tr>
+									<td colspan="2"></td>
+									<td>Advance Amount</td>
+									<td><input class="input-control" value="{{order.advance_pay}}" oninput="update_advance_pay(this.value)" style="background:transparent;" {% if not order.dispatched_with == "" %}readonly{%endif%} /></td>
+								</tr>
+							</tbody>
+							<tfoot>
+								<tr>
+									<th colspan="3">Grand Total</th>
+									<th><input class="input-control" style="background:transparent;" id="grand_total" value="{{order.grand_total}}" readonly /></th>
+								</tr>
+								<tr>
+									<th colspan="3">Balance Amount</th>
+									<th><input class="input-control" style="background:transparent;" id="balance_amount" value="{{order.balance_amount}}" readonly /></th>
+								</tr>
+							</tfoot>
+						</table>
+						<style type="text/css">
+							.input-control {
+								width: 75px;
+							}
+						</style>	
+					</div>
+				</div>
+
+				<script type="text/javascript">
+					// function for edit discount and taxes in rupee fields
+					function editdisandtax() {
+						var order_number = "{{order.order_number}}";
+						var comment_text = document.getElementById('commentbox').value;
+						var discount_rs = document.getElementById('discount_rs').value;
+						var service_tax_rs =document.getElementById('service_tax_rs').value;
+						var vat_rs = document.getElementById('vat_rs').value;
+						var service_charge_rs = document.getElementById('service_charge_rs').value;
+						
+						var discount_percent = document.getElementById('discount_percent');
+						discount_percent.value = (discount_rs * 100) / {{order.subtotal}};
+
+						var service_tax_percent = document.getElementById('service_tax_percent');
+						service_tax_percent.value = (service_tax_rs * 100) / {{order.subtotal}};
+
+						var vat_percent = document.getElementById('vat_percent');
+						vat_percent.value = (vat_rs * 100) / {{order.subtotal}};
+
+						var service_charge_percent = document.getElementById('service_charge_percent');
+						service_charge_percent.value = (service_charge_rs * 100)/{{order.subtotal}};
+						// updatediscountandtax();
+						$.post("/myadmin/updatediscountandtax/",{"order_number":order_number,"discount_percent":discount_percent.value,"service_tax_percent":service_tax_percent.value,"vat_percent":vat_percent.value,"service_charge_percent":service_charge_percent.value,"comment_text":comment_text},function(data){
+							if(data['status'] == 'success')
+							{
+								$('#grand_total').val(data['grand_total']);
+							};
+						});
+					}
+				</script>
+			</div>
+
+		</div>
+	</div>
+
+<!-- modal for edit order basic detail -->
+<div class="modal fade" id="editorder" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            	<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            	<h4 class="modal-title" id="">Edit Order #{{order.order_number}}</h4>
+            </div>
+            <div class="modal-body">
+            	<form class = "form-horizontal" method = "post" action = "/myadmin/editorder/{{order.order_number}}/">
+					{% csrf_token %}
+					<div class = "form-group">
+						<label for="ordernumber" class="col-sm-2 control-label">Order Number: </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" name = "order_number" value="{{order.order_number}}" readonly />
+					    </div>
+					</div>
+					<div class = "form-group">
+						<label for="contactnumber" class="col-sm-2 control-label">Contact Number: </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" name="contact_number" value="{{order.customer_mobile}}" readonly />
+					    </div>
+					</div>
+					<div class = "form-group">
+						<label for="customer-name" class="col-sm-2 control-label">Customer Name: </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" name="customer_name" value="{{order.customer_name}}" />
+					    </div>
+					</div>
+					<div class = "form-group">
+						<label for="order-date" class="col-sm-2 control-label">Order Date: </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" name = "order_date" value="{{order.placed_at}}" readonly />
+					    </div>
+					</div>
+					<div class = "form-group">
+						<label for="customer-address" class="col-sm-2 control-label">Customer Address: </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" name="address" value="{{order.address}}" />
+					    </div>
+					</div>
+					<!-- <div class = "form-group">
+						<label for="area" class="col-sm-2 control-label">Area: </label>
+						<div class="col-sm-10">
+					        <select class="form-control" name = "area">
+					        	{%for city in cities%}
+								<option value="{{city}}">{{city}}</option>
+								{%endfor%}
+				        	</select>
+					    </div>
+					</div> -->
+					<div class = "form-group">
+						<label for="delivery-type" class="col-sm-2 control-label">Delivery Type: </label>
+						<div class="col-sm-10">
+					        <select id="deliverytype" class="form-control" name = "delivery_type">
+								<option value="Home Deliverly" {% if order.delivery_type == "Home Deliverly" %}selected{% endif %}>Home Delivery</option>
+							  	<option value="Branch Pickup" {% if order.delivery_type == "Branch Pickup" %}selected{% endif %}>Branch Pickup</option>
+							  	<option value="Dining" {% if order.delivery_type == "Dining" %}selected{% endif %}>Dining</option>
+							  	<option value="Outside Dining" {% if order.delivery_type == "Outside Dining" %}selected{% endif %}>Outside Dining</option>
+							  	<option value="Room Service" {% if order.delivery_type == "Room Service" %}selected{% endif %}>Room Service</option>
+							</select>
+					    </div>
+					</div>
+					<div class = "form-group">
+						<label for="delivery-date" class="col-sm-2 control-label">Delivery Date: </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" name="delivery_date" 
+					        value="{{order.expected_at|date:'Y-m-d H:i:s'}}" />
+					    </div>
+					</div>
+					{% if request.session.admin.role == 'admin' %}
+					<div class = "form-group">
+						<label for="order-source" class="col-sm-2 control-label">Order Source: </label>
+						<div class="col-sm-10">
+					        <select class="form-control" name = "source">
+								<option value="Foodpanda" {%if order.source == 'Foodpanda'%}selected{%endif%}>Foodpanda</option>
+								<option value="Call Center" {%if order.source == 'Call Center'%}selected{%endif%}>Call Center</option>
+								<option value="Web" {%if order.source == 'Web'%}selected{%endif%}>Web</option>
+				        	</select>
+					    </div>
+					</div>
+					{% endif %}
+					<div class = "form-group">
+						<label for="refrence-number" class="col-sm-2 control-label">Refrence Number: </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" name="ref_number" />
+					    </div>
+					</div>
+					<div class = "form-group">
+						<label for="payment-mode" class="col-sm-2 control-label">Payment Mode: </label>
+						<div class="col-sm-10">
+					        <select id="payment-mode" class="form-control" name="payment_mode">
+								{% for paymentmode in paymentmodes %}
+									<option value="{{paymentmode.payment_mode}}" {%if order.payment_mode == paymentmode.payment_mode %}selected{% endif %}>{{paymentmode.payment_mode}}</option>
+								{% endfor %}
+							</select>
+					    </div>
+					</div>
+					{% if request.session.admin.role == 'admin' %}
+					<div class = "form-group">
+						<label for="onlinepay_status" class="col-sm-2 control-label">Pay Status: </label>
+						<div class="col-sm-10">
+					        <select id="onlinepay_status" class="form-control" name="onlinepay_status">
+								<option value="NA" {%if order.onlinepay_status == 'NA'%}selected{%endif%}>NA</option>
+								<option value="success" {%if order.onlinepay_status == 'success'%}selected{%endif%}>success</option>
+								<option value="pending" {%if order.onlinepay_status == 'pending'%}selected{%endif%}>pending</option>
+							</select>
+					    </div>
+					</div>
+					{% endif %}
+					<p align="center">Current Payment status is <b>{{order.onlinepay_status}}</b></p>
+					<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+				    <div class="form-group">
+				      <div class="col-sm-10 col-sm-offset-4">
+				        <button type="submit" class="btn btn-primary">Save</button>
+				        <button class="btn btn-primary" data-dismiss="modal">Cancel</button>
+				      </div>
+				    </div>
+				</form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end of modal -->
+
+
+<script type="text/javascript">
+
+
+	// scroll page few pixels on load
+	function Scrolldown() {
+	     window.scroll(0,500); 
+	}
+
+	window.onload = Scrolldown;
+
+
+	// function for calculating total in additem form.
+	function calculate() {
+		var quantity = document.getElementById('quantity').value;	
+		var price = document.getElementById('price').value;
+		var total = document.getElementById('total');	
+		var mytotal = quantity * price;
+		total.value = mytotal;	
+	}
+
+	// function to remove items from cart
+	function subtractordercart(item_code,item_subname,item_quantity){
+		var order_number = '{{order.order_number}}';	
+		$.post("/myadmin/subtractitemtoordercart/",{"item_code":item_code,"item_subname":item_subname,"item_quantity":item_quantity,"order_number":order_number},function(data){
+		}).done(function(){
+			$.get('/myadmin/updateordercart/{{order.order_number}}/',function(data){
+				$(".updateorderdetail").html(data);
+			})
+		});
+	}
+
+	// function to add items to cart
+	function addordercart(){
+		var item_code = document.getElementById('item_code').value;	
+		var item_subname = document.getElementById('item_subname').value;	
+		var item_quantity = document.getElementById('quantity').value;
+		var order_number = '{{order.order_number}}';	
+		$.post("/myadmin/additemtoordercart/",{"item_code":item_code,"item_subname":item_subname,"item_quantity":item_quantity,"order_number":order_number},function(data){
+				$('#item').val('');
+				$('#quantity').val('1');
+				$('#price').val('');
+				$('#total').val('');
+		}).done(function(){
+			$.get('/myadmin/updateordercart/{{order.order_number}}/',function(data){
+				$(".updateorderdetail").html(data);
+			})
+		});
+	}
+
+	// function to edit all discount, tax,(in % fields) and comment.
+	function updatediscountandtax() {
+		var order_number = "{{order.order_number}}";
+		var comment_text = document.getElementById('commentbox').value;
+		var discount_percent = document.getElementById('discount_percent').value;	
+		var service_tax_percent = document.getElementById('service_tax_percent').value;
+		var vat_percent = document.getElementById('vat_percent').value;
+		var service_charge_percent = document.getElementById('service_charge_percent').value;
+		var distance_in_km = document.getElementById('distance_in_km').value;
+		$.post("/myadmin/updatediscountandtax/",{"order_number":order_number,"discount_percent":discount_percent,"service_tax_percent":service_tax_percent,"vat_percent":vat_percent,"service_charge_percent":service_charge_percent,"distance_in_km":distance_in_km,"comment_text":comment_text},function(data){
+			if(data['status'] == 'success')
+			{
+				$('#discount_rs').val(data['discount_rs']);
+				$('#service_tax_rs').val(data['service_tax_rs']);
+				$('#vat_rs').val(data['vat_rs']);
+				$('#service_charge_rs').val(data['service_charge_rs']);
+				$('#delivery_charge').val(data['delivery_charge']);
+				$('#grand_total').val(data['grand_total']);
+			};
+		});
+	}
+
+	// function to update advance payment of order
+	function update_advance_pay(advance_pay) {
+		var order_number = '{{order.order_number}}';
+		var url = "/myadmin/allorder/update_advance_pay/";
+		$.post(url, {'order_number': order_number, 'advance_pay': advance_pay}, function(data){
+			if(data['status'] == 'success')
+				{	
+					$('#balance_amount').val(data['balance_pay']);
+				};
+		});
+	}
+</script>
+<script type="text/javascript" src="{% static 'app/js/jquery.ui.js' %}"></script>
+<script type="text/javascript">
+	$(document).on('keyup', 'input', function(e) {
+	 if(e.keyCode == 13) {
+	 	if (e.target.id !== 'quantity'){
+	 		var inputs = $(e.target).parents(".additem").eq(0).find(":input:visible:not([readonly]):enabled"),
+		   idx = inputs.index(e.target);
+		       if (idx == inputs.length - 1) {
+		          inputs[0].select()
+		       } else {
+		          inputs[idx + 1].focus();
+		          inputs[idx + 1].select();
+		       }
+	 	}
+	 	else{
+	 		$("#item").focus();
+	 	}
+	 }
+
+	});
+</script>
+<!-- autocomplete js for add item into cart -->
+<script type="text/javascript">
+    $(function() {
+      $("#item").autocomplete({
+            autofocous: true,
+            source: function( request, response ) {
+            $.ajax({
+              url: "/ajaxcheckitem_callcenter/"+ request.term,
+              success: function( data ) {
+                response( JSON.parse(data) );
+              },
+              error: function(data) {
+              	console.log(data);
+              }
+            });
+          },
+        minLength: 1,
+        focus: function( event, ui ) {
+            $( ".autocomplete-field" ).val( ui.item.item_name );
+            return false;
+          },
+        select: function( event, ui ) {
+            $( "#item" ).val(ui.item.item_code + "-" + ui.item.item_name + "-" + ui.item.item_subname);
+            $( "#price" ).val( ui.item.item_price );
+            $( "#item_code" ).val( ui.item.item_code );
+            $( "#item_subname" ).val( ui.item.item_subname );
+            
+            return false;
+          }
+      }).autocomplete( "instance" )._renderItem = function( ul, item ) {
+          return $( "<li>" )
+            .append( "<a>" + item.item_code + "-" + item.item_name + "-" + item.item_subname + "</a>" )
+            .appendTo( ul );
+        };
+    });
+</script>
+{%endblock content%}

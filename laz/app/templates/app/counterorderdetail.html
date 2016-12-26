@@ -1,0 +1,445 @@
+{% extends "app/baseadmin.html" %}
+{% load staticfiles %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+	<style type="text/css">
+		input[type="Number"]::-webkit-inner-spin-button{
+		    display: none;
+		}
+	</style>
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div><br>
+	<div class = "container">
+		<div class="panel panel-default" style="background-color:#10452f;color:#ffffff;">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-signal"></span>&nbsp;&nbsp;&nbsp;Order Details
+		    <span class="pull-right">Order No:{{order.order_number}}&nbsp;&nbsp;&nbsp;</span>
+		  </div>
+		</div>
+		<div class = "container">
+			<!--Dispatch order form-->
+			{%if request.session.admin.role == 'admin' or order.bill_print == None%}
+			<div class="row text-center" style="margin-top: 25px">
+				<div class="form-group col-xs-2 col-md-2">
+					<input type="button" onclick="printDiv('printableArea')" class="btn btn-default" style="background: #10452f;" value="Print Order" id="printbtn" />
+				</div>
+			</div>
+			{%endif%}
+			
+
+		<!--For Order Printing -->
+			<style type="text/css" media="print">
+				.printablediv table tr td {
+				  font-size: x-small;
+				}
+				.printablediv table tr th {
+				  font-size: small;
+				}
+			</style>
+			<div id="printableArea" class="printablediv" style="display:none;">
+			    <div class="row table-responsive" style="margin-left: 5px;">
+					<table class = "table table-bordered" border="1 px">
+						<tbody>
+							<tr>
+								<td>
+									<b>LAZEEZ HAKEEM DELIVERY</b><br/>
+									Bhopal, Madhya Pradesh, India<br/>
+									0755 6222227<br/>
+									support@lhdindia.com<br/>
+									<b>Service Tax No.:</b>AAUPH6905KSD001<br/>
+									<b>VAT No.:</b>23864007086
+								</td>
+								<td>
+									<b>Customer</b><br/>
+									{{order.customer.customer_name|title}}<br/>
+									{{order.customer.customer_number}}<br/>
+									<b>Payment Mode :</b>{{order.payment_mode}}
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<b>Order Number :</b>{{order.order_number}}
+								</td>
+								<td>
+									<b>Order Date :</b>{{order.ordered_at}}
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<!--Item description-->
+				<div class="row" style="margin-left: 5px;">
+					<table class = "table table-bordered iteminfo">
+						<thead class="jumbotron">
+							<tr>
+								<th>S.No.</th>
+								<th>Item Description</th>
+								<th>Quantity</th>
+								<th>Price</th>
+								<th>Total</th>
+							</tr>
+						</thead>
+						<tbody>
+							{%for item in ordered_items%}
+								<tr>
+									<td>{{forloop.counter}}</td>
+									<td>{{item.name}}-{{item.subname}}</td>
+									<td>{{item.quantity}}</td>
+									<td>{{item.price}}</td>
+									<td>{% widthratio item.quantity 1 item.price|add:"0" %}</td>
+								</tr>
+							{%endfor%}
+						</tbody>
+						<tfoot class="jumbotron">
+							<tr>
+								<td colspan="2">Sub Total</td>
+								<td></td>
+								<td></td>
+								<td colspan="2">{{order.subtotal}}</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+				<!--cart info-->
+				<div class="row" style="margin-left: 5px;">
+					<label>Order Summary</label>
+					<div class="table-responsive">
+						<table class = "table table-bordered">
+							<thead>
+								<tr>
+									<th colspan="3">Sub Total</th>
+									<th>{{order.subtotal}}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% if order.discount_percent|add:"0" > 0 %}
+								<tr>
+									<td>Discount(%)</td>
+									<td>{{order.discount_percent}}</td>
+									<td>Discount(Rs)</td>
+									<td>{{order.discount_rs}}</td>
+								</tr>
+								{% endif %}
+								{% if order.service_tax_percent|add:"0" > 0 %}
+								<tr>
+									<td>Service Tax(%)</td>
+									<td>{{order.service_tax_percent}}</td>
+									<td>Service Tax(Rs)</td>
+									<td>{{order.service_tax_rs}}</td>
+								</tr>
+								{% endif %}
+								{% if order.vat_percent|add:"0" > 0 %}
+								<tr>
+									<td>VAT(%)</td>
+									<td>{{order.vat_percent}}</td>
+									<td>VAT(Rs)</td>
+									<td>{{order.vat_rs}}</td>
+								</tr>
+								{% endif %}
+								{% if order.service_charge_percent|add:"0" > 0 %}
+								<tr>
+									<td>Service Charge(%)</td>
+									<td>{{order.service_charge_percent}}</td>
+									<td>Service Charge(Rs)</td>
+									<td>{{order.service_charge_rs}}</td>
+								</tr>
+								{% endif %}
+							</tbody>
+							<tfoot>
+								<tr>
+									<th colspan="3">Grand Total</th>
+									<th>{{order.grand_total}}</th>
+								</tr>
+							</tfoot>
+						</table>
+					</div>
+				</div>
+			</div>
+			<script>
+				function printDiv(divName) {
+				    var printContents = document.getElementById(divName).innerHTML;
+				    var originalContents = document.body.innerHTML;
+
+				    document.body.innerHTML = printContents;
+
+				    window.print();
+
+				    document.body.innerHTML = originalContents;
+				}
+			</script>
+
+		<!--End of For Order Printing-->
+
+			<!--Order basic Information-->
+			<div class="row table-responsive" style="margin-top: 25px">
+				<table class = "table table-bordered" border="1 px">
+					<tbody>
+						<tr>
+							<td>
+								<b>LAZEEZ HAKEEM DELIVERY</b><br/>
+								Bhopal, Madhy Pradesh, India<br/>
+								0755 6222227<br/>
+								support@lhdindia.com<br/>
+								<b>Service Tax No.:</b>AAUPH6905KSD001<br/>
+								<b>VAT No.:</b>23864007086
+							</td>
+							<td>
+								<b>Customer</b> &nbsp
+								<a href="#" data-toggle = "modal" data-target = "#editorder">Edit</a><br/>
+								{{order.customer.customer_name|title}}<br/>
+								{{order.customer.customer_number}}<br/>
+								<b>Payment Mode :</b>{{order.payment_mode.payment_mode}}
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<b>Order Number :</b>{{order.order_number}}<br>
+								<b>Order Date :</b>{{order.ordered_at}}
+							</td>
+							<td>
+								<b>Assigned (By/On) :</b> {{order.assigned_by}}/{{order.assigned_at}}<br>
+								<b>waiter :</b> {{order.assigned_waiter|title}}
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<!--add item to cart-->
+			{% if order.bill_print == None%}
+				<div class="row">
+					<table class="table table-borderd">
+						<thead class="jumbotron">
+							<tr>
+								<th>Item Description</th>
+								<th>Quantity</th>
+								<th>Price</th>
+								<th>Total</th>
+								<th>Add</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr class="additem">
+					            <td><input type="text" id="item" name = "item-description" style="background:transparent;" placeholder = "Item Description" autofocus="autofocus" value="" /></td>
+					            <td>
+					            	<input class="input-control" id="quantity" style="background:transparent;" name="quantity" oninput="calculate()" onKeyDown="if(event.keyCode==13) addordercart()" value="1" />
+					            </td>
+					            <td>
+					            	<input class="input-control" style="background:transparent;" id="price" name="price" oninput="calculate()" readonly />
+					            </td>
+					            <input id="item_code" name="item_code" type="hidden" />
+					            <input id="item_subname" name="item_subname" type="hidden" />
+					            <input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+					            <td><input style="background:transparent;" class="input-control" id="total" readonly /></td>
+					            <td>
+					            	<button type="submit" onclick="addordercart()"><span class = "glyphicon glyphicon-plus"></span></button>
+					            </td>
+							</tr>
+						</tbody>
+					</table>	
+				</div>
+			{%endif%}
+
+			<div class="updateorderdetail">
+				{% include "app/updatecounterorderdetail.html" %}	
+			</div>
+
+		</div>
+	</div>
+
+<!-- modal for edit order basic detail -->
+<div class="modal fade" id="editorder" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            	<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            	<h4 class="modal-title" id="">Edit Order #{{order.order_number}}</h4>
+            </div>
+            <div class="modal-body">
+            	<form class = "form-horizontal" method = "post" action = "/myadmin/editcounterorder/{{order.order_number}}/">
+					{% csrf_token %}
+					<div class = "form-group">
+						<label for="ordernumber" class="col-sm-2 control-label">Order Number: </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" name = "order_number" value="{{order.order_number}}" readonly />
+					    </div>
+					</div>
+					<div class = "form-group">
+						<label for="contactnumber" class="col-sm-2 control-label">Contact Number: </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" id="customer_number" name="customer_number" value="{{order.customer.customer_number}}" />
+					    </div>
+					</div>
+					<div class = "form-group">
+						<label for="customer-name" class="col-sm-2 control-label">Customer Name: </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" id="customer_name" name="customer_name" value="{{order.customer.customer_name}}" />
+					    </div>
+					</div>
+					<div class = "form-group">
+						<label for="order-date" class="col-sm-2 control-label">Order Date: </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" name = "order_date" value="{{order.ordered_at}}" readonly />
+					    </div>
+					</div>
+					<div class = "form-group">
+						<label for="payment-mode" class="col-sm-2 control-label">Payment Mode: </label>
+						<div class="col-sm-10">
+					        <select id="payment-mode" class="form-control" name="payment_mode">
+								{% for paymentmode in paymentmodes %}
+									<option value="{{paymentmode.payment_mode}}" {%if order.payment_mode.payment_mode == paymentmode.payment_mode %}selected{% endif %}>{{paymentmode.payment_mode}}</option>
+								{% endfor %}
+							</select>
+					    </div>
+					</div>
+					<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+				    <div class="form-group">
+				      <div class="col-sm-10 col-sm-offset-4">
+				        <button type="submit" class="btn btn-primary">Save</button>
+				        <button class="btn btn-primary" data-dismiss="modal">Cancel</button>
+				      </div>
+				    </div>
+				    <div align="center">
+						<h4 id = "fororderno"></h4>
+					</div>
+				</form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end of modal -->
+
+
+<script type="text/javascript">
+	$('#customer_number').on('input', function() { 
+	    var mobileno = $(this).val()
+	    $.post("/ajaxcheckcustomer/", {"mobile": mobileno}, function(data){
+	    	if(data['status'] == "pass")
+	    	{
+	    		$('#customer_name').val(data['name']);
+	    		$('#fororderno').text('Congratulations this is your ' + data['no'] + ' order');
+	    	};
+		});
+	});
+
+	// function for calculating total in additem form.
+	function calculate() {
+		var quantity = document.getElementById('quantity').value;	
+		var price = document.getElementById('price').value;
+		var total = document.getElementById('total');	
+		var mytotal = quantity * price;
+		total.value = mytotal;	
+	}
+
+	// function to remove items from cart
+	function subtractordercart(item_code,item_subname,item_quantity){
+		var order_number = '{{order.order_number}}';	
+		$.post("/myadmin/subtractitemtotableorder/",{"item_code":item_code,"item_subname":item_subname,"item_quantity":item_quantity,"order_number":order_number},function(data){
+		}).done(function(){
+			$.get('/myadmin/updatecounterordercart/{{order.order_number}}/',function(data){
+				$(".updateorderdetail").html(data);
+			})
+		});
+	}
+
+	// function to add items to cart
+	function addordercart(){
+		var item_code = document.getElementById('item_code').value;	
+		var item_subname = document.getElementById('item_subname').value;	
+		var item_quantity = document.getElementById('quantity').value;
+		var order_number = '{{order.order_number}}';
+		$.post("/myadmin/additemtotableorder/",{"item_code":item_code,"item_subname":item_subname,"item_quantity":item_quantity,"order_number":order_number},function(data){
+				$('#item').val('');
+				$('#quantity').val('1');
+				$('#price').val('');
+				$('#total').val('');
+		}).done(function(){
+			$.get('/myadmin/updatecounterordercart/{{order.order_number}}/',function(data){
+				$(".updateorderdetail").html(data);
+			})
+		});
+	}
+
+	// function to edit all discount, tax,(in % fields) and comment.
+	function updatediscountandtax() {
+		var order_number = "{{order.order_number}}";
+		var comment_text = document.getElementById('commentbox').value;
+		var discount_percent = document.getElementById('discount_percent').value;	
+		var service_tax_percent = document.getElementById('service_tax_percent').value;
+		var vat_percent = document.getElementById('vat_percent').value;
+		var service_charge_percent = document.getElementById('service_charge_percent').value;
+		// var distance_in_km = document.getElementById('distance_in_km').value;
+		$.post("/myadmin/updatecdisandtax/",{"order_number":order_number,"discount_percent":discount_percent,"service_tax_percent":service_tax_percent,"vat_percent":vat_percent,"service_charge_percent":service_charge_percent,"comment_text":comment_text},function(data){
+			if(data['status'] == 'success')
+			{
+				$('#discount_rs').val(data['discount_rs']);
+				$('#service_tax_rs').val(data['service_tax_rs']);
+				$('#vat_rs').val(data['vat_rs']);
+				$('#service_charge_rs').val(data['service_charge_rs']);
+				$('#delivery_charge').val(data['delivery_charge']);
+				$('#grand_total').val(data['grand_total']);
+			};
+		});
+	}
+</script>
+<script type="text/javascript" src="{% static 'app/js/jquery.ui.js' %}"></script>
+<script type="text/javascript">
+	$(document).on('keyup', 'input', function(e) {
+	 if(e.keyCode == 13) {
+	 	if (e.target.id !== 'quantity'){
+	 		var inputs = $(e.target).parents(".additem").eq(0).find(":input:visible:not([readonly]):enabled"),
+		   idx = inputs.index(e.target);
+		       if (idx == inputs.length - 1) {
+		          inputs[0].select()
+		       } else {
+		          inputs[idx + 1].focus();
+		          inputs[idx + 1].select();
+		       }
+	 	}
+	 	else{
+	 		$("#item").focus();
+	 	}
+	 }
+
+	});
+</script>
+<!-- autocomplete js for add item into cart -->
+<script type="text/javascript">
+    $(function() {
+      $("#item").autocomplete({
+            autofocous: true,
+            source: function( request, response ) {
+            $.ajax({
+              url: "/ajaxcheckitem/"+ request.term,
+              success: function( data ) {
+                response( JSON.parse(data) );
+              },
+              error: function(data) {
+              	console.log(data);
+              }
+            });
+          },
+        minLength: 1,
+        focus: function( event, ui ) {
+            $( ".autocomplete-field" ).val( ui.item.item_name );
+            return false;
+          },
+        select: function( event, ui ) {
+            $( "#item" ).val(ui.item.item_code + "-" + ui.item.item_name + "-" + ui.item.item_subname);
+            $( "#price" ).val( ui.item.item_price );
+            $( "#item_code" ).val( ui.item.item_code );
+            $( "#item_subname" ).val( ui.item.item_subname );
+            
+            return false;
+          }
+      }).autocomplete( "instance" )._renderItem = function( ul, item ) {
+          return $( "<li>" )
+            .append( "<a>" + item.item_code + "-" + item.item_name + "-" + item.item_subname + "</a>" )
+            .appendTo( ul );
+        };
+    });
+</script>
+{%endblock content%}

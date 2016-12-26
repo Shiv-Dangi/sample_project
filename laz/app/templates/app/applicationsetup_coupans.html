@@ -1,0 +1,51 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color: #10452f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-gift"></span>&nbsp;&nbsp;&nbsp;Coupons
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<a href = "/myadmin/addcouponpage/" class = "btn btn-default pull-right">Create new Coupons</a><br>
+			<table class = "table table-striped">
+			<thead>
+			<tr>
+				<th>#</th>
+				<th>No of Coupons</th>
+				<th>Prefix</th>
+				<th>Suffix</th>
+				<th>Start Date</th>
+				<th>End Date</th>
+				<th>Discount</th>
+				<th>Status</th>
+				<th>Action</th>
+			</tr>
+			</thead>
+			<tbody>
+			{% for coupon in coupons%}
+				<tr>
+					<td>{{forloop.counter}}</td>
+					<td><a href="/myadmin/couponinfo/{{coupon.prefix}}/{{coupon.suffix}}/">{{coupon.num_of_coupons}}</a></td>
+					<td>{{coupon.prefix}}</td>
+					<td>{{coupon.suffix}}</td>
+					<td>{{coupon.start_date}}</td>
+					<td>{{coupon.end_date}}</td>
+					<td>{{coupon.discount_value}}-{%if coupon.discount_type == "Rs"%}Rs{%else%}%{%endif%}</td>
+					<td>{{coupon.is_active}}</td>
+					<td>
+						<a href="/myadmin/editcouponspage/{{coupon.id}}/" class="glyphicon glyphicon-pencil"></a>
+						&nbsp;&nbsp;&nbsp; 
+						<a href="/myadmin/deletecoupons/{{coupon.id}}/" class="glyphicon glyphicon-trash"></a>
+					</td>
+				</tr>
+			{%endfor%}
+			</tbody>
+			</table>
+		</div>
+	</div>
+{%endblock content%}

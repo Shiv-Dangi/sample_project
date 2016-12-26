@@ -1,0 +1,142 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	
+	<!-- modal for editing the table information -->
+		<div class="modal fade" id="edit_customer_info" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="exampleModalLabel">Edit customer Information</h4>
+		      </div>
+		      <div class="modal-body">
+		        <form class = "form-horizontal" method = "post" action = "/myadmin/edit_customer_info/">
+		        	{% csrf_token %}
+		          <div class="form-group">
+		          	<label class="col-sm-3 control-label">Customer Name</label>
+		          	<div class="col-sm-9">
+		          		<input type="text" class="form-control" id="customer_name" name="name" required />
+		          	</div>
+		          </div>
+		          <div class="form-group">
+		            <label class="col-sm-3 control-label">Customer Number</label>
+		            <div class="col-sm-9">
+		            	<input type="text" class="form-control" id="customer_number" name="number" required />
+		            </div>
+		          </div>
+		          <div class="form-group">
+		            <label class="col-sm-3 control-label">Customer Address</label>
+		            <div class="col-sm-9">
+		            	<input type="text" class="form-control" id="customer_address" name="address" required />
+		            </div>
+		          </div>
+		          <div class="form-group">
+		            <label class="col-sm-3 control-label">Order Number</label>
+		            <div class="col-sm-9">
+		            	<input type="text" class="form-control" id="order_number" name="order_number" required />
+		            </div>
+		          </div>
+		          <div class="form-group">
+		            <label class="col-sm-3 control-label">Is Blocked </label>
+		            <div class="col-sm-9">
+		            	<input type="checkbox" class="form-control" id="is_blocked" name="is_blocked" value="1" />
+		            </div>
+		          </div>
+		          <input name="customer_id" id="customerid" type="hidden"></input>
+		          <input name="url" value="{{request.path}}" type="hidden"></input>
+		          <div class="form-group text-center">
+		          	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		            <button type="submit" class="btn btn-primary">Update</button>
+		          </div>
+		        </form>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+
+		<script type="text/javascript">
+			$('#edit_customer_info').on('show.bs.modal', function (event) {
+			  var button = $(event.relatedTarget) // Button that triggered the modal
+			  var id = button.data('id')
+			  var name = button.data('name') // Extract info from data-* attributes
+			  var number = button.data('number')
+			  var address = button.data('address')
+			  var isblocked = button.data('isblocked')
+			  var order_number = button.data('ordernumber')
+
+			  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+			  var modal = $(this)
+			  modal.find('#customerid').val(id);
+			  modal.find('#customer_name').val(name);
+			  modal.find('#customer_number').val(number);
+			  modal.find('#customer_address').val(address);
+			  modal.find('#order_number').val(order_number);
+			  if (isblocked == 'True'){
+			  	modal.find('#is_blocked').prop('checked', true);
+			  } else {
+			  	modal.find('#is_blocked').prop('checked', false);
+			  }
+			})
+		</script>
+	<!-- end of the modal -->
+
+
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color: #10452f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Customers
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<a href="{% url 'export_customers_xls' %}" class = "btn btn-default pull-left">Export all Customers in Excel Sheet</a>
+			<a href = "/myadmin/addcustomerpage/" class = "btn btn-default pull-right">Create new Customer</a><br>
+			<table class = "table table-striped">
+				<thead>
+					<tr>
+						<th>Customer_name</th>
+						<th>Customer_address</th>
+						<th>Customer_number</th>
+						<th>Is blocked</th>
+						<th>Order Number</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for customer in customers%}
+						<tr>
+							<td>{{customer.customer_name}}</td>
+							<td>{{customer.customer_address}}</td>
+							<td>{{customer.customer_number}}</td>
+							<td>{{customer.isblocked}}</td>
+							<td>{{customer.order_number}}</td>
+							<td>
+								<a class="glyphicon glyphicon-pencil" data-id="{{customer.id}}" data-name="{{customer.customer_name}}" data-address="{{customer.customer_address}}" data-number="{{customer.customer_number}}" data-isblocked="{{customer.isblocked}}" data-ordernumber="{{customer.order_number}}" data-toggle="modal" data-target="#edit_customer_info"></a>
+							</td>
+						</tr>
+					{%endfor%}
+				</tbody>
+			</table>
+
+			<!-- pagination footer-->
+			<div class="row pagination text-center" style="width: 100%;">
+				<span class="step-links">
+			        {% if customers.has_previous %}
+			            <a href="?page={{ customers.previous_page_number }}">prev << </a>
+			        {% endif %}
+			        <span class="current">
+			            {{ customers.number }} of {{ customers.paginator.num_pages }}
+			        </span>
+
+			        {% if customers.has_next %}
+			            <a href="?page={{ customers.next_page_number }}"> >> next</a>
+			        {% endif %}
+			    </span>
+			</div>
+			<!-- end of pagination footer -->
+		</div>
+	</div>
+{%endblock content%}

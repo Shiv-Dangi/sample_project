@@ -1,0 +1,43 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class = "jumbotron">
+			<form class = "form-horizontal" method = "post" action = "/myadmin/createcustomer/" enctype="multipart/form-data">
+				{% csrf_token %}
+				<div class = "form-group">
+					<label for="item_name" class="col-sm-2 control-label">Customer Name: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="item_name" placeholder="customer name" name = "name">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="item_subname" class="col-sm-2 control-label">Customer Number: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="item_subname" placeholder="Customer Number" name = "mobile">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="item_subname" class="col-sm-2 control-label">No Of Orders: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="item_subname" value = "0" name = "orders">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="item_code" class="col-sm-2 control-label">Address: </label>
+					<div class="col-sm-10">
+				        <textarea name = "address" id = "Address"></textarea>
+				    </div>
+				</div>
+				<div class="form-group">
+			      <div class="col-sm-10 col-sm-offset-6">
+			        <button type="submit" class="btn btn-primary">Submit</button>
+			      </div>
+			    </div>
+			</form>
+		</div>
+	</div>
+{%endblock content%}

@@ -1,0 +1,168 @@
+<!--Item description-->
+<div class="row">
+	<table class = "table table-bordered iteminfo">
+		<thead class="jumbotron">
+			<tr>
+				<th>S.No.</th>
+				<th>Item Description</th>
+				<th>Quantity</th>
+				<th>Price</th>
+				<th>Total</th>
+				{% if order.dispatched_with == "" %}
+					<th>Delete</th>
+				{%endif%}
+			</tr>
+		</thead>
+		<tbody>
+			{% if order.offer_from_web == "True" %}
+				{%for item in ordered_items%}
+					<tr>
+						<td></td>
+						<td>{{item.name}}-{{item.subname}}</td>
+						<td>{{item.quantity}}</td>
+						<td>{{item.price_actual}}</td>
+						<td>{% widthratio item.quantity 1 item.price_actual %}</td>
+						{% if order.dispatched_with == "" %}
+						<td><div class="col-sm-2 text-center"><button class="btn btn-sm plusminus" onclick = "subtractordercart('{{item.item_code}}','{{item.subname}}', '{{item.quantity}}')"><span class = "glyphicon glyphicon-minus"></span></button></div></td>
+						{%endif%}
+					</tr>
+				{%endfor%}
+			{% else %}
+				{%for item in ordered_items%}
+					<tr>
+						<td></td>
+						<td>{{item.name}}-{{item.subname}}</td>
+						<td>{{item.quantity}}</td>
+						<td>{{item.price}}</td>
+						<td>{% widthratio item.quantity 1 item.price %}</td>
+						{% if order.dispatched_with == "" %}
+						<td><div class="col-sm-2 text-center"><button class="btn btn-sm plusminus" onclick = "subtractordercart('{{item.item_code}}','{{item.subname}}', '{{item.quantity}}')"><span class = "glyphicon glyphicon-minus"></span></button></div></td>
+						{%endif%}
+					</tr>
+				{%endfor%}
+			{% endif %}
+		</tbody>
+		<tfoot class="jumbotron">
+			<tr>
+				<td colspan="2">Sub Total</td>
+				<td></td>
+				<td></td>
+				<td colspan="2">{{order.subtotal}}</td>
+			</tr>
+		</tfoot>
+	</table>
+</div>
+
+<!--discount and tax info-->
+<div class="row jumbotron">
+	<div class="col-sm-6">
+		<div class="form-group">
+			<label for="comment">Remark/Comments</label>
+			<textarea class="form-control" rows="7" id="commentbox" oninput="updatediscountandtax()">
+				{{order.special_comment}}
+			</textarea>
+		</div>
+	</div>
+	<div class="col-sm-6 table-responsive">
+		<table class = "table table-bordered">
+			<thead>
+				<tr>
+					<th colspan="3">Sub Total</th>
+					<th>{{order.subtotal}}</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Discount(%)</td>
+					<td><input class="input-control" id="discount_percent" type="Number" step=0.01 value="{{order.discount_percent}}" oninput="updatediscountandtax()"></input></td>
+					<td>Discount(Rs)</td>
+					<td><input class="input-control" id="discount_rs" type="Number" value="{{order.discount_rs}}" 
+					oninput="editdisandtax()" /></td>
+				</tr>
+				<tr>
+					<td>Service Tax(%)</td>
+					<td>
+						<input class="input-control" id="service_tax_percent" type="Number" step=0.01 value="{{order.service_tax_percent}}" oninput="updatediscountandtax()">
+						</input>
+					</td>
+					<td>Service Tax(Rs)</td>
+					<td><input class="input-control" id="service_tax_rs" type="Number" value="{{order.service_tax_rs}}" 
+					oninput="editdisandtax()" /></td>
+				</tr>
+				<tr>
+					<td>VAT(%)</td>
+					<td><input class="input-control" id="vat_percent" type="Number" step=0.01 value="{{order.vat_percent}}" oninput="updatediscountandtax()" /></td>
+					<td>VAT(Rs)</td>
+					<td><input class="input-control" id="vat_rs" type="Number" value="{{order.vat_rs}}" 
+					oninput="editdisandtax()" /></td>
+				</tr>
+				<tr>
+					<td>Service Charge(%)</td>
+					<td>
+						<input class="input-control" id="service_charge_percent" type="Number" step=0.01 value="{{order.service_charge_percent}}" oninput="updatediscountandtax()">
+						</input>
+					</td>
+					<td>Service Charge(Rs)</td>
+					<td><input class="input-control" id="service_charge_rs" type="Number" value="{{order.service_charge_rs}}" oninput="editdisandtax()" /></td>
+				</tr>
+				<tr>
+					<td>Distance in km</td>
+					<td>
+						<input class="input-control" id="distance_in_km" type="Number" step=0.01 oninput="updatediscountandtax()" />
+					</td>
+					<td>Delivery Charge</td>
+					<td><input class="input-control" id="delivery_charge" type="Number" value="{{order.delivery_charge}}" readonly /></td>
+				</tr>
+				{% if order.e_wallet|add:"0" > 0 %}
+				<tr>
+					<td colspan="2"></td>
+					<td>e-Wallet</td>
+					<td><input class="input-control" value="{{order.e_wallet}}" readonly /></td>
+				</tr>
+				{% endif %}
+			</tbody>
+			<tfoot>
+				<tr>
+					<th colspan="3">Grand Total</th>
+					<th><input class="input-control" id="grand_total" value="{{order.grand_total}}" readonly /></th>
+				</tr>
+			</tfoot>
+		</table>
+		<style type="text/css">
+			.input-control {
+				width: 75px;
+			}
+		</style>	
+	</div>
+</div>
+
+<script type="text/javascript">
+	// function for edit discount and taxes in rupee fields
+	function editdisandtax() {
+		var order_number = "{{order.order_number}}";
+		var comment_text = document.getElementById('commentbox').value;
+		var discount_rs = document.getElementById('discount_rs').value;
+		var service_tax_rs = document.getElementById('service_tax_rs').value;
+		var vat_rs = document.getElementById('vat_rs').value;
+		var service_charge_rs = document.getElementById('service_charge_rs').value;
+		
+		var discount_percent = document.getElementById('discount_percent');
+		discount_percent.value = (discount_rs * 100) / {{order.subtotal}};
+
+		var service_tax_percent = document.getElementById('service_tax_percent');
+		service_tax_percent.value = (service_tax_rs * 100) / {{order.subtotal}};
+
+		var vat_percent = document.getElementById('vat_percent');
+		vat_percent.value = (vat_rs * 100) / {{order.subtotal}};
+
+		var service_charge_percent = document.getElementById('service_charge_percent');
+		service_charge_percent.value = (service_charge_rs * 100) / {{order.subtotal}};
+		// updatediscountandtax();
+		$.post("/myadmin/updatediscountandtax/",{"order_number":order_number,"discount_percent":discount_percent.value,"service_tax_percent":service_tax_percent.value,"vat_percent":vat_percent.value,"service_charge_percent":service_charge_percent.value,"comment_text":comment_text},function(data){
+			if(data['status'] == 'success')
+			{
+				$('#grand_total').val(data['grand_total']);
+			};
+		});
+	}
+</script>

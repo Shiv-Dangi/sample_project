@@ -1,0 +1,940 @@
+{% extends "app/customerend_base.html" %}
+{% load harishtags %}
+{%load staticfiles%}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block mainbody%}
+<link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
+<link rel = "stylesheet" href = "{% static 'app/css/jquery.datetimepicker.css' %}" />
+<script type="text/javascript" src="{% static 'app/js/jquery.datetimepicker.full.js' %}"></script>
+
+<style>
+  #locationField, #controls {
+    position: relative;
+    width: 100%;
+  }
+  #autocomplete {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 99%;
+  }
+  .label {
+    text-align: right;
+    font-weight: bold;
+    width: 100px;
+    color: #303030;
+  }
+  #address {
+    background-color: transparent;
+    width: 80%;
+    padding-right: 2px;
+  }
+  #address td {
+    font-size: 10pt;
+  }
+  .field {
+    width: 99%;
+  }
+  .slimField {
+    width: 40%;
+  }
+  .wideField {
+    width: 100%;
+  }
+  #locationField {
+    height: 20px;
+    margin-bottom: 2px;
+  }
+</style>
+
+<style>
+	/* The snackbar - position it at the bottom and in the middle of the screen */
+#snackbar {
+    visibility: hidden; /* Hidden by default. Visible on click */
+    min-width: 250px; /* Set a default minimum width */
+    margin-left: -125px; /* Divide value of min-width by 2 */
+    background-color: #333; /* Black background color */
+    color: #fff; /* White text color */
+    text-align: center; /* Centered text */
+    border-radius: 2px; /* Rounded borders */
+    padding: 16px; /* Padding */
+    position: fixed; /* Sit on top of the screen */
+    z-index: 1; /* Add a z-index if needed */
+    left: 50%; /* Center the snackbar */
+    bottom: 30px; /* 30px from the bottom */
+}
+
+/* Show the snackbar when clicking on a button (class added with JavaScript) */
+#snackbar.show {
+    visibility: visible; /* Show the snackbar */
+
+/* Add animation: Take 0.5 seconds to fade in and out the snackbar. 
+However, delay the fade out process for 2.5 seconds */
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+/* Animations to fade the snackbar in and out */
+@-webkit-keyframes fadein {
+    from {bottom: 0; opacity: 0;} 
+    to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+    from {bottom: 30px; opacity: 1;} 
+    to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}
+</style>
+
+<style type="text/css">
+    .box{
+        padding: 0px;
+        display: none;
+        margin-top: 10px;
+    }
+    .red{ background: transparent; }
+    .blue{ background: transparent; }
+    .other{ background: transparent; }
+</style>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+	    $('input[type="radio"]').click(function(){
+	        if($(this).attr("value")=="red"){
+	            $(".box").not(".red").hide();
+	            $(".red").show();
+	        }
+	        if($(this).attr("value")=="blue"){
+	            $(".box").not(".blue").hide();
+	            $(".blue").show();
+	        }
+	        if($(this).attr("value")=="other"){
+	            $(".box").not(".other").hide();
+	            $(".other").show();
+	        }
+	    });
+	});
+</script>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		if("{{request.session.user.address}}"){
+			var address = "{{request.session.user.address}}";
+			address = address.split(',');
+			$('#street_number').val(address[0]);
+			$('#route').val(address[1]);
+			$('#locality').val(address[2]);
+			$('#administrative_area_level_1').val(address[3]);
+			$('#country').val(address[4]);
+			$('#postal_code').val(address[5]);
+		};
+	});
+</script>
+
+<script>(function(d, s, id) {
+	  var js, fjs = d.getElementsByTagName(s)[0];
+	  if (d.getElementById(id)) return;
+	  js = d.createElement(s); js.id = id;
+	  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.6&appId=417114418480750";
+	  fjs.parentNode.insertBefore(js, fjs);
+	}(document, 'script', 'facebook-jssdk'));
+</script>
+
+	<!-- start container -->
+		<div class="container" style="min-height:490px;">
+			<div class="row mt30">
+				<div class="col-md-6 col-md-push-3">
+					{%if 'cart' in request.session %}
+						<div class="row text-center">
+					        <div class="col-sm-4" style="padding:0px;"><label><input type="radio" name="colorRadio" value="red">Delivery</label></div>
+					        <div class="col-sm-4" style="padding:0px;"><label><input type="radio" name="colorRadio" value="blue">Pickup </label></div>
+					        {% if 'offer' not in request.session and 'partner' not in request.session %}
+					        <div class="col-sm-4" style="padding:0px;"><label><input type="radio" name="colorRadio" value="other">Dining</label></div>
+					        {% endif %}
+					    </div>
+					    <hr style="width:100%;">
+
+					    <!--For Home Delivery-->
+
+					    <div class="red box">
+						    <form class = "form-horizontal" method = "post" id="formfield1" action = "/placeorder/">
+						    	{%csrf_token%}
+						    	<h5>Our Address: &nbsp;&nbsp;&nbsp;<b>Lazeez Hakeem, MP Nagar, Zone-I, Near DB Mall, Bhopal.</b></h5><br>
+						    	{% if 'partner' not in request.session %}
+						    	<div class="row">
+						    		<div class="col-sm-3" ><h5>Address:</h5><h6><b>(Enter landmark/locality name)</b></h6></div>
+						    		<div class="col-sm-9" >
+								    	<div id="locationField">
+									      <input id="autocomplete" placeholder="Locality"
+									             onFocus="geolocate()" type="text" class="form-control" name = "address"></input>
+									    </div>
+									</div>
+								</div>
+								<input type = "text" style = "display:none;" value="Home Delivery" name="delivery_type" id="delivery_type1"/>
+							    <div class="row">
+						    		<div class="col-sm-12">
+						    			<input class="form-control" id="street_number" name="street" type="text" 
+								            placeholder="House Number and Street" required="required"></input>
+								    </div>
+								    <div class="col-sm-12">
+						    			<input class="form-control" id="route" name="locality" type="text"
+								            placeholder="Locality" required="required"></input>
+								    </div>
+								    <div class="col-sm-6">
+								    	<input class="form-control" id="locality" name="city" type="text"
+								            placeholder="City" required="required"></input>
+								    </div>
+								    <div class="col-sm-6">
+										<input class="form-control" name="state" required="required" type="text"
+									              id="administrative_area_level_1"  placeholder="State"></input>
+									</div>
+									<div class="col-sm-6">
+										<input class="form-control" id="postal_code" name="zipcode" required="required" 
+									            type="text" placeholder="ZIP Code"></input>
+									</div>
+									<div class="col-sm-6">
+										<input class="form-control" name="country" required="required" type="text"
+									              id="country" placeholder="Country"></input>
+									</div>
+								</div><br>
+								{% else %}
+								<input type = "text" style = "display:none;" value="Home Delivery" name="delivery_type" id="delivery_type1"/>
+								<h5>Partner Address: &nbsp;&nbsp;&nbsp;<b>{{request.session.partner.address}}</b></h5><br>
+								{% endif %}
+								<div class="row">
+									<div class="col-sm-4"><h5>Payments: </h5></div>
+									<div class="col-sm-8">
+										<select class="form-control" name = "paymentmode" id="paymentmode1">
+											{% if 'offer' not in request.session %}
+												{%for paymentmode in paymentmodes %}
+											  		<option value="{{paymentmode.payment_mode}}" default>{{paymentmode}}</option>
+											  	{%endfor%}
+											  	{% if 'partner' in request.session and request.session.partner.credit_limit > 0 %}
+										  		<option value="credit">credit</option>
+										  		{% endif %}
+										  		{% if 'user' in request.session and request.session.user.credit_limit > 0 %}
+										  		<option value="credit">credit</option>
+										  		{% endif %}
+										  	{% else %}
+										  		<option value="Online Pay">Online Pay</option>
+										  	{% endif %}
+											<!-- {% if 'offer' in request.session %}
+												{%for paymentmode in paymentmodes %}
+										  			{%if paymentmode.payment_mode in request.session.offer_payment_mode%}
+										  				<option value="{{paymentmode.payment_mode}}" default>{{paymentmode}}</option>
+										  			{%endif%}
+										  		{%endfor%}
+											{% else %}
+												{%for paymentmode in paymentmodes %}
+											  		<option value="{{paymentmode.payment_mode}}" default>{{paymentmode}}</option>
+											  	{%endfor%}
+											{% endif %} -->
+										</select>
+									</div>
+								</div><br>
+								<div class="row text-center">
+									{% if 'offer' in request.session %}
+										{% if request.session.offer_time == 'Lunch' %}
+											<h5>Your order will be <b>delivered on coming {{request.session.offer_day}} between 11 am and 1 pm.</b></h5>
+										{% endif %}
+										{% if request.session.offer_time == 'Dinner' %}
+											<h5>Your order will be <b>delivered on coming {{request.session.offer_day}} between 5 pm and 7 pm.</b></h5>
+										{% endif %}
+									{% else %}
+							        <div class="col-sm-6">
+							        	<label><input type="radio" name="deliverRadio" value="nownow" checked />Now</label>
+							        </div>
+							        <div class="col-sm-6">
+							        	<label><input type="radio" name="deliverRadio" value="laterbhai"/>Later</label>
+							        </div>
+							        {% endif %}
+						    	</div><br>
+						    	<script type="text/javascript">
+									$(document).ready(function(){
+										$(".boxx").not(".nownow").hide();
+									    $('input[type="radio"]').click(function(){
+									        if($(this).attr("value")=="nownow"){
+									            $(".boxx").not(".nownow").hide();
+									            $(".nownow").show();
+									        }
+									        if($(this).attr("value")=="laterbhai"){
+									            $(".boxx").not(".laterbhai").hide();
+									            $(".laterbhai").show();
+									        }
+									    });
+									});
+								</script>
+								{% if 'offer' not in request.session %}
+								<div class="nownow boxx"></div>
+						    	<div class="laterbhai boxx">
+						    		<label for="expctddatetime">Expected Delivery Date - Time:</label>
+							    	<input type="text" placeholder="Click to choose a date and time" id="datetimepicker1" class="form-control" style="background:transparent;" name="expected_date_time"/>
+							    </div><br>
+							    {% endif %}
+								<div class="row">
+									<div class="col-sm-12">
+										<input class="form-control" id="comment1" name="comment" placeholder="Any Special Request?"/>
+									</div>
+								</div><br>
+								<div class="text-center">
+										{% if 'offer' in request.session %}
+											<input style="width:20px;height:20px;" type="checkbox" required="required">&nbsp;&nbsp;I accept the <a href="#" data-toggle="modal" data-target="#modalTC">terms and conditions</a> related to this offer.</input><br><br>
+											{%if 'user' in request.session or 'partner' in request.session %}
+											<!-- <button type="button" name="btn" value="Submit" id="submitBtn2" data-toggle="modal" data-target="#confirm-order" class="btn btn-success" style="width:100%;">Place Order</button> -->
+											<div class="row">
+												<div class="col-sm-12">
+													<button type="submit" class="btn btn-info" style="background:#10462f;">Place Order</button>
+												</div>
+											</div>
+											{%else%}
+											<div class="row">
+												<div class="col-sm-12">
+													<a href = "#" data-toggle = "modal" style="background:#10462f;" data-target = "#userlogin" class = "btn btn-primary">Place Order</a>
+												</div>
+											</div>
+											{%endif%}
+										{% else %}
+											{%if 'user' in request.session or 'partner' in request.session %}
+											<!-- <button type="button" name="btn" value="Submit" id="submitBtn2" data-toggle="modal" data-target="#confirm-order" class="btn btn-success" style="width:100%;">Place Order</button> -->
+											<div class="row">
+												<div class="col-sm-6">
+													<a href="/" class="btn btn-danger">Edit Order</a>
+												</div>
+												<div class="col-sm-6">
+													<button type="submit" class="btn btn-info" style="background:#10462f;">Place Order</button>
+												</div>
+											</div>
+											{%else%}
+											<div class="row">
+												<div class="col-sm-6">
+													<a href="/" class="btn btn-danger">Edit Order</a>
+												</div>
+												<div class="col-sm-6">
+													<a href = "#" data-toggle = "modal" style="background:#10462f;" data-target = "#userlogin" class = "btn btn-primary">Place Order</a>
+												</div>
+											</div>
+											{%endif%}
+										{% endif %}
+									
+								</div>
+							</form><br><br>
+						</div>
+						<script>
+						  // This example displays an address form, using the autocomplete feature
+						  // of the Google Places API to help users fill in the information.
+
+						  // This example requires the Places library. Include the libraries=places
+						  // parameter when you first load the API. For example:
+
+						  var placeSearch, autocomplete;
+						  var componentForm = {
+						    street_number: 'short_name',
+						    route: 'long_name',
+						    locality: 'long_name',
+						    administrative_area_level_1: 'short_name',
+						    country: 'long_name',
+						    postal_code: 'short_name'
+						  };
+
+						  function initAutocomplete() {
+						    // Create the autocomplete object, restricting the search to geographical
+						    // location types.
+						    autocomplete = new google.maps.places.Autocomplete(
+						        /** @type {!HTMLInputElement} */(document.getElementById('autocomplete')),
+						        {types: ['geocode']});
+
+						    // When the user selects an address from the dropdown, populate the address
+						    // fields in the form.
+						    autocomplete.addListener('place_changed', fillInAddress);
+						  }
+
+						  function fillInAddress() {
+						    // Get the place details from the autocomplete object.
+						    var place = autocomplete.getPlace();
+
+						    for (var component in componentForm) {
+						      document.getElementById(component).value = '';
+						      document.getElementById(component).disabled = false;
+						    }
+
+						    // Get each component of the address from the place details
+						    // and fill the corresponding field on the form.
+						    for (var i = 0; i < place.address_components.length; i++) {
+						      var addressType = place.address_components[i].types[0];
+						      if (componentForm[addressType]) {
+						        var val = place.address_components[i][componentForm[addressType]];
+						        document.getElementById(addressType).value = val;
+						      }
+						    }
+						  }
+
+						  // Bias the autocomplete object to the user's geographical location,
+						  // as supplied by the browser's 'navigator.geolocation' object.
+						  function geolocate() {
+						    if (navigator.geolocation) {
+						      navigator.geolocation.getCurrentPosition(function(position) {
+						        var geolocation = {
+						          lat: position.coords.latitude,
+						          lng: position.coords.longitude
+						        };
+						        var circle = new google.maps.Circle({
+						          center: geolocation,
+						          radius: position.coords.accuracy
+						        });
+						        autocomplete.setBounds(circle.getBounds());
+						      });
+						    }
+						  }
+						</script>
+
+						<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBhpzTADJP5C8mnF12fHbuzdXTekZCL-vg&libraries=places&callback=initAutocomplete"
+						    async defer>
+						</script>
+
+
+						<!--For Branch Pickup-->
+					    <div class="blue box">
+					    	<form class = "form-horizontal" method = "post" id="formfield2" action = "/placeorder/">
+					    		{%csrf_token%}
+						    	<h5>Address: &nbsp;&nbsp;&nbsp;
+						    		<b>Lazeez Hakeem, MP Nagar, Zone-I, Near DB Mall, Bhopal.</b>
+						    	</h5><br>
+						    	<input type = "text" style = "display:none;" value="Branch Pickup" name="delivery_type" id="delivery_type2"/>
+						    	<div class="row">
+									<div class="col-sm-4"><h5>Payments: </h5></div>
+									<div class="col-sm-8">
+									
+									
+										<select class="form-control" name = "paymentmode" id="paymentmode2">
+										  	<!-- {% if 'offer' in request.session %}
+										  		{%for paymentmode in paymentmodes %}
+										  			{%if paymentmode.payment_mode in request.session.offer_payment_mode%}
+										  			{{paymentmode.payment_mode}}
+										  			<h1>{{paymentmode}}</h1>h1>
+										  				<option value="{{paymentmode.payment_mode}}" default>{{paymentmode}}</option>
+										  			}
+										  			}
+										  			}
+										  			{%endif%}
+										  		{%endfor%}
+											{% else %}
+											 	{%for paymentmode in paymentmodes %}
+											 	{{paymentmode.payment_mode}}
+											 	<h1>{{paymentmode}}</h1>h1>
+											  		<option value="{{paymentmode.payment_mode}}" default>{{paymentmode}}</option>
+											  	{%endfor%}
+											{% endif %} -->
+											{% if 'offer' not in request.session %}
+												{%for paymentmode in paymentmodes %}
+											  		<option value="{{paymentmode.payment_mode}}" default>{{paymentmode}}</option>
+											  	{%endfor%}
+											  	{% if 'partner' in request.session and request.session.partner.credit_limit > 0 %}
+										  		<option value="credit">credit</option>
+										  		{% endif %}
+										  		{% if 'user' in request.session and request.session.user.credit_limit > 0 %}
+										  		<option value="credit">credit</option>
+										  		{% endif %}
+										  	{% else %}
+										  		<option value="Online Pay">Online Pay</option>
+										  	{% endif %}
+										</select>
+									</div>
+								</div><br>
+								<div class="row text-center">
+									{% if 'offer' in request.session %}
+										{% if request.session.offer_time == 'Lunch' %}
+											<h5>Your order will be <b>ready for pickup on coming {{request.session.offer_day}} between 11 am and 1 pm.</b></h5>
+										{% endif %}
+										{% if request.session.offer_time == 'Dinner' %}
+											<h5>Your order will be <b>ready for pickup on coming {{request.session.offer_day}} between 5 pm and 7 pm.</b></h5>
+										{% endif %}
+									{% else %}
+							        <div class="col-sm-6">
+							        	<label><input type="radio" name="deliverRadio" value="nownownow" checked>Now</label>
+							        </div>
+							        <div class="col-sm-6">
+							        	<label><input type="radio" name="deliverRadio" value="laterbhaibhai">Later</label>
+							        </div>
+							        {% endif %}
+						    	</div><br>
+						    	<script type="text/javascript">
+									$(document).ready(function(){
+										$(".boxxx").not(".nownownow").hide();
+									    $('input[type="radio"]').click(function(){
+									        if($(this).attr("value")=="nownownow"){
+									            $(".boxxx").not(".nownownow").hide();
+									            $(".nownownow").show();
+									        }
+									        if($(this).attr("value")=="laterbhaibhai"){
+									            $(".boxxx").not(".laterbhaibhai").hide();
+									            $(".laterbhaibhai").show();
+									        }
+									    });
+									});
+								</script>
+								{% if 'offer' not in request.session %}
+								<div class="nownownow boxxx"></div>
+						    	<div class="laterbhaibhai boxxx">
+						    		<label for="expctddatetime">Expected Pickup Date - Time:</label>
+							    	<input type="text" id="datetimepicker2" class="form-control" style="background:transparent;" name="expected_date_time"/>
+							    </div>
+							    {% endif %}
+							    <div class="row">
+									<div class="col-sm-12">
+										<input class="form-control" id="comment2" name="comment" placeholder="Any Special Request?" />
+									</div>
+								</div><br>
+								<div class="text-center">
+									
+										{% if 'offer' in request.session %}
+											<input style="width:20px;height:20px;" type="checkbox" required="required">&nbsp;&nbsp;I accept the <a href="#" data-toggle="modal" data-target="#modalTC">terms and conditions</a> related to this offer.</input><br><br>
+											{%if 'user' in request.session or 'partner' in request.session %}
+											<!-- <button type="button" name="btn" value="Submit" id="submitBtn2" data-toggle="modal" data-target="#confirm-order" class="btn btn-success" style="width:100%;">Place Order</button> -->
+											<div class="row">
+												<div class="col-sm-12">
+													<button type="submit" class="btn btn-info" style="background:#10462f;">Place Order</button>
+												</div>
+											</div>
+											{%else%}
+											<div class="row">
+												<div class="col-sm-12">
+													<a href = "#" data-toggle = "modal" style="background:#10462f;" data-target = "#userlogin" class = "btn btn-primary">Place Order</a>
+												</div>
+											</div>
+											{%endif%}
+										{% else %}
+											{%if 'user' in request.session or 'partner' in request.session %}
+											<!-- <button type="button" name="btn" value="Submit" id="submitBtn2" data-toggle="modal" data-target="#confirm-order" class="btn btn-success" style="width:100%;">Place Order</button> -->
+											<div class="row">
+												<div class="col-sm-6">
+													<a href="/" class="btn btn-danger">Edit Order</a>
+												</div>
+												<div class="col-sm-6">
+													<button type="submit" class="btn btn-info" style="background:#10462f;">Place Order</button>
+												</div>
+											</div>
+											{%else%}
+											<div class="row">
+												<div class="col-sm-6">
+													<a href="/" class="btn btn-danger">Edit Order</a>
+												</div>
+												<div class="col-sm-6">
+													<a href = "#" data-toggle = "modal" style="background:#10462f;" data-target = "#userlogin" class = "btn btn-primary">Place Order</a>
+												</div>
+											</div>
+											{%endif%}
+										{% endif %}
+									
+								</div>
+							</form><br><br>
+					    </div>
+					    <!--For Dining-->
+
+					    <div class="other box">
+					    	<form class = "form-horizontal" method = "post" id="formfield3" action = "/placeorder/">
+					    		{%csrf_token%}
+						    	<h5>Address: &nbsp;&nbsp;&nbsp;<b>Lazeez Hakeem, MP Nagar, Zone-I, Near DB Mall, Bhopal.</b></h5><br>
+						    	<div class="row">
+						    		<div class="col-sm-3"><h5>Service Tax:</h5></div>
+						    		<div class="col-sm-3"><h5><b>6%</b></h5></div>
+						    		<div class="col-sm-2"><h5>Net:</h5></div>
+						    		<div class="col-sm-3 text-danger"><h4 id="new_grand_total"><b>₹&nbsp;</b></h4></div>
+						    		<script type="text/javascript">
+						    			var six = ({{request.session.cart.totalcost}} * 6 / 100);
+						    			var new_grand_total = ({{request.session.cart.grandtotal}} + six);
+						    			document.getElementById('new_grand_total').innerHTML =  "₹&nbsp;" + new_grand_total;
+						    		</script>
+						    		<div class="col-sm-1"></div>
+						    	</div><br>
+						    	<input type = "text" style = "display:none;" value="Dining" name="delivery_type" id="delivery_type3"/>
+								<div class="row">
+									<div class="col-sm-4"><h5>Payments: </h5></div>
+									<div class="col-sm-8">
+										<select class="form-control" name = "paymentmode" id = "paymentmode3">
+										  	<!-- {% if 'offer' in request.session %}
+										  		{%for paymentmode in paymentmodes %}
+										  			{%if paymentmode in request.session.offer.payment_mode%}
+										  				<option value="{{paymentmode.payment_mode}}" default>{{paymentmode}}</option>
+										  			{%endif%}
+										  		{%endfor%}
+											{% else %}
+												{%for paymentmode in paymentmodes %}
+											  		<option value="{{paymentmode.payment_mode}}" default>{{paymentmode}}</option>
+											  	{%endfor%}
+											{% endif %} -->
+											{%for paymentmode in paymentmodes %}
+										  		<option value="{{paymentmode.payment_mode}}" default>{{paymentmode}}</option>
+										  	{%endfor%}
+										</select>
+									</div>
+								</div><br>
+								<div class="row">
+									<div class="col-sm-4">
+										<h5>No. of People:</h5> 
+									</div>
+									<div class="col-sm-6">
+										<select class="form-control" name="no_of_people">
+											<option value="1">1</option>
+											<option value="2">2</option>
+											<option value="3">3</option>
+											<option value="4">4</option>
+											<option value="5">5</option>
+											<option value="6">6</option>
+											<option value="7">7</option>
+											<option value="8">8</option>
+											<option value="9">9</option>
+											<option value="10">10</option>
+										</select>
+									</div>
+									<div class="col-sm-2">
+									</div>
+								</div><br>
+								<div class="row" style="padding-left:15px;padding-right:15px;">
+									<label for="expctddatetime">Expected Dining Date - Time:</label>
+					 				<input type="text" id="datetimepicker3" class="form-control" style="background:transparent;" name="expected_date_time" required />	
+					 			</div><br>
+								<div class="row">
+									<div class="col-sm-12">
+										<input class="form-control" id="comment3" name="comment" placeholder="Any Special Request?" />
+									</div>
+								</div><br>
+								<div class="text-center">
+									
+										{%if 'user' in request.session or 'partner' in request.session %}
+										<!-- <button type="button" name="btn" value="Submit" id="submitBtn2" data-toggle="modal" data-target="#confirm-order" class="btn btn-success" style="width:100%;">Place Order</button> -->
+										<div class="row">
+											<div class="col-sm-6">
+												<a href="/index/" class="btn btn-danger">Edit Order</a>
+											</div>
+											<div class="col-sm-6">
+												<button type="submit" class="btn btn-info" style="background:#10462f;">Place Order</button>
+											</div>
+										</div>
+										{%else%}
+										<div class="row">
+											<div class="col-sm-6">
+												<a href="/index/" class="btn btn-danger">Edit Order</a>
+											</div>
+											<div class="col-sm-6">
+												<a href = "#" data-toggle = "modal" style="background:#10462f;" data-target = "#userlogin" class = "btn btn-primary">Place Order</a>
+											</div>
+										</div>
+										{%endif%}
+									
+								</div>
+							</form><br><br>
+					    </div>
+					{%else%}
+						{%if 'offer' in request.session%}
+						{%else%}
+						{%endif%}
+					{%endif%}
+					<script type="text/javascript">
+						var dt = new Date();
+					    dt.setMinutes(dt.getMinutes() + 50);
+						
+						$('#datetimepicker1').datetimepicker({
+					    	step:15,
+					    	minDate: 0,
+					    	maxDate:'+1970-01-07',//tomorrow is maximum date calendar
+					    	minDateTime: dt,
+					    	format:'Y-m-d H:i',
+					    	formatDate:'Y-m-d'
+						});
+
+						$('#datetimepicker2').datetimepicker({
+					    	step:15,
+					    	minDate: 0,
+					    	maxDate:'+1970-01-07',//tomorrow is maximum date calendar
+					    	minDateTime: dt,
+					    	format:'Y-m-d H:i',
+					    	formatDate:'Y-m-d'
+						});
+
+						$('#datetimepicker3').datetimepicker({
+							step:15,
+					    	minDate: 0,
+					    	maxDate:'+1970-01-07',//tomorrow is maximum date calendar
+					    	minDateTime: dt,
+					    	format:'Y-m-d H:i',
+					    	formatDate:'Y-m-d'
+						});
+					</script>
+
+					<script type="text/javascript">
+						var vat = ({{request.session.cart.totalcost}} * 5 / 100);
+						$('#submitBtn1').click(function() {
+						    /* when click on the button in the delivery form, display the entered values in the modal */
+						    $('#modalsubtotal').text('{{request.session.cart.totalcost}}');
+						    $('#modalpaymentmode').text($('#paymentmode1').val());
+						    $('#modalspecialrequest').text($('#comment1').val());
+						    $('#modaldeliverytype').text($('#delivery_type1').val());
+						    $('#modalgrandtotal').text('{{request.session.cart.grandtotal}}');
+						    $('#modaldeliverydate').text($('#datetimepicker1').val());
+						    $('#modalvat').text(vat);
+						    $('#modalservicetax').text(0);
+						    $('#modaldeliveryadress').text($('#street_number').val()+', '+$('#route').val()+ ', '+$('#locality').val()+', '+$('#administrative_area_level_1').val()+', '+$('#country').val()+', '+$('#postal_code').val());
+						});
+						$('#submitBtn2').click(function() {
+						    /* when click on the button in the pickup form, display the entered values in the modal */
+						     $('#modalsubtotal').text('{{request.session.cart.totalcost}}');
+						    $('#modalpaymentmode').text($('#paymentmode2').val());
+						    $('#modalspecialrequest').text($('#comment2').val());
+						    $('#modaldeliverytype').text($('#delivery_type2').val());
+						    $('#modalgrandtotal').text('{{request.session.cart.grandtotal}}');
+						    $('#modalvat').text(vat);
+						    $('#modalservicetax').text(0);
+						    $('#modaldeliverydate').text($('#datetimepicker2').val());
+						    $('#modaldeliveryadress').text('Lazeez Hakeem, MP Nagar, Zone-I, Near DB Mall, Bhopal.');
+						});
+						$('#submitBtn3').click(function() {
+						    /* when click on the button in the dining form, display the entered values in the modal */
+						    var service_tax = ({{request.session.cart.totalcost|mult}} - {{request.session.cart.totalcost}});
+						    $('#modalsubtotal').text('{{request.session.cart.totalcost}}');
+						    $('#modalpaymentmode').text($('#paymentmode3').val());
+						    $('#modalspecialrequest').text($('#comment3').val());
+						    $('#modaldeliverytype').text($('#delivery_type3').val());
+						    $('#modalgrandtotal').text(new_grand_total);
+						    $('#modalvat').text(vat);
+						    $('#modalservicetax').text(service_tax-vat);
+						    $('#modaldeliverydate').text($('#datetimepicker3').val());
+						    $('#modaldeliveryadress').text('Lazeez Hakeem, MP Nagar, Zone-I, Near DB Mall, Bhopal.');
+						});
+						$('#submit-order').click(function(){
+						    /* when the confirm button in the modal is clicked, submit the form */
+						    var order_form = $('#modaldeliverytype').text();
+						    if (order_form == 'Home Delivery'){
+						    	$('#formfield1').submit();
+						    }
+						    if (order_form == 'Branch Pickup'){
+						    	$('#formfield2').submit();
+						    }
+						    if (order_form == 'Dining'){
+						    	$('#formfield3').submit();
+						    }
+						});
+					</script>
+				</div>
+			</div>
+			<!-- end .row -->
+			<!-- Modal -->
+			  <div class="modal fade" id="modalTC" role="dialog">
+			    <div class="modal-dialog">
+			    
+			      <!-- Modal content-->
+			      <div class="modal-content">
+			        <div class="modal-header">
+			          <button type="button" class="close" data-dismiss="modal">&times;</button>
+			          <h4 class="modal-title">Offer Terms and Conditions</h4>
+			        </div>
+			        <div class="modal-body">
+			          <p>LHDINDIA welcomes and thanks you for taking interest in our Wednesday Menu Main-Course Edition.<br>
+			          	Following are the terms and conditions associated with this offer.<br><br>
+			          	1. Though we would try our best to serve our patrons, home delivery may be affected due to bad weather, heavy traffic, unapproachable address or some other reasons beyond our control.<br><br>
+			          	2. In case LHDINDIA is unable to deliver the order or there is some delay in the order, then customer would be informed on his/her registered mobile number.<br><br>
+			          	3. LHDINDIA would focus to serve its best in main-course menu.<br><br>
+			          	4. Order for Lunch in Main-Course edition would be delivered between 11:00-13:00 and that for Dinner will be delivered between 17:00 and 19:00.<br><br>
+			          	5. Our menu would depend upon the day you choose for delivery. We have a different menu for each day.<br><br>
+			          	6. In order to experience hassle-free food delivery experience, it is recommeded to choose Online Payment option. We also have Cash on Delivery option for your convenience.<br><br>
+			          	7. Order will be cancelled only up to 6 hours before the delivery time. No order will be cancelled after that and the user will be responsible for paying the bill amount or loss incurred.<br><br>
+			          	8. LHDINDIA reserves all rights of cancellation of orders. All disputes will be subject to Bhopal Jurisdiction only.</p>
+			        </div>
+			        <div class="modal-footer">
+			          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			        </div>
+			      </div>
+			      
+			    </div>
+			  </div>
+			   <!-- Modal for ZUP Pay -->
+			  <div class="modal fade" id="modalZUP" role="dialog">
+			    <div class="modal-dialog">
+			    
+			      <!-- Modal content-->
+			      <div class="modal-content">
+			        <div class="modal-header">
+			          <button type="button" class="close" data-dismiss="modal">&times;</button>
+			          <h4 class="modal-title">Regarding ZUP Pay</h4>
+			        </div>
+			        <div class="modal-body">
+			        	<div class="text-center">
+			        		<img src="/static/app/img/zuplogo.jpg" width="100" height="100">
+			        		<p><b>Follow these steps to avail extra 30% cashback by using ZUP:<br><br></b></p>
+			        	</div>
+			          <p>1. Download ZUP app from<a href="https://play.google.com/store/apps/details?id=in.paymint&hl=en" target="_blank"> this link</a> or <a href="http://download.zup.today" target="_blank">http://download.zup.today</a>.<br><br>
+			          	2. Select Offers.<br><br>
+			          	3. Subscribe to a channel: Lazeez Hakeem Bhopal.<br><br>
+			          	4. Enter amount to pay. This amount will be sent via LHDINDIA on order placement.<br><br>
+			          	5. Click offers and redeem Lazeez Wednesday Menu Offer before paying.<br><br>
+			          	6. Use vendor code 1060 to pay.<br><br> </p>
+			          	<h4><b>Your order will be processed only after verifying a successful ZUP transaction.</b></h4>
+			        </div>
+			        <div class="modal-footer">
+			          <button type="button" class="btn btn-default" data-dismiss="modal">Okay, Thanks!</button>
+			        </div>
+			      </div>
+			      
+			    </div>
+			  </div>
+			  <!-- Modal for PayTM -->
+			  <div class="modal fade" id="modalPAYTM" role="dialog">
+			    <div class="modal-dialog">
+			    
+			      <!-- Modal content-->
+			      <div class="modal-content">
+			        <div class="modal-header">
+			          <button type="button" class="close" data-dismiss="modal">&times;</button>
+			          <h4 class="modal-title">Regarding Paytm</h4>
+			        </div>
+			        <div class="modal-body">
+			        	<div class="text-center">
+			        		<p><b>Choose any of the two steps for making payments via Paytm:<br><br></b></p>
+			        	</div>
+			          <p>
+			      		1. Through Paytm, transfer your order's Grand Total amount to +91 9826267746 (Lazeez Hakeem). You can also mention your order number while making this transfer. These details will be sent to you via SMS on order placement.<br><br>
+			      		2. You can scan the QR code in the image to make the necessary transfer.<br>
+			      		<img src="/static/app/img/paytm.jpg">
+			          </p>
+			          	<h4><b>Your order will be processed only after verifying a successful Paytm transaction.</b></h4>
+			        </div>
+			        <div class="modal-footer">
+			          <button type="button" class="btn btn-default" data-dismiss="modal">Okay, Thanks!</button>
+			        </div>
+			      </div>
+			      
+			    </div>
+			  </div>
+		</div>
+	<!--end .container -->
+
+<script>
+	$(document).ready(function() {
+		if ("{{request.session.userinvaild}}"){
+			$(".userlogin").click();	
+		} 
+		if ("{{request.session.mobileexistsalready}}"){
+			$("#logintab").removeClass("active");
+			$("#signuptab").addClass("active");
+			$(".userlogin").click();
+		}
+		if ("{{request.session.mobiledoesnotexistforgot}}") {
+			$("#logintab").removeClass("active");
+			$("#forgotpasswordtab").addClass("active");
+			$(".userlogin").click();
+		}
+		if ("{{request.session.userisblocked}}"){
+			$(".userlogin").click();
+		}
+	});
+	removeerrors();
+	function removeerrors(){
+		$.get('/removeerrors/',function(data){
+
+		})
+	}
+	// removeoffererror();
+	// function removeoffererror(){
+	// 	$.get('/removeoffererror/',function(data){
+
+	// 	})
+	// }			
+</script>
+<script>
+	$('#paymentmode1').change(function()
+	{
+	    if (this.value == 'ZUP Pay')
+	    {
+	         $('#modalZUP').modal('show');
+	    }
+	});
+	$('#paymentmode2').change(function()
+	{
+	    if (this.value == 'ZUP Pay')
+	    {
+	         $('#modalZUP').modal('show');
+	    }
+	});
+	$('#paymentmode1').change(function()
+	{
+	    if (this.value == 'Paytm')
+	    {
+	         $('#modalPAYTM').modal('show');
+	    }
+	});
+	$('#paymentmode2').change(function()
+	{
+	    if (this.value == 'Paytm')
+	    {
+	         $('#modalPAYTM').modal('show');
+	    }
+	});
+	$(document).ready(function() {
+	$('#otherpaymentmode2').show(); //hide field on start
+ 	$('#onlinepaymentmode2').hide(); //hide field on start
+	$('#paymentmode2').change(function() {
+ 
+	 var $index = $('#paymentmode2').index(this);
+ 
+	 if($('#paymentmode2').val() == 'Online Pay') { //if this value is selected
+	 $('#otherpaymentmode2').hide(); //this field is hidden
+	 $('#onlinepaymentmode2').show();
+	 } 
+	 
+	 else{
+	 $('#onlinepaymentmode2').hide();
+ 	 $('#otherpaymentmode2').show();//else it is shown
+	 }
+        });
+ });
+</script>
+<script>
+	$(document).ready(function() {
+	$('#otherpaymentmode3').show(); //hide field on start
+ 	$('#onlinepaymentmode3').hide(); //hide field on start
+	$('#paymentmode3').change(function() {
+ 
+	 var $index = $('#paymentmode3').index(this);
+ 
+	 if($('#paymentmode3').val() == 'Online Pay') { //if this value is selected
+	 $('#otherpaymentmode3').hide(); //this field is hidden
+	 $('#onlinepaymentmode3').show();
+	 } 
+	 
+	 else{
+	 $('#onlinepaymentmode3').hide();
+ 	 $('#otherpaymentmode3').show();//else it is shown
+	 }
+        });
+ });
+</script>
+<script>
+	$(document).ready(function() {
+	$('#otherpaymentmode1').show(); //hide field on start
+ 	$('#onlinepaymentmode1').hide(); //hide field on start
+	$('#paymentmode1').change(function() {
+ 
+	 var $index = $('#paymentmode1').index(this);
+ 
+	 if($('#paymentmode1').val() == 'Online Pay') { //if this value is selected
+	 $('#otherpaymentmode1').hide(); //this field is hidden
+	 $('#onlinepaymentmode1').show();
+	 } 
+	 
+	 else{
+	 $('#onlinepaymentmode1').hide();
+ 	 $('#otherpaymentmode1').show();//else it is shown
+	 }
+        });
+ });
+</script>
+{%endblock mainbody%}

@@ -1,0 +1,190 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div><br>
+	<div class = "container" style="width:100%;">
+	
+
+	<!--For Order Printing -->
+			<style type="text/css" media="print">
+				.printablediv table tr td {
+				  font-size: 1em;
+				  font-family: verdana;
+				}
+				.printablediv table tr th {
+				  font-size: 1em;
+				  font-family: verdana;
+				}
+			</style>
+			<div id="printableArea" class="printablediv" style="width:100%">
+			    <div class="row table-responsive" style="margin-left: 0px;width:100%">
+					<table class = "table table-bordered" border="1 px" style="width:100%;">
+						<tbody>
+							<tr>
+								<td>
+									LAZEEZ HAKEEM, Bhopal<br/>
+									Bhopal, Madhya Pradesh, India<br/>
+									0755 6222227<br/>
+									support@lhdindia.com<br/>
+									<!-- <b>Service Tax No.:</b>AAUPH6905KSD001<br/>
+									<b>VAT No.:</b>23864007086 -->
+								</td>
+								<td>
+									Service Tax No.: AAUPH6905KSD001<br/>
+									VAT No.: 23864007086<br/><br/>
+									{% if order.table_no %}
+									Table: {{order.table_no}}
+									{% endif %}<br/>
+									<!-- <b>Customer</b><br/>
+									{{order.customer.customer_name|title}}<br/>
+									{{order.customer.customer_number}}<br/> -->
+									Payment Mode: {{order.payment_mode}}
+								</td>
+							</tr>
+							<tr>
+								<td>
+									Order Number: {{order.order_number}}
+								</td>
+								<td>
+									Order Date: {{order.ordered_at}}
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<!--Item description-->
+				<div class="row" style="margin-left: 5px;">
+					<table class = "table table-bordered iteminfo">
+						<thead class="jumbotron">
+							<tr>
+								<th>S.No.</th>
+								<th>Item Description</th>
+								<th>Quantity</th>
+								<th>Price</th>
+								<th>Total</th>
+							</tr>
+						</thead>
+						<tbody>
+							{%for item in ordered_items%}
+								<tr>
+									<td>{{forloop.counter}}</td>
+									<td>
+										{% if item.quantity ==  0%}
+											<strike>{{item.name}}-{{item.subname}}</strike>
+										{% else %}
+											{{item.name}}-{{item.subname}}
+										{%endif%}
+									</td>
+									<td>{{item.quantity}}</td>
+									<td>{{item.price}}</td>
+									<td>{% widthratio item.quantity 1 item.price|add:"0" %}</td>
+								</tr>
+							{%endfor%}
+						</tbody>
+						<tfoot class="jumbotron">
+							<tr>
+								<td colspan="2">Sub Total</td>
+								<td></td>
+								<td></td>
+								<td colspan="2">{{order.subtotal}}</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+				<!--cart info-->
+				<div class="row" style="margin-left: 5px;">
+					<label>Order Summary</label>
+					<div class="table-responsive">
+						<table class = "table table-bordered">
+							<thead>
+								<tr>
+									<th colspan="3">Sub Total</th>
+									<th>{{order.subtotal}}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% if order.discount_percent|add:"0" > 0 %}
+								<tr>
+									<td>Discount(%)</td>
+									<td>{{order.discount_percent|floatformat:"2"}}</td>
+									<td>Discount(Rs)</td>
+									<td>{{order.discount_rs|floatformat:"2"}}</td>
+								</tr>
+								{% endif %}
+								{% if order.service_tax_percent|add:"0" > 0 %}
+								<tr>
+									<td>Service Tax(%)</td>
+									<td>{{order.service_tax_percent}}</td>
+									<td>Service Tax(Rs)</td>
+									<td>{{order.service_tax_rs}}</td>
+								</tr>
+								{% endif %}
+								{% if order.vat_percent|add:"0" > 0 %}
+								<tr>
+									<td>VAT(%)</td>
+									<td>{{order.vat_percent}}</td>
+									<td>VAT(₹)</td>
+									<td>{{order.vat_rs}}</td>
+								</tr>
+								{% endif %}
+								{% if order.service_charge_percent|add:"0" > 0 %}
+								<tr>
+									<td>Service Charge(%)</td>
+									<td>{{order.service_charge_percent}}</td>
+									<td>Service Charge(₹)</td>
+									<td>{{order.service_charge_rs}}</td>
+								</tr>
+								{% endif %}
+								{% if order.advance_pay > 0 %}
+								<tr>
+									<td>Advance Payment</td>
+									<td></td>
+									<td></td>
+									<td>{{order.advance_pay}}</td>
+								</tr>
+								<tr>
+									<td>Balance Payment</td>
+									<td></td>
+									<td></td>
+									<td>{{order.balance_pay}}</td>
+								</tr>
+								{% endif %}
+							</tbody>
+							<tfoot>
+								<tr>
+									<th colspan="3">Grand Total</th>
+									<th>₹ {{order.grand_total}}</th>
+								</tr>
+								<tr>
+									<th colspan="3">Grand Total (Rounded-Off)</th>
+									<th>₹ {{order.grand_total|floatformat:"0"}}</th>
+								</tr>
+							</tfoot>
+						</table>
+					</div>
+				</div>
+				<div class="row text-center">
+					<h4>It's Happiness with Food</h4>
+					<h4>We know your heart since 1971!</h4>
+				</div>
+			</div>
+			<script>
+				function printDiv(divName) {
+				    var printContents = document.getElementById(divName).innerHTML;
+				    var originalContents = document.body.innerHTML;
+
+				    document.body.innerHTML = printContents;
+
+				    window.print();
+
+				    document.body.innerHTML = originalContents;
+				}
+			</script>
+
+		<!--End of For Order Printing-->
+
+	</div>
+{%endblock content%}

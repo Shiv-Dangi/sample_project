@@ -1,0 +1,147 @@
+{% extends "app/customerend_base.html" %}
+{%load staticfiles%}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block mainbody%}
+
+<div class="container">
+	<h4 align="center"><b>Order Number: {{order.order_number}}</b></h4><br>
+	<div class="row text-center">
+		<div class="col-sm-4">
+			<h5><b>Customer Name:</b> {{order.customer_name}}</h5>
+		</div>
+		<div class="col-sm-4">
+			<h5><b>Contact Number:</b> {{order.customer_mobile}}</h5>
+		</div>
+		<div class="col-sm-4">
+			<h5><b>Order Source:</b> {{order.source}}</h5>
+		</div>
+	</div>
+	<h5 align="center">Address: {{order.address}}</h5>
+	<h5 align="center">Special Remark: {{order.special_comment}}</h5>
+	<div class="row text-center">
+		<div class="col-sm-4">
+			<h5><b>Delivery Type:</b> {{order.delivery_type}}</h5>
+		</div>
+		<div class="col-sm-4">
+			<h5><b>Delivery expct. at:</b> {{order.delivered_at|default_if_none:order.expected_at}}</h5>
+		</div>
+		<div class="col-sm-4">
+			<h5><b>Placed at:</b> {{order.placed_at}}</h5>
+		</div>
+	</div>
+	<!--Item description-->
+	<div class="row" style="margin-left: 5px;">
+		<table class = "table table-bordered iteminfo">
+			<thead class="jumbotron">
+				<tr>
+					<th>S.No.</th>
+					<th>Item Description</th>
+					<th>Quantity</th>
+					<th>Price</th>
+					<th>Total</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% if order.offer_from_web == "True" %}
+					{%for item in ordered_items%}
+						<tr>
+							<td>{{forloop.counter}}</td>
+							<td>{{item.name}}-{{item.subname}}</td>
+							<td>{{item.quantity}}</td>
+							<td>{{item.price_actual}}</td>
+							<td>{% widthratio item.quantity 1 item.price_actual %}</td>
+						</tr>
+					{%endfor%}
+				{% else %}
+					{%for item in ordered_items%}
+						<tr>
+							<td>{{forloop.counter}}</td>
+							<td>{{item.name}}-{{item.subname}}</td>
+							<td>{{item.quantity}}</td>
+							<td>{{item.price}}</td>
+							<td>{% widthratio item.quantity 1 item.price %}</td>
+						</tr>
+					{%endfor%}
+				{% endif %}
+			</tbody>
+			<tfoot class="jumbotron">
+				<tr>
+					<td colspan="2">Sub Total</td>
+					<td></td>
+					<td></td>
+					<td colspan="2">{{order.subtotal}}</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+	<!--cart info-->
+	<div class="row" style="margin-left: 5px;">
+		<label>Order Summary</label>
+		<div class="table-responsive">
+			<table class = "table table-bordered">
+				<thead>
+					<tr>
+						<th colspan="3">Sub Total</th>
+						<th>{{order.subtotal}}</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% if order.discount_percent|add:"0" > 0 %}
+					<tr>
+						<td>Discount(%)</td>
+						<td>{{order.discount_percent}}</td>
+						<td>Discount(Rs)</td>
+						<td>{{order.discount_rs}}</td>
+					</tr>
+					{% endif %}
+					{% if order.service_tax_percent|add:"0" > 0 %}
+					<tr>
+						<td>Service Tax(%)</td>
+						<td>{{order.service_tax_percent}}</td>
+						<td>Service Tax(Rs)</td>
+						<td>{{order.service_tax_rs}}</td>
+					</tr>
+					{% endif %}
+					{% if order.vat_percent|add:"0" > 0 %}
+					<tr>
+						<td>VAT(%)</td>
+						<td>{{order.vat_percent}}</td>
+						<td>VAT(Rs)</td>
+						<td>{{order.vat_rs}}</td>
+					</tr>
+					{% endif %}
+					{% if order.service_charge_percent|add:"0" > 0 %}
+					<tr>
+						<td>Service Charge(%)</td>
+						<td>{{order.service_charge_percent}}</td>
+						<td>Service Charge(Rs)</td>
+						<td>{{order.service_charge_rs}}</td>
+					</tr>
+					{% endif %}
+					{% if order.delivery_charge|add:"0" > 0 %}
+						<tr>
+							<td colspan="3">Delivery Charge</td>
+							<td>{{order.delivery_charge}}</td>
+						</tr>
+					{%endif%}
+					{% if order.e_wallet|add:"0" > 0 %}
+					<tr>
+						<td colspan="2"></td>
+						<td>e-Wallet</td>
+						<td>{{order.e_wallet}}</td>
+					</tr>
+					{% endif %}
+				</tbody>
+				<tfoot>
+					<tr>
+						<th colspan="3">Grand Total</th>
+						<th>{{order.grand_total}}</th>
+					</tr>
+				</tfoot>
+			</table>
+		</div>
+	</div>
+</div>
+
+
+{%endblock mainbody%}

@@ -1,0 +1,46 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-gift"></span>&nbsp;&nbsp;&nbsp;{{coupons.0.prefix}}-{{coupons.0.start_from}}-{{coupons.0.suffix}}
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<table class = "table table-striped">
+			<thead>
+			<tr>
+				<th>#</th>
+				<th>Coupon No.</th>
+				<th>Order No.</th>
+				<th>Discount Type</th>
+				<th>Discount Value</th>
+				<th>Is Block</th>
+			</tr>
+			</thead>
+			<tbody>
+			{% for coupon in coupons%}
+				<tr>
+					<td>{{forloop.counter}}</td>
+					<td>{{coupon.coupon_number}}</td>
+					<td>{{coupon.order_number | default_if_none:""}}</td>
+					<td>{%if coupon.discount_type == "Rs"%}Rs{%else%}%{%endif%}</td>
+					<td>{{coupon.discount_amount}}</td>
+					<td>
+						{% if coupon.blocked == True %}
+							Blocked
+						{% else %}
+							<a href="/myadmin/unblockcoupon/{{coupon.coupon_number}}/">Unblock</a>
+						{% endif %}
+					</td>
+				</tr>
+			{%endfor%}
+			</tbody>
+			</table>
+		</div>
+	</div>
+{%endblock content%}

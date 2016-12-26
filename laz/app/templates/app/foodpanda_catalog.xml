@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<Vendor xmlns="https://foodintegrations.com/Integration/Catalog">
+    <Id>3340</Id>
+    <Menus>
+        <Menu>
+            <Id>1</Id>
+            <Title>LHD Menu</Title>
+            <Description>Lazeez Hakeem Delivery</Description>
+            <StartHour>00:00:00</StartHour>
+            <EndHour>23:59:59</EndHour>
+            <MenuType>delivery</MenuType>
+        </Menu>
+    </Menus>
+    <MenuCategories>
+        {% for key, value in catalog.items %}
+            {% for key1, value1 in value.items %}
+                <MenuCategory>
+                    <Id>cat{{key1.id}}</Id>
+                    <Title>{{key.item_category}}-{{key1.subcategory_name}}</Title>
+                    <Description>{{key.description}}</Description>
+                    <Products>
+                        {% for key2, value2 in value1.items %}
+                            <Product>
+                                <Id>{{value2.0.item_name}}{{key2}}</Id>
+                                <Title>{{value2.0.item_name|title}}</Title>
+                                <Description>{{value2.0.item_description}}</Description>
+                                <Image src = "{{value2.0.image}}" />
+                                <ProductVariations>
+                                    {% for item in value2|dictsort:"price" %}
+                                        <ProductVariation>
+                                            <Id>{{item.item_code}}{{item.id}}</Id>
+                                            <Title>{{item.item_subname}}</Title>
+                                            <Price>{{item.price}}</Price>
+                                            <ContainerPrice>{{item.price}}</ContainerPrice>
+                                        </ProductVariation>
+                                    {% endfor %}
+                                </ProductVariations>
+                            </Product>
+                        {% endfor %}
+                    </Products>
+                </MenuCategory>
+            {% endfor %}
+        {% endfor %}
+    </MenuCategories>
+</Vendor>

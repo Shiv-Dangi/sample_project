@@ -1,0 +1,194 @@
+<!-- item-description row -->
+	<div class="row" style="margin-top: 0px;">
+		<table class = "table table-bordered scroll" style="margin-bottom:0px;">
+			{% if not order.bill_print %}
+			<thead class="jumbotron" style="display:none;">
+			{% else %}
+			<thead class="jumbotron" style="background:transparent;">
+			{% endif %}
+				<tr>
+					<th style="width: 5%;">S.No.</th>
+					<th style="width: 70%;">Item Description</th>
+					<th style="width: 5%;">Quantity</th>
+					<th style="width: 10%;" class="text-center">Price</th>
+					<th style="width: 10%;" class="text-center">Total</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{%for item in ordered_items%}
+					<tr>
+						<td style="width: 5%; text-align:center; ">{{forloop.counter}}</td>
+						<td style="width: 70%; text-align:left; ">
+							{% if item.quantity ==  0%}
+								<strike>{{item.name}}-{{item.subname}}</strike>
+							{% else %}
+								{{item.name}}-{{item.subname}}
+							{%endif%}
+						</td>
+						<td style="width: 5%; text-align:center; ">{{item.quantity}}</td>
+						<td style="width: 10%; text-align:center; ">{{item.price}}</td>
+						<td style="width: 10%; text-align:center; ">{% widthratio item.quantity 1 item.price %}</td>
+						<td style="width: 5%; text-align:center; ">{% if not order.bill_print %}
+							<div class="col-sm-2 text-center"><button class="btn btn-sm plusminus removeitem" style="font-size:5px;" onclick = "subtractordercart('{{item.item_code}}','{{item.subname}}', '{{item.quantity}}', '{{order.order_number}}', '{{table.table_number}}')"><span class = "glyphicon glyphicon-minus"></span></button></div>
+							{% endif %}
+						</td>
+					</tr>
+				{%endfor%}
+			</tbody>
+			<tfoot class="jumbotron" style="background:#d2e28b;">
+				<tr>
+					<td>Sub Total</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td class="text-center">
+						<h5 style="padding:0px;margin:0px;">₹ {{order.subtotal}}</h5>
+						{% if not order.bill_print %}
+							<div class="row text-center">
+								<button class="btn btn-sm btn-primary" id="printqtbtn" style="padding:5px;display:none;" {% if pqt_items %}onclick="printqt('printqtarea', '{{order.order_number}}', '{{table.table_number}}')" {%endif%}>PRINT QT</button>
+							</div>
+			            {% endif %}
+        			</td>
+				</tr>
+			</tfoot>
+		</table>
+			
+        <!-- for qt printing -->
+			<div id="printqtarea" class="printqtdiv" style="display: none;">
+				<!--Item description-->
+				<div class="row text-center">Table - {{table.table_number}}</div>
+				<div class="row" style="margin-left: 5px;">
+					<table class = "table table-bordered iteminfo" style="margin-bottom: 2px;">
+						<thead class="jumbotron">
+							<tr>
+								<th>S.No.</th>
+								<th>Item Description</th>
+								<th>Quantity</th>
+							</tr>
+						</thead>
+						<tbody>
+							{%for item in pqt_items%}
+								<tr>
+									<td>{{forloop.counter}}</td>
+									<td>{{item.name}}-{{item.subname}}</td>
+									<td>{{item.pqt}}</td>
+								</tr>
+							{%endfor%}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		<!-- end of qt printing -->
+	</div>
+<!-- end of item description row -->
+
+<!--add customer row -->
+	<div class="row" style="border: 1px solid #fff;">
+		<table class="table text-center" style="margin-bottom:2px;">
+			<tbody>
+				{% if order.customer == None %}
+				<tr>
+					<td> <h5 style="margin:2px;"><b>Customer :</b></h5> </td>
+					<td>
+						<input type="text" style="height: 20px;font-size: 14px;line-height: 14px;background:transparent;" class="form-control" id="customer_number" placeholder="Mobile Number" style="background:transparent;" />
+					</td>
+					<td>
+						<input type="text" style="height: 20px;font-size: 14px;line-height: 14px;background:transparent;" class="form-control" id="customer_name" placeholder="Customer Name" style="background:transparent;" />
+					</td>
+					<td>
+						<button class="btn btn-sm btn-primary submitcusinfo" style="padding:0px;" onclick="addcustomerinfo('{{order.order_number}}', '{{table.table_number}}');">SUBMIT</button>
+					</td>
+				</tr>
+				{% else %}
+				<tr>
+					<td> Customer : </td>
+					<td> Mobile No : {{order.customer.customer_number|default:"skipped"}}</td>
+					<td> Name : {{order.customer.customer_name|default:"skipped"}}</td>
+					<td>
+					<button class="btn btn-sm btn-primary" style="padding:0px;" onclick="foronlinepay('{{order.order_number}}', '{{order.customer.customer_number}}');">Online Pay SMS</button>
+					</td>
+				</tr>
+				{% endif %}
+			</tbody>
+		</table>
+	</div>
+<!--end of add customer row -->
+
+<!--order summry row -->
+	<div class="row" style="border: 1px solid #fff;padding:5px;">
+		<table class="table text-left">
+			<tbody>
+				<tr>
+					<td style="padding-top:10px;">Discount :</td>
+					{% if order.bill_print == None %}
+						<td style="padding:0px;">
+							<input type="Number" step="0.01" class="form-control text-center" id="discount_percent" value="{{order.discount_percent}}" oninput="editdiscount('{{order.order_number}}', this.value);" style="background:transparent;width:50%;" />
+						</td>
+						<td style="padding:0px;">
+							<input type="Number" step="0.01" class="form-control text-center" id="discount_rs" value="{{order.discount_rs}}" oninput="editdiscount_rs('{{order.order_number}}', '{{order.subtotal}}', this.value);" style="background:transparent;width:50%;" />
+						</td>
+					{% else %}
+						<td style="padding:0px;">{{order.discount_percent}}%</td>
+						<td style="padding:0px;">&#8377; {{order.discount_rs}}</td>
+					{% endif %}
+					<td style="padding-top:10px;">Advance Payment :</td>
+					{% if order.bill_print == None %}
+						<td style="padding:0px;">
+							<input type="Number" step="0.01" class="form-control text-center" value="{{order.advance_pay}}" oninput="editadvance_pay('{{order.order_number}}', this.value);" style="background:transparent;width:50%;" />
+						</td>
+					{% endif %}
+				</tr>
+				<tr>
+					<td style="padding:0px;">Vat(5%) :</td>
+					<td style="padding:0px;display:none;">{{order.vat_percent}}%</td>
+					<td></td>
+					<td></td>
+					<td style="padding-left:15px;">&#8377; {{order.vat_rs}}</td>
+				</tr>
+				<tr>
+					<td style="padding:0px;">Service Tax(6%) :</td>
+					<td style="padding:0px;display:none;">{{order.service_tax_percent}}%</td>
+					<td></td>
+					<td></td>
+					<td style="padding-left:15px;">&#8377; {{order.service_tax_rs}}</td>
+				</tr>
+				<tr>
+					<td style="padding:0px;">Round off :</td>
+					<td style="padding:0px;"></td>
+					<td></td>
+					<td style="padding-left:15px;">&#8377; {{roundof_total}}</td>
+				</tr>
+				<tr>
+					<td style="padding:0px;">Total :</td>
+					<td style="padding:0px;"></td>
+					<td></td>
+					<td style="padding-left:15px;">&#8377; <span id="grand_total">{{order.grand_total|floatformat:"0"}}
+						</span></td>
+					{% if order.bill_print == None  %}
+					<td style="padding:0px; padding-right:20px;" class="text-right">
+						<button class="btn btn-sm btn-primary" style="display:none;" id="printbillbtn" {% if ordered_items %}onclick="printbill('{{order.order_number}}', '{{table.table_number}}')" {%endif%}>PRINT FINAL BILL</button>
+					</td style="padding:0px;">
+					{% endif %}
+				</tr>
+				<tr>
+					<td style="padding:0px;">Advance Pay :</td>
+					<td style="padding:0px;"></td>
+					<td></td>
+					<td style="padding-left:15px;" >&#8377; 
+						<span id="advance_pay">{{order.advance_pay}}</span>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding:0px;">Balance Pay :</td>
+					<td style="padding:0px;"></td>
+					<td></td>
+					<td style="padding-left:15px;">&#8377; 
+						<span id="balance_pay"> {{order.balance_pay}} </span>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+<!--end of order summry row -->

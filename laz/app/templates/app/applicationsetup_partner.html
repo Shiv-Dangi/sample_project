@@ -1,0 +1,45 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color: #10452f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class= "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-align-justify"></span>&nbsp;&nbsp;&nbsp;Partner
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<a href = "/myadmin/addpartnerpage/" class = "btn btn-default pull-right">Create Partner</a>
+			<table class = "table table-striped">
+				<thead>
+					<tr>
+						<th>Logo</th>
+						<th>Partner Name</th>
+						<th>Login ID</th>
+						<th>Password</th>
+						<th>Contact Number</th>
+						<th>Edit</th>
+						<th>Setup Menu</th>
+						<th>Delete</th>
+					</tr>
+				</thead>
+				<tbody>
+					{%for partner in partners%}
+						<tr>
+							<td><img src ="{{partner.logo_link}}" style = "height:100px;width:100px;" \></td>
+							<td>{{partner.partner_name}}</td>
+							<td>{{partner.loginid}}</td>
+							<td>{{partner.password}}</td>
+							<td>{{partner.contact_number}}</td>
+							<td><a href="/myadmin/editpartnerpage/{{partner.loginid}}/" class="glyphicon glyphicon-pencil"></a></td>
+							<td><a href="/myadmin/applicationsetup/partnermenu/{{partner.loginid}}/" class="glyphicon glyphicon-pencil"></a></td>
+							<td><a href="/myadmin/deletepartner/{{partner.id}}/" class="glyphicon glyphicon-trash"></a></td>
+						</tr>
+					{%endfor%}
+				</tbody>
+			</table>
+		</div>
+	</div>
+{%endblock content%}

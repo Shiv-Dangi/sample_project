@@ -1,0 +1,300 @@
+{% extends "app/baseadmin.html" %}
+{% load staticfiles %}
+{% load harishtags %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<link rel = "stylesheet" href = "{% static 'app/css/jquery-ui.min.css' %}" />
+	<style type="text/css">
+		input[type="Number"]::-webkit-inner-spin-button{
+		    display: none;
+		}
+		.tableorder {
+			padding-bottom: 20px;
+		}
+		.tooltip {
+		    position: relative;
+		    display: inline-block;
+		    border-bottom: 1px dotted black;
+		}
+
+		.tooltip .tooltiptext {
+		    visibility: hidden;
+		    width: 120px;
+		    background-color: black;
+		    color: #fff;
+		    text-align: center;
+		    border-radius: 6px;
+		    padding: 5px 0;
+
+		    /* Position the tooltip */
+		    position: absolute;
+		    z-index: 1;
+		}
+
+		.tooltip:hover .tooltiptext {
+		    visibility: visible;
+		}
+
+		.table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td {
+    	padding: 2px;
+    	}
+	</style>
+
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;margin:0px;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+
+	<div class="row" style="margin-left: 0px;">
+		<div class= "col-sm-12 tableorder">
+			{% include "app/branchcounter_order.html" %}
+		</div>
+	</div>
+	<div class="text-center">
+		<h5><b>CTRL+Q</b> : Print QT;  <b>CTRL+Z</b> : Print Bill;  <b>CTRL+X</b> : Vacate and New;</h5>
+	</div>
+
+	<script type="text/javascript">
+		// function to generate new counter order
+		function createtableorder(){
+			$('#loadingmessage').show();
+			var table = '{{table.table_number}}';
+			$.post("/myadmin/placetableorder/", {"table_number":table}, function(data){
+			}).done(function(){
+				$.get('/countertableorder/',{'table_number': table},function(data){
+					$(".tableorder").html(data);
+					$('#loadingmessage').hide();
+				})
+			});
+		}
+
+		// function for calculating total in additem form.
+		function calculate() {
+			var quantity = document.getElementById('quantity').value;
+			var price = document.getElementById('price').value;
+			var total = document.getElementById('total');
+			var mytotal = quantity * price;
+			total.value = mytotal;
+		}
+
+
+		// function to remove items from cart
+		function subtractordercart(item_code,item_subname,item_quantity,order_number){
+			// var order_number = '{{order.order_number}}';
+			var table_number = '{{table.table_number}}';
+			$.post("/myadmin/subtractitemtotableorder/",{"item_code":item_code,"item_subname":item_subname,"item_quantity":item_quantity,"order_number":order_number},function(data){
+			}).done(function(){
+				$.get('/countertableorder/',{'table_number': table_number},function(data){
+					$(".tableorder").html(data);
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper').css({'display': 'block'});
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1)').css({'display': 'block'});
+				})
+			});
+		}
+
+		// function to add items to cart
+		function addordercart(order_number){
+			var item_code = document.getElementById('item_code').value;
+			var item_subname = document.getElementById('item_subname').value;
+			var item_quantity = document.getElementById('quantity').value;
+			// var order_number = '{{order.order_number}}';
+			var table_number = '{{table.table_number}}';
+			$.post("/myadmin/additemtotableorder/",{"item_code":item_code,"item_subname":item_subname,"item_quantity":item_quantity,"order_number":order_number},function(data){
+					$(".item-description").html(data);
+					$('#item').val('');
+					$('#quantity').val('1');
+					$('#price').val('');
+					$('#total').val('');
+			});
+		}
+
+ 		// function to print a order
+		function printDiv(divName) {
+		    var printContents = document.getElementById(divName).innerHTML;
+		    var originalContents = document.body.innerHTML;
+
+		    document.body.innerHTML = printContents;
+
+		    window.print();
+
+		    document.body.innerHTML = originalContents;
+		    return true;
+		}
+
+		// function to order print qt of an table
+		function printqt(divName, order_number, table_number) {
+			$.post("/myadmin/printqt/",{"order_number":order_number},function(data){
+			}).done(function(){
+				$.get('/countertableorder/',{'table_number': table_number},function(data){
+					$(".tableorder").html(data);
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper').css({'display': 'block'});
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1)').css({'display': 'block'});
+				})
+			});
+			printDiv(divName);
+		}
+
+		// function to add customer information with a order
+		function addcustomerinfo (order_number, table_number){
+			var customer_number = $('#customer_number').val();
+			var customer_name = $('#customer_name').val();
+			var url = "/myadmin/addcustomerinfo/";
+			$.post(url, {'order_number':order_number, 'customer_number':customer_number, 'customer_name':customer_name}, function(data){
+				$('#addcustomerinfo').modal('hide');
+			}).done(function(){
+				$.get('/countertableorder/',{'table_number': table_number},function(data){
+					$(".tableorder").html(data);
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper').css({'display': 'block'});
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1)').css({'display': 'block'});
+				})
+			});
+		}
+
+		// function to edit discount for a counter order
+		function editdiscount(order_number, discount_percent) {
+			var url = "/myadmin/editdiscount_counter/";
+			$.post(url, {'order_number':order_number, 'discount_percent':discount_percent}, function(data){
+				if(data['status'] == 'success')
+					{
+						$('#discount_rs').val(data['discount_rs']);
+						$('#grand_total').text(data['grand_total']);
+					};
+			});
+		}
+
+		function editdiscount_rs(order_number, subtotal, discount_rs) {
+			var discount_percent = (discount_rs * 100) / subtotal;
+			$('#discount_percent').val(discount_percent);
+			var url = "/myadmin/editdiscount_counter/";
+			$.post(url, {'order_number':order_number, 'discount_percent':discount_percent}, function(data){
+				if(data['status'] == 'success')
+					{
+						$('#grand_total').text(data['grand_total']);
+					};
+			});
+		}
+
+		// function for bill print
+		function printbill(order_number, table_number){
+			var post_url = "/myadmin/billprint/"+order_number+"/";
+			$.post(post_url, function(data){}).done(function(){
+				$.get('/countertableorder/',{'table_number': table_number},function(data){
+					$(".tableorder").html(data);
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper').css({'display': 'block'});
+					$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1)').css({'display': 'block'});
+					setTimeout(function() { $('select[name=payment-mode]').focus() }, 200);
+				})
+			});
+			printcounterorder(order_number);
+		}
+
+		// function for print button below order number on dashboard
+		function printcounterorder(order_number){
+			url = '/myadmin/printcounterorder/' + order_number + '/';
+			var printWindow = window.open(url, '_blank');
+			printWindow.onload = function() {
+			    var isIE = /(MSIE|Trident\/|Edge\/)/i.test(navigator.userAgent);
+			    if (isIE) {
+
+			        printWindow.print();
+			        setTimeout(function () { printWindow.close(); }, 100);
+
+			    } else {
+
+			        setTimeout(function () {
+			            printWindow.print();
+			            var ival = setInterval(function() {
+			                printWindow.close();
+			                clearInterval(ival);
+			            }, 200);
+			        }, 500);
+			    }
+			}
+		}
+
+		// function to add a payment mode to an order
+		function addpaymode(order_number, table_number) {
+			var order_id = "paymode" + order_number
+			var payment_mode = document.getElementById(order_id).value;
+			var url = "/myadmin/addpaymode/";
+			$.post(url, {'payment_mode':payment_mode, 'order_number':order_number}, function(data){
+
+			}).done(function(){
+                if(table_number != 0) {
+                    $.get('/tableorder/', {'table_number': table_number}, function (data) {
+                        $(".tableorder").html(data);
+							$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div.row.wrapper').css({'display': 'block'});
+							$('body > div.row > div.container.col-sm-10 > div > div > div.col-sm-9.col-md-9 > div > div:nth-child(1)').css({'display': 'block'});
+                    })
+                }
+                else{
+                    location.reload();
+                }
+			});
+		}
+
+        function removeExpense(expense1){
+            {% for expense in today_expenses %}
+                if('{{ expense }}' == expense1 ){
+                    var idx = "#expense-{{ forloop.counter }}";
+                    $(idx).fadeOut(500, function () {
+                            var ls = $(idx).text().split("\n");
+                            ls = ls[ls.length-3];
+                            console.log($("#expense-total").text() - ls);
+                            $("#expense-total").text({{today_expense_total.amount__sum}} - ls);
+                        $.post('/myadmin/removetodayexpense/', {'expense_for': '{{ expense.expense_for }}', 'url': '{{ request.path }}', 'amount': '{{expense.amount}}'}, function() {
+                            location.reload();
+                        });
+                    });
+                }
+            {% endfor %}
+        }
+
+        function removeExpCollection(expense1){
+            console.log("Hello");
+            {% for expense in today_collection %}
+                if('{{ expense }}' == expense1 ){
+                    var idx = "#collection-{{ forloop.counter }}";
+                    $(idx).fadeOut(500, function () {
+                            var ls = $(idx).text().split("\n");
+                            ls = ls[ls.length-3];
+                            console.log($("#collection-total").text() - ls);
+                            $("#collection-total").text({{today_collection_total.amount__sum}} - ls);
+                        $.post('/myadmin/removetodaycollection/', {'collection_for': '{{ expense.collection_for }}', 'url': '{{ request.path }}', 'amount': '{{ expense.amount }}'}, function() {
+                            location.reload();
+                        });
+                    });
+                }
+            {% endfor %}
+        }
+
+        function removedelexp(expense1){
+            {% for expense in delboy_payments %}
+                if('{{ expense.delivery_boy.loginid }}' == expense1 ){
+                    var idx = "#delexp-{{ expense }}";
+                    $(idx).fadeOut(500, function () {
+                            var ls = $(idx).text().split("\n");
+                            ls = ls[ls.length-3];
+                            console.log($("#delexp-total").text() - ls);
+                            $("#delexp-total").text({{delboy_payment_total.amount__sum}} - ls);
+                        $.post('/myadmin/removedelexp/', {'login_id': '{{ expense.delivery_boy.loginid }}', 'url': '{{ request.path }}', 'amount': ls}, function() {
+                            location.reload();
+                        });
+                    });
+                }
+            {% endfor %}
+        }
+	</script>
+	<script type="text/javascript" src="{% static 'app/js/jquery.ui.js' %}"></script>
+	<script type="text/javascript" src="{% static 'app/js/shortcut.js' %}"></script>
+	<script type="text/javascript">
+		shortcut.add("ctrl+q", function() {
+			document.getElementById("printqtbtn").click();
+	    });
+	    shortcut.add("ctrl+z", function() {
+	    	document.getElementById("printbillbtn").click();
+	    });
+	    shortcut.add("ctrl+x", function() {
+	    	document.getElementById("vacatetable_btn").click();
+	    }); 
+	</script>
+{%endblock content%}

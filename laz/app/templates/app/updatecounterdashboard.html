@@ -1,0 +1,137 @@
+<table class = "table table-bordered">
+	<thead>	
+		<tr class="heading-row">
+			<th class = "text-center">Table No</th>
+			<th class = "text-center">Order No</th>
+			<th class = "text-center">Waiter</th>
+			<th class = "text-center">Customer</th>
+			<th class = "text-center">Grand Total</th>
+			<th class = "text-center">Vacate</th>
+		</tr>
+	</thead>
+	<tbody>
+		{%for order in table_orders%}
+			<tr>
+				<th class="text-center" style="vertical-align:middle;">
+					{{order.table_no}}
+					{% if request.session.admin.role == 'admin' %}
+					<br><br>
+					<a href="#" data-id="{{order.order_number}}" class="btn btn-success btn-sm" data-toggle="modal" data-target="#view-order">View</a>
+					{% endif %}
+				</th>
+
+				<th class="text-center" style="vertical-align:middle;">
+					<a class="order-num" target="_blank" href="/myadmin/counterorderdetail/{{order.order_number}}/">{{order.order_number}}</a>
+					{% if request.session.admin.role == 'admin' %}
+					<br><br>
+					<button align="center" type="button" class="btn btn-success btn-sm" onclick="printcounterorder({{order.order_number}});"><span class="glyphicon glyphicon-print"></span></button> 	
+					{% endif %}
+				</th>
+
+				{% if order.assigned_waiter == None and not order.table_no.table_number == 0 %}
+					<th class="text-center" style="vertical-align:middle;">
+						{% if request.session.admin.role == 'branchuser' or request.session.admin.role == 'admin' or request.session.admin.role == 'billinguser'%}
+							<select style="background: transparent;" class="form-control" id="assignw{{order.order_number}}" onchange="assignwaiter({{order.order_number}});">
+								<option value="" selected>Please select a waiter</option>
+								{%for waiter in waiters%}
+									<option value = "{{waiter.userid}}" default>{{waiter}}</option>
+								{%endfor%}
+							</select>
+						{% endif %}	
+					</th>
+					<th></th>
+					<th></th>
+					<th></th>
+				{% else %}
+					<th class="text-center" style="vertical-align:middle;">
+						{{order.assigned_waiter|default_if_none:"COUNTER BRANCH ORDER"}}, {{order.assigned_at|default_if_none:""}}
+					</th>
+
+					{% if order.customer == None and order.bill_print == None %}
+						<th class="text-center" style="vertical-align:middle;">
+							<div class="form-horizontal">
+					      		<div class="form-group">
+					          	<label for="table_number" class="col-sm-3 control-label">Mobile Number </label>
+					          	<div class="col-sm-9">
+					          		<input type="text" class="form-control customer_number" name="{{order.order_number}}" id="customer_number{{order.order_number}}" required />
+					          	</div>
+					          </div>
+					          <div class="form-group">
+					            <label for="table_name" class="col-sm-3 control-label">Name </label>
+					            <div class="col-sm-9">
+					            	<input type="text" class="form-control" id="customer_name{{order.order_number}}" required />
+					            </div>
+					          </div>
+					          <input name="url" value="{{request.path}}" type="hidden" />
+					          <div class="form-group text-center">
+					            <button class="btn btn-primary submitcusinfo" onclick="addcustomerinfo('{{order.order_number}}');">submit</button>
+					          </div>
+					          <div align="center">
+								<h4 id = "fororderno{{order.order_number}}"></h4>
+							  </div>
+					      	</div>
+						</th>
+						<th></th>
+						<th></th>
+					{% else %}
+						<th class="text-center" style="vertical-align:middle;">
+							{{order.customer.customer_name|default:"skipped"}}-{{order.customer.customer_number|default:"skipped"}}
+						</th>
+						<th class="text-center" style="vertical-align:middle;">
+							<h5><b>Grand Total: ₹ {{order.grand_total|floatformat:"0"}}</b></h5>
+						</th>
+						<th class="text-center" style="vertical-align:middle;">
+							<a class="btn btn-primary btn-sm" href="/myadmin/finaltableorder/{{order.order_number}}/">vacate</a>
+						</th>
+
+							<!-- {% if order.payment_mode == None %}
+								<th class="text-center" style="vertical-align:middle;">
+									<h5><b>Grand Total: ₹ {{order.grand_total|floatformat:"0"}}</b></h5>
+									<select id="paymode{{order.order_number}}" class="form-control" style="background:transparent;" onchange="addpaymode({{order.order_number}});" required>
+										<option value="" selected>Please select payment mode</option>
+										{% for paymentmode in paymentmodes %}
+											<option value="{{paymentmode.id}}">{{paymentmode.payment_mode}}</option>
+										{% endfor %}
+									</select>
+								</th>
+								<th></th>
+							{% else %}
+								<th class="text-center" style="vertical-align:middle;">
+									<h5><b>Grand Total: ₹ {{order.grand_total|floatformat:"0"}}</b></h5>
+									{{order.payment_mode}}<br>
+									<select id="paymode{{order.order_number}}" class="form-control" style="background:transparent;" onchange="addpaymode({{order.order_number}});" required>
+										<option value="" selected>Please select payment mode</option>
+										{% for paymentmode in paymentmodes %}
+											<option value="{{paymentmode.id}}">{{paymentmode.payment_mode}}</option>
+										{% endfor %}
+									</select>
+								</th>
+
+								<th class="text-center" style="vertical-align:middle;">
+									<a class="btn btn-primary btn-sm" href="/myadmin/finaltableorder/{{order.order_number}}/">vacate</a>
+								</th>
+							{% endif %} -->
+
+					{% endif %}
+
+				{% endif %}
+			</tr>
+		{%endfor%}
+	</tbody>
+</table>
+
+<script type="text/javascript">
+	// function to check customer existense on input mobile number
+	$('.customer_number').on('input', function() { 
+	    var mobileno = $(this).val()
+	    var order_number = $(this).attr('name');
+	    // console.log(order_number);
+	    $.post("/ajaxcheckcustomer/", {"mobile": mobileno}, function(data){
+	    	if(data['status'] == "pass")
+	    	{
+	    		$('#customer_name'+order_number).val(data['name']);
+	    		$('#fororderno'+order_number).text('Congratulations this is your ' + data['no'] + ' order');
+	    	};
+		});
+	});
+</script>

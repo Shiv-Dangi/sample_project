@@ -1,0 +1,420 @@
+{% extends "app/customerend_base.html" %}
+{%load staticfiles%}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM | Food Home Delivery in Bhopal | Online Food Ordering in Bhopal | Bulk Food Ordering in Bhopal{%endblock title%}
+{%block mainbody%}
+
+<style>
+	.panel-default>.panel-heading+.panel-collapse>.panel-body {
+	    border-top-color: #ecf0f1;
+	    background: #d2e28b;
+	}
+	.list-group-item:nth-child(n) {
+	    margin-bottom: 0;
+	    border-bottom-right-radius: 4px;
+	    border-bottom-left-radius: 4px;
+	    background: #d2e28b;
+	}
+	.panel-default>.panel-heading {
+	    color: red;
+	    background-color: #d2e28b;
+	    border-color: #ecf0f1;
+	}
+	.list-group-item:nth-child(n):hover {
+	    margin-bottom: 0;
+	    border-bottom-right-radius: 4px;
+	    border-bottom-left-radius: 4px;
+	    background: #d2e28b;
+	}
+	.list-group-item:nth-child(n):visited {
+	    margin-bottom: 0;
+	    border-bottom-right-radius: 4px;
+	    border-bottom-left-radius: 4px;
+	    background: #d2e28b;
+	}
+
+</style>
+
+	<!-- start container -->
+		<div class="container" style="width:100%;">
+			<div class="row mt30">
+				<!-- Side-panel begin -->
+				<div class="col-md-3 col-sm-3 col-xs-3">
+					<div class="side-panel" style="background:transparent;">
+						<div class = "text-center" style="padding: 10px;border-radius:10px;overflow:auto;">
+							<h4 style="font-family: 'Bowlby One SC', cursive; color:#ed3237;">LAZEEZ REGULAR MENU</h4>
+							<div class="list-group text-left">
+
+								<div class="panel-group" id="accordion">
+									{%for category, subcategories in category_dict.items%}
+										<div class="panel panel-default">
+									      <div class="panel-heading">
+									        <h4 class="panel-title">
+									          <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{category.id}}" style="font-size:18px;">
+									          	<b>{{category.item_category|title}}</b>
+									          </a>
+									        </h4>
+									      </div>
+									      <div id="collapse{{category.id}}" class="panel-collapse collapse {%if forloop.first%}in{%endif%}">
+									        <div class="panel-body">
+								        		{%for subcategory in subcategories%}
+								        			<a href="#itemcat{{category.id}}{{subcategory.id}}" class="list-group-item" role="tab" data-toggle="tab">
+														<div class="row">
+															<div class="col-sm-0"><img src = "" style = "height:50px;width:50px;display:none;" /></div>
+															<div class="col-sm-12">
+																<h5 class="list-group-item-heading" style="font-size:18px;">
+																	{{subcategory.subcategory_name|title}}
+																</h5>
+															</div>
+														</div>
+													</a>
+								        		{%endfor%}
+									        </div>
+									      </div>
+									    </div>
+									{%endfor%}
+								</div>
+								
+							</div>
+						</div>
+					</div>
+					<!-- end side-panel -->
+					<br>
+					<div class="table-responsive text-center" style="margin-top:10px; background:transparent;">
+						<h4 style="font-family: 'Bowlby One SC', cursive; color:#ed3237;">Trending Now <span class="glyphicon glyphicon-sort-by-attributes-alt"></span></h4>
+						<table class="table table-bordered" style="width:100%;" align="center">
+						    <thead>
+						      <tr>
+						      	<td><b>Rank</b></td>
+						      	<td><b>Dish Name</b></td>
+						        <!-- <th>Trending Now <span class="glyphicon glyphicon-sort-by-attributes-alt"></span></th> -->
+						      </tr>
+						    </thead>
+						    <tbody>
+						    {% for trend in top_10_trending %}
+						      <tr>
+						      	<td>{{forloop.counter}}
+						        <td>{{trend}}</td>
+						      </tr>
+						    {% endfor %}
+						    </tbody>
+						</table>
+					  	*This data is updated in real time. 
+					</div>
+					{% if promotion_video %}
+						<iframe style="margin-top:30px;" width="100%" height="200" src="{{promotion_video.0.video}}" frameborder="0" allowfullscreen>   </iframe>
+					{%endif%}
+				</div>
+				<!--end .col-md-3 -->
+				<div class="col-sm-6" style="padding:0px;">
+					<div>
+						<div class="all-menu-details">
+							{% if 'partner' in request.session%}
+								<div class="col-sm-12 tab-content " style="padding:0px;">
+									{% for key, value in items.items %}
+									{% for key1, value1 in value.items %}
+										<div class="tab-pane {% if forloop.parentloop.first %}{% if forloop.first %}active{%endif%}{%endif%}" id = "itemcat{{key.id}}{{key1.id}}" role="tabpanel">
+											<h5>{{key1|title}}</h5>
+											<div class="item-list">
+												{%for key2,value2 in value1.items%}
+												<div class="list-image">
+													<!-- <img src = "{{value2.0.image}}" alt=""> -->
+													<img src = "/static/app/img/default.png" alt="">
+												</div>
+												<div class="all-details">
+													<div class="visible-option">
+														<div class="details">
+															{% if value2.0.item.item_type == 'VEG' %}
+															<div class="col-sm-2">
+																<img src="/static/app/img/vegonly.png" width="25" height="25" style="margin-top:15px;">
+															</div>
+															<div class="col-sm-10">
+																<h4 style="color:green;"><b><h6 style="padding-top:0px;">{{value2.0.item.item_name|title}}
+																			</h6></b></h4>
+															</div>
+															{% else %}
+															<div class="col-sm-2">
+																<img src="/static/app/img/nonvegonly.png" width="25" height="25" style="margin-top:15px;">
+															</div>
+															<div class="col-sm-10">
+																<h4 style="color:red;"><b><h6 style="padding-top:0px;">{{value2.0.item.item_name|title}}</h6></b></h4>
+															</div>
+															{% endif %}
+															<p>{{value2.0.item.item_description}}</p><br>
+														</div>
+
+														<div class="price-option fl">
+															<h4>₹ {{value2.0.expected_price}}</h4>
+															<button class="toggle">Option</button>
+														</div>
+														<!-- end .price-option-->
+													</div> <!-- end .vsible-option -->
+
+													<div class="dropdown-option clearfix">
+														<div class="dropdown-details">					
+															<form class="default-form">
+																{%for allsame in value2%}	
+																	<div class="row">
+																		<div class="col-sm-3">
+																			<label for="{{allsame.item.item_subname}}">{{allsame.item.item_subname }}    (₹ {{allsame.expected_price}})</label>
+																		</div>
+																		<div class="col-sm-3">
+																			<label for="{{allsame.item.item_subname}}">Serves: {{allsame.item.serves}}</label>
+																		</div>
+																		<div class="col-sm-3">
+																			<label for="{{allsame.item.item_subname}}">Code: {{allsame.item.item_code}}</label>
+																		</div>
+																		<div class="col-sm-3">
+																			{%if 'user' in request.session or 'partner' in request.session %}
+																			<button class="btn btn-sm plusminus" onclick = "addcart('{{allsame.item.item_code}}','{{allsame.item.item_subname}}')">
+																			<span class = "glyphicon glyphicon-shopping-cart"></span>&nbsp;&nbsp;<b>Add</b></button>
+																			{% else %}
+																			<button class="btn btn-sm" href = "#" data-toggle = "modal" data-target = "#userlogin">
+																			<span class = "glyphicon glyphicon-shopping-cart"></span>&nbsp;&nbsp;<b>Add</b></button>
+																			{% endif %}
+																		</div><br><br>
+																		<div class="col-sm-6">
+																			<label for="{{allsame.item.item_subname}}">Delivery Time: {{allsame.item.del_time}}</label>
+																		</div>
+																		<div class="col-sm-6">
+																			<label for="{{allsame.item_subname}}">Advance Payment: {{allsame.item.advance_pay}}</label>
+																		</div>
+																	</div><hr>
+																{%endfor%}				
+															</form>
+														</div>
+														<!--end .dropdown-details-->
+													</div><!--end .dropdown-option-->
+													
+												</div><!-- end .all-details -->
+												{%endfor%}
+											</div><!-- end .item-list -->
+										</div>
+									{% endfor %}
+									{% endfor %}
+								</div>
+							{% else %}
+								<div class="col-sm-12 tab-content" style="padding:0px;">
+									{% for key, value in items.items %}
+									{% for key1, value1 in value.items %}
+										<div class="tab-pane {% if forloop.parentloop.first %}{% if forloop.first %}active{%endif%}{%endif%}" id = "itemcat{{key.id}}{{key1.id}}" role="tabpanel">
+											<h5>{{key1|title}}</h5>
+											<div class="item-list">
+												{%for key2,value2 in value1.items%}
+												<div class="list-image">
+													<!-- <img src = "{{value2.0.image}}" alt=""> -->
+													<img src = "/static/app/img/default.png" alt="">
+												</div>
+												<div class="all-details">
+													<div class="visible-option">
+														<div class="details">
+															{% if value2.0.item_type == 'VEG' %}
+																<div class="col-sm-2">
+																	<img src="/static/app/img/vegonly.png" width="25" height="25" style="margin-top:15px;">
+																</div>
+																<div class="col-sm-10">
+																	<h4 style="color:green;">
+																		<b><h6 style="padding-top:0px;">{{value2.0.item_name|title}}</h6></b>
+																	</h4>
+																</div>
+															{% else %}
+																<div class="col-sm-2">
+																	<img src="/static/app/img/nonvegonly.png" width="25" height="25" style="margin-top:15px;">
+																</div>
+																<div class="col-sm-10">
+																	<h4 style="color:red;"><b><h6 style="padding-top:0px;">{{value2.0.item_name|title}}</h6></b></h4>
+																</div>
+															{% endif %}
+															<p>{{value2.0.item_description}}</p><br>
+														</div>
+														<div class="price-option fl">
+															<h4 id="minprice{{key2}}"></h4>
+															<button class="toggle">Option</button>
+															<script type="text/javascript">
+																var price = {{value2.0.price}};
+																{% for item in value2 %}
+																	if (price > {{item.price}}) {
+																		price = {{item.price}};
+																	}
+																{% endfor %}
+																document.getElementById("minprice{{key2}}").innerHTML="₹ " + price;
+															</script>
+														</div><!-- end .price-option-->
+														
+													</div> <!-- end .vsible-option -->
+									
+													<div class="dropdown-option clearfix">
+														<div class="dropdown-details">
+															{%for allsame in value2|dictsort:"price"%}	
+																<div class="row">
+																	<div class="col-sm-3">
+																		<label for="{{allsame.item_subname}}">{{allsame.item_subname }}    (₹ {{allsame.price}})</label>
+																	</div>
+																	<div class="col-sm-3">
+																		<label for="{{allsame.item_subname}}">Serves: {{allsame.serves}}</label>
+																	</div>
+																	<div class="col-sm-3">
+																		<label for="{{allsame.item_subname}}">Code: {{allsame.item_code}}</label>
+																	</div>
+																	<div class="col-sm-3">
+																		{%if 'user' in request.session or 'partner' in request.session %}
+																		<button class="btn btn-sm plusminus" onclick = "addcart('{{allsame.item_code}}','{{allsame.item_subname}}')">
+																		<span class = "glyphicon glyphicon-shopping-cart"></span>&nbsp;&nbsp;<b>Add</b></button>
+																		{% else %}
+																		<button class="btn btn-sm" href = "#" data-toggle = "modal" data-target = "#userlogin">
+																		<span class = "glyphicon glyphicon-shopping-cart"></span>&nbsp;&nbsp;<b>Add</b></button>
+																		{% endif %}
+																	</div><br><br>
+																	<div class="col-sm-6">
+																		<label for="{{allsame.item_subname}}">Delivery Time: {{allsame.del_time}}</label>
+																	</div>
+																	<div class="col-sm-6">
+																		<label for="{{allsame.item_subname}}">Advance Payment: {{allsame.advance_pay}}</label>
+																	</div>
+																</div><hr>
+															{%endfor%}			
+														</div><!--end .dropdown-details-->
+													</div><!--end .dropdown-option-->
+												</div><!-- end .all-details -->
+												{%endfor%}
+											</div><!-- end .item-list -->
+										</div>
+									{% endfor %}
+									{% endfor %}
+								</div>
+							{% endif %}
+						</div> 
+					</div><!-- end .tab-content -->
+				</div>
+				<!--end main-grid layout-->
+				<div class="col-sm-3">
+					<div class="my-check-right mycart" style="min-height:500px;background:transparent;">
+						{% include "app/cartincheckout.html" %}
+					</div><br>
+					<!-- end .chekout class -->
+					<div class="text-center">
+						<a href="http://maps.google.com/maps?daddr=23.232656,77.433148" target="_blank">
+							<img src="/static/app/img/maps.png" width="150">
+							<h5 style="color:#10462f;">Start Navigation to Lazeez Hakeem</h5>
+						</a><br>
+						<a href="https://www.google.co.in/maps/uv?hl=en&pb=!1s0x397c4267767daa99%3A0x7ef51883a9fe0f46!2m13!2m2!1i80!2i80!3m1!2i20!16m7!1b1!2m2!1m1!1e1!2m2!1m1!1e3!3m1!7e115!4s%2Fmaps%2Fplace%2Flazeez%2Bhakeem%2Bbhopal%2F%4023.2125277%2C77.4366441%2C3a%2C75y%2C65.06h%2C90t%2Fdata%3D*213m4*211e1*213m2*211sMU4g_B2Y84oAAAQfCbYrnA*212e0*214m2*213m1*211s0x0%3A0x7ef51883a9fe0f46!5slazeez%20hakeem%20bhopal%20-%20Google%20Search&imagekey=!1e2!2szjhRbd65uGgAAAQfCbVm9A&sa=X&ved=0ahUKEwj2u770nqzQAhVHQY8KHfzuC7IQoB8IdzAK" target="_blank">
+							<img src="/static/app/img/360.png">
+							<h5 style="color:#10462f;">Virtual Tour of Lazeez Hakeem</h5>
+						</a>
+					</div>
+					</br></br>
+					<!--News and Event section  -->
+					{% if news_event_list %}
+						<div id="myCarousel" class="carousel slide" data-ride="carousel">
+						  <!-- Wrapper for slides -->
+						  <div class="carousel-inner" role="listbox">
+						  	{% for item in news_event_list %}
+						    <div class="item {%if forloop.first%} active {%endif%}">
+						      <img src="{{item.image_url}}" alt="Chania" height="300px" width="300px" />
+						      <div class="carousel-caption">
+						        <h3>{{item.title}}</h3>
+						        <p>{{item.description}}</p>
+						      </div>
+						    </div>
+						    {% endfor %}
+						  </div>
+						</div>
+					{% endif %}
+					<!-- end of news and event section -->
+				</div>
+			</div>
+			<!-- end .row -->
+		</div>
+	<!--end .container -->
+
+
+<script type="text/javascript">
+	function couponapply(){
+		var coupon_code = document.getElementById('coupon-code'),
+		coupon_code = coupon_code.value;
+		$.post("/applycoupon/", {"coupon_code": coupon_code}, function(data){
+
+		}).done(function(){
+			$.get('/checkoutcartajaxreload/',function(data){
+				$(".mycart").html(data);
+			})
+		});
+	}
+	function ewalletused(){
+		if (document.getElementById('wallet-checkbox').checked){
+			$.post("/applyewallet/", function(data){
+
+			}).done(function(){
+				$.get('/checkoutcartajaxreload/',function(data){
+				$(".mycart").html(data);
+				})
+			});
+		}
+		else {
+			alert("please check Checkbox First!")
+		}
+	}
+
+	function ewalletremove(){
+		$.post("/removewallet_amount/", function(data){
+
+		}).done(function(){
+			$.get('/checkoutcartajaxreload/',function(data){
+				$(".mycart").html(data);
+			})
+		});
+	}
+
+	function addcart(item_code,item_subname){
+			$.post("/additemtocart/",{"item_code":item_code,"item_subname":item_subname},function(data){
+		
+			}).done(function(){
+				$.get('/checkoutcartajaxreload/',function(data){
+					$(".mycart").html(data);
+				})
+			}); 
+	}
+
+	function subtractcart(item_code,item_subname){
+		$.post("/subtractitemtocart/",{"item_code":item_code,"item_subname":item_subname},function(data){
+			
+		}).done(function(){
+			$.get('/checkoutcartajaxreload/',function(data){
+				$(".mycart").html(data);
+			})
+		});
+	}
+</script>
+<script>
+	$(document).ready(function() {
+		if ("{{request.session.userinvaild}}"){
+			$(".userlogin").click();	
+		} 
+		if ("{{request.session.mobileexistsalready}}"){
+			$("#logintab").removeClass("active");
+			$("#signuptab").addClass("active");
+			$(".userlogin").click();
+		}
+		if ("{{request.session.mobiledoesnotexistforgot}}") {
+			$("#logintab").removeClass("active");
+			$("#forgotpasswordtab").addClass("active");
+			$(".userlogin").click();
+		}
+		if ("{{request.session.userisblocked}}"){
+			$(".userlogin").click();
+		}
+	});
+	removeerrors();
+	function removeerrors(){
+		$.get('/removeerrors/',function(data){
+
+		})
+	}
+	removeoffererror();
+	function removeoffererror(){
+		$.get('/removeoffererror/',function(data){
+
+		})
+	}			
+</script>
+{%endblock mainbody%}
+	<!--https://api.myjson.com/bins/2d7ky-->

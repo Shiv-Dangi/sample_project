@@ -1,0 +1,254 @@
+{% extends "app/baseadmin.html" %}
+{% load staticfiles %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<link rel = "stylesheet" href = "{% static 'app/css/jquery-ui.min.css' %}" />
+	<style type="text/css">
+		.additem {
+			padding-left: 22px;
+		}
+		.control-field {
+			padding-left: 0px;
+			padding-right: 0px;
+		}
+		.btn {
+			margin-top: 25px
+		}
+	</style>
+
+	<!-- modal for editing the Inventory item information -->
+		<div class="modal fade" id="edit_inventory_item_info" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="exampleModalLabel">Edit Inventory Item Detail</h4>
+		      </div>
+		      <div class="modal-body">
+		        <form class = "form-horizontal" method = "post" action = "/myadmin/editinventoryitem/">
+		        	{% csrf_token %}
+		          <div class="form-group">
+		          	<label for="item_name" class="col-sm-3 control-label">Item Name </label>
+		          	<div class="col-sm-9">
+		          		<input type="text" class="form-control" id="item_name" name="item_name" required />
+		          	</div>
+		          </div>
+		          <div class="form-group">
+		            <label for="quantity" class="col-sm-3 control-label">Quantity(in gm)</label>
+		            <div class="col-sm-9">
+		            	<input type="Number" class="form-control" id="quantity" name="quantity" required />
+		            </div>
+		          </div>
+		          <div class="form-group">
+		            <label for="alert_quantity" class="col-sm-3 control-label">Alert Quantity </label>
+		            <div class="col-sm-9">
+		            	<input type="text" class="form-control" id="alert_quantity" name="alert_quantity" required />
+		            </div>
+		          </div>
+		          <div class="form-group">
+		            <label for="alert_number" class="col-sm-3 control-label">Alert Number </label>
+		            <div class="col-sm-9">
+		            	<input type="text" class="form-control" id="alert_number" name="alert_number" required/>
+		            </div>
+		          </div>
+		          <div class="form-group">
+		            <label for="alert_email" class="col-sm-3 control-label">Alert Email </label>
+		            <div class="col-sm-9">
+		            	<input type="email" class="form-control" id="alert_email" name="alert_email" required/>
+		            </div>
+		          </div>
+		          
+		          <input name="item_id" id="itemid" type="hidden"></input>
+		          <input name="url" value="{{request.path}}" type="hidden"></input>
+		          <div class="form-group text-center">
+		          	<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		            <button type="submit" class="btn btn-primary">Save</button>
+		          </div>
+		        </form>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+
+		<script type="text/javascript">
+			$('#edit_inventory_item_info').on('show.bs.modal', function (event) {
+			  var button = $(event.relatedTarget) // Button that triggered the modal
+			  //var table = button.data('id') // Extract info from data-* attributes
+			  var item_name = button.data('name')
+			  var quantity = button.data('quantity')
+			  var alert_quantity = button.data('alert-quantity')
+			  var alert_number = button.data('number')
+			  var alert_email = button.data('email')
+			  var item_id = button.data('id')
+			  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+			  var modal = $(this)
+			  modal.find('#itemid').val(item_id);
+			  modal.find('#item_name').val(item_name);
+			  modal.find('#quantity').val(quantity);
+			  modal.find('#alert_quantity').val(alert_quantity);
+			  modal.find('#alert_number').val(alert_number);
+			  modal.find('#alert_email').val(alert_email);
+			})
+		</script>
+	<!-- end of the modal -->
+
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class= "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-align-justify"></span>&nbsp;&nbsp;&nbsp;Manage Inventory Items
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<div class="row additemform">
+				<div>Add New Inventory Item</div>
+				<form method = "post" action ="/myadmin/addinventoryitem/" enctype="multipart/form-data">
+				  	{% csrf_token %}
+				  	<div class = "form-group col-xs-3 col-md-3 control-field">
+						<label for="item_name" class="control-label additem">Item Name </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" placeholder="Item Name" name="item_name" required />
+					    </div>
+					</div>
+					<!-- <div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="quantity" class="control-label additem">Quantity (gm) </label>
+						<div class="col-sm-10">
+					        <input type="Number" class="form-control" placeholder="50000" name="quantity" required />
+					    </div>
+					</div> -->
+					<div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="alert_quantity" class="control-label additem">Alert Quantity</label>
+						<div class="col-sm-10">
+					        <input type="Number" class="form-control" placeholder="5000" name="alert_quantity" required />
+					    </div>
+					</div>
+					<div class = "form-group col-xs-3 col-md-3 control-field">
+						<label for="alert_number" class="control-label additem">Alert No. </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" placeholder="8512044412" name="alert_number" required />
+					    </div>
+					</div>
+					<div class = "form-group col-xs-3 col-md-3 control-field">
+						<label for="alert_email" class="control-label additem">Alert Email</label>
+						<div class="col-sm-10">
+					        <input type="email" class="form-control" name="alert_email" placeholder="name@mail.com" required/>
+					    </div>
+					</div>
+					<input name="url" value="{{request.path}}" type="hidden" />
+				  	<button type="submit" class="btn btn-default col-xs-1 col-md-1">Add</button>
+				</form>
+			</div>
+
+			 <hr style="background-color: black; height: 2px;">
+
+			<div class="row purchaseinventory_form">
+			 	<div>Inventory Purchase Entry</div>
+				<form method = "post" action ="/myadmin/purchaseinventoryitem/" enctype="multipart/form-data">
+				  	{% csrf_token %}
+				  	<div class = "form-group col-xs-3 col-md-3 control-field">
+						<label for="item_name" class="control-label additem">Item Name </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" id="item" placeholder="Item Name" name="item_name" value="" required />
+					    </div>
+					</div>
+					<div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="quantity" class="control-label additem">Quantity </label>
+						<div class="col-sm-10">
+					        <input type="Number" class="form-control" placeholder="50000" name="quantity" required />
+					    </div>
+					</div>
+					<div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="unit" class="control-label additem">Unit</label>
+						<div class="col-sm-10">
+							<select class="form-control" name="unit">
+								<option value="kg">Kg</option>
+								<option value="gm">gm</option>
+							</select>
+					    </div>
+					</div>
+					<div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="amount" class="control-label additem">Amount</label>
+						<div class="col-sm-10">
+					        <input type="Number" class="form-control" placeholder="5000" name="amount" />
+					    </div>
+					</div>
+					<div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="alert_number" class="control-label additem">Bill No. </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" name="bill_number" />
+					    </div>
+					</div>
+					<input name="item_id" value="" id="item_id" type="hidden" />
+					<input name="url" value="{{request.path}}" type="hidden" />
+				  	<button type="submit" class="btn btn-default col-xs-1 col-md-1">submit</button>
+				</form>
+			</div>
+
+			 <hr style="background-color: black; height: 2px;">
+
+			<table class = "table table-striped">
+				<thead>
+					<tr>
+						<th>Item Name</th>
+						<th>Quantity (gm)</th>
+						<th>Alert Quantity (gm)</th>
+						<th>Dependency</th>
+						<th>Edit</th>
+						<th>Delete</th>
+					</tr>
+				</thead>
+				<tbody>
+					{%for item in inventory_items %}
+						<tr>
+							<td>{{item.item_name}}</td>
+							<td>{{item.quantity}}</td>
+							<td>{{item.alert_quantity}}</td>
+							<td><a href="/myadmin/manage_dependency/{{item.id}}/">Manage dependency</a></td>
+							<td>
+								<a class="glyphicon glyphicon-pencil" data-id="{{item.id}}" data-name="{{item.item_name}}" data-quantity="{{item.quantity}}" data-alert-quantity="{{item.alert_quantity}}" data-number="{{item.alert_number}}" data-email="{{item.alert_email}}" data-toggle="modal" data-target="#edit_inventory_item_info"></a>
+							</td>
+							<td><a href="/myadmin/removeinventory_item/{{item.id}}/" class="glyphicon glyphicon-remove"></a></td>
+						</tr>
+					{%endfor%}
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<script type="text/javascript" src="{% static 'app/js/jquery.ui.js' %}"></script>
+	<script type="text/javascript">
+		$(function() {
+	      $("#item").autocomplete({
+	            autofocous: true,
+	            source: function( request, response ) {
+	            $.ajax({
+	              url: "/ajaxcheckinventoryitem/"+ request.term,
+	              success: function( data ) {
+	                response( JSON.parse(data) );
+	              },
+	              error: function(data) {
+	              	console.log(data);
+	              }
+	            });
+	          },
+	        minLength: 1,
+	        focus: function( event, ui ) {
+	            $( ".autocomplete-field" ).val( ui.item.item_name );
+	            return false;
+	          },
+	        select: function( event, ui ) {
+	            $( "#item" ).val( ui.item.item_name );
+	            $( "#item_id" ).val( ui.item.item_id );
+
+	            return false;
+	          }
+	      }).autocomplete( "instance" )._renderItem = function( ul, item ) {
+	          return $( "<li>" )
+	            .append( "<a>" +  item.item_name +  "</a>" )
+	            .appendTo( ul );
+	        };
+	    });
+	</script>
+{%endblock content%}

@@ -1,0 +1,45 @@
+
+<style>
+	input[type="date"]::-webkit-inner-spin-button{
+	    display: none;
+	}
+</style>
+		
+<!-- <h5><b>Delivery Boy Payment Report:- {{delboy_payments.0.date|date:"d-M-Y"}}</b></h5> -->
+<br>
+<div>
+	{% if delboy_collection %}
+		<table class = "table table-bordered del_boyreport_table">
+			<tr>
+				<th>Delivery Boy</th>
+				<th>Amount</th>
+				<th>Mark Collected</th>
+			</tr>
+		{%for item in delboy_collection %}
+			<tr>
+				<td>{{item.delivery_boy}}</td>
+				<td>{{item.amount|floatformat:"0"}}</td>
+				<td>
+					{%if item.collected_at == None %}
+						<input type="checkbox" onclick="collectfromdboy('{{item.delivery_boy.loginid}}')"></input>
+					{%else%}
+						collected
+					{%endif%}
+				</td>
+			</tr>
+		{%endfor%}
+			<tr>	
+				<td>Collected:</td>
+				<td colspan="2">{{amount_collected.amount__sum|default_if_none:0|floatformat:"0"}}</td>
+			</tr>
+			<tr>	
+				<td>Remaining:</td>
+				<td colspan="2">{{amount_left.amount__sum|default_if_none:0|floatformat:"0"}}</td>
+			</tr>
+			<tr>	
+				<th>TOTAL:</th>
+				<th colspan="2">{{total_amount.amount__sum|default_if_none:0|floatformat:"0"}}</th>
+			</tr>
+		</table>
+	{% endif %}
+</div>

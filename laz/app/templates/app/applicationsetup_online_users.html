@@ -1,0 +1,70 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color: #10452f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Online Users
+		  </div>
+		</div>
+		<div class = "jumbotron row">
+			<div class="row col-sm-7">
+				<form class = "form" method = "post" action = "/myadmin/applicationsetup/online_users/">
+					{% csrf_token %}
+					<div class = "form-group">
+						<div class="col-sm-3">
+					        <input type="text" class="form-control" id="phone" placeholder="mobile no." name = "phone">
+					    </div>
+					</div>
+					<div class = "form-group">
+						<div class="col-sm-3">
+					        <input type="text" class="form-control" id="name" placeholder="name" name = "name">
+					    </div>
+					</div>
+				    <div class="form-group">
+				      <div class="col-sm-2">
+				        <button type="submit" class="btn btn-primary">Search</button>
+				      </div>
+				    </div>
+				</form>
+			</div>
+			<div class="col-sm-3" style="margin-top:10px;">
+				<a href="{% url 'export_users_xls' %}" class = "btn btn-default pull-left">Export users in Excel Sheet</a>
+			</div>
+			<div class="col-sm-2" style="margin-top:10px;">
+				<a href = "/myadmin/addonlineuserpage/" class = "btn btn-default pull-right">Create new User</a>
+			</div>
+			<table class = "table table-striped col-sm-12">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Mobile</th>
+						<th>Password</th>
+						<th>Gender</th>
+						<th>Company</th>
+						<th>Membership_Type</th>
+						<th>Block_User</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody>
+				{% for user in users%}
+					<tr>
+						<td>{{user.full_name}}</td>
+						<td>{{user.phone}}</td>
+						<td>{{user.password}}</td>
+						<td>{{user.gender}}</td>
+						<td>{{user.company}}</td>
+						<td>{{user.membership_type}}</td>
+						<td>{{user.block_user}}</td>
+						<td><a href="/myadmin/editonlineuserpage/{{user.phone}}/" class="glyphicon glyphicon-pencil"></a></td>
+					</tr>
+				{%endfor%}
+				</tbody>
+			</table>
+		</div>
+	</div>
+{%endblock content%}

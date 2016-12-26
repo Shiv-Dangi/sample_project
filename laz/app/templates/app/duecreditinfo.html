@@ -1,0 +1,116 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color: #10452f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Online Users
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<div class="row">
+				{% if 'duecreditinfoerror' in request.session %}
+				<h5>Enter any one, not both</h5>
+				{% endif %}
+				<form class = "form" method = "post" action = "/duecreditinfo/">
+					{% csrf_token %}
+					<div class = "form-group">
+						<div class="col-sm-3">
+					        <input type="text" class="form-control" id="phone" placeholder="Mobile No. (for other users)" name = "phone">
+					    </div>
+					</div>
+					<div class = "form-group">
+						<div class="col-sm-3">
+					        <input type="text" class="form-control" id="loginid" placeholder="Login ID (for partner)" name = "loginid">
+					    </div>
+					</div>
+				    <div class="form-group">
+				      <div class="col-sm-2">
+				        <button type="submit" class="btn btn-primary">Search</button>
+				      </div>
+				    </div>
+				</form>
+			</div>
+		</div>
+		<div class="row">
+			 Select All <input id="select_all" type="checkbox" class="checkbox_class" />
+		</div>
+		<table class = "table table-bordered col-sm-12">
+			<thead>
+				<tr>
+					<th>Select</th>
+					<th>Order Number</th>
+					<th>Mobile/LoginId</th>
+					<th>Amount</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% csrf_token %}
+				{% for duecredit in duecredits %}
+					<tr>
+						<td>
+							<!-- <a href="/clearduecredit/{{duecredit.order_number}}">Mark Cleared</a> -->
+							<input type="checkbox" id="{{duecredit.order_number}}" value="{{duecredit.amount_due}}" class="checkbox_class" onclick="add_to_order_list(this);" />
+						</td>
+						<td><a href="/myadmin/orderdetail/{{duecredit.order_number}}/" target="_blank">{{duecredit.order_number}}</a></td>
+						<td>{{duecredit.customer_mobile}}</td>
+						<td>{{duecredit.amount_due}}</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		<button class="btn btn-primary" id="clear_credit_button">CLEAR CREDIT</button>
+	</div>
+	<div class="footer navbar-fixed-bottom" style="background-color:#10452f;">
+		<div class="row">
+			<div class="col-sm-11">
+				<div class="pull-left" style="padding-top: 5px;font-size:small;">Welcome, {{request.session.admin.name}}-lhdhakeem&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					Selected Credit Amount to be Cleared Rs- <span id="selected_credit_amount">0</span>.
+				<div>
+			</div>
+			<div class="col-sm-1">
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		var order_list = new Array();
+		
+		$('#select_all').click(function(){
+	        if($(this).prop("checked")) {
+	            $(".checkbox_class").prop("checked", true);
+	            document.getElementById('selected_credit_amount').innerHTML ='{{duecredits_total.amount_due__sum}}';
+	            {% for duecredit in duecredits %}
+	            	order_list.push('{{duecredit.order_number}}')
+	            {% endfor %}
+	        } else {
+	            $(".checkbox_class").prop("checked", false);
+	            document.getElementById('selected_credit_amount').innerHTML = '0';
+	            order_list = [];
+	        }
+	    });
+
+	    function add_to_order_list(e1) {
+	    	var total_amount_due = document.getElementById('selected_credit_amount').innerText;
+	    	if(e1.checked){
+	    		order_list.push(e1.id);
+	    		total_amount_due = parseFloat(total_amount_due) + parseFloat(e1.value);
+	    		document.getElementById('selected_credit_amount').innerHTML = total_amount_due;
+	    	} else {
+	    		order_list.pop(e1.id);
+	    		total_amount_due = parseFloat(total_amount_due) - parseFloat(e1.value);
+	    		document.getElementById('selected_credit_amount').innerHTML = total_amount_due;
+	    	}
+	    }
+
+	    $('#clear_credit_button').click(function(){
+	    	var url = "/clear_duecredits/";
+	    	$.post(url, {data: order_list},function(data){}).done(function(){
+	    		window.location.reload();
+	    	});
+	    });
+	</script>
+{%endblock content%}

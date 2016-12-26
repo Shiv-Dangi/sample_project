@@ -1,0 +1,160 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class = "jumbotron">
+			<form class = "form-horizontal" method = "post" action = "/myadmin/createoffer/">
+				{% csrf_token %}
+				<legend>Create New Offer</legend>
+				<div class = "form-group">
+					<label for="offer name" class="col-sm-2 control-label">Offer Name: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="offer_name" placeholder="" name = "offer_name">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="offer image url" class="col-sm-2 control-label">Offer Image Url: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="offer_image" placeholder="" name = "offer_image">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="applicable on" class="col-sm-2 control-label">Applicable On</label>
+					<div class="col-sm-10">
+				        <select class="form-control" id="applicable_on" name = "applicable_on">
+							<option value="Booking">Booking</option>
+							<option value="Delivery">Delivery</option>
+			        	</select>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="offer date" class="col-sm-2 control-label">Offer Date: </label>
+					<div class="col-sm-10">
+				        <input type="date" class="form-control" id="offer_date" placeholder="" name = "offer_date" required title="enter a valid date in desired formet">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="start time" class="col-sm-2 control-label">Start Time: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="start_time" name = "start_time">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="end time" class="col-sm-2 control-label">End Time: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="end_time" name = "end_time">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="description" class="col-sm-2 control-label">Description: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="description" name = "description">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="delivery days" class="col-sm-2 control-label">Delivery Days: </label>
+					<div class="col-sm-1">
+						<input type="checkbox" class="form-control" id="is_active" name = "sunday" value="1">
+						<label>Sunday</label>
+				    </div>
+				    <div class="col-sm-1">
+				    	<input type="checkbox" class="form-control" id="is_active" name = "monday" value="2">
+						<label>Monday</label>
+				    </div>
+				    <div class="col-sm-1">
+				    	<input type="checkbox" class="form-control" id="is_active" name = "tuesday" value="3">
+						<label>Tuesday</label>
+				    </div>
+				    <div class="col-sm-1">
+						<input type="checkbox" class="form-control" id="is_active" name = "wednesday" value="4">
+						<label>Wednesday</label>
+				    </div>
+				    <div class="col-sm-1">
+						<input type="checkbox" class="form-control" id="is_active" name = "thursday" value="5">
+						<label>Thursday</label>
+				    </div>
+				    <div class="col-sm-1">
+						<input type="checkbox" class="form-control" id="is_active" name = "friday" value="6">
+						<label>Friday</label>
+				    </div>
+				    <div class="col-sm-1">
+						<input type="checkbox" class="form-control" id="is_active" name = "saturday" value="7">
+						<label>Saturday</label>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="payment mode" class="col-sm-2 control-label">Payment Mode: </label>
+					<div class="col-sm-10">
+						<label>
+							<input type="checkbox" class="form-control" id="cod" name = "cod" value="Cash on Delivery">
+							Cash on Delivery %
+							<input type="text" class="form-control" id="cod_percent" name = "" value="" disabled="">
+						</label>
+						<label>
+				        	<input type="checkbox" class="form-control" id="online" name = "online" value="Online Pay">
+				        	Online Payment %
+				        	<input type="text" class="form-control" id="online_percent" name = "" value="" disabled="">
+				        </label>
+				        <label>
+				        	<input type="checkbox" class="form-control" id="smd" name = "smd" value="Sodexo Meal Passes">
+				        	Sodexo Meal Passes %
+				        	<input type="text" class="form-control" id="smd_percent" name = "" value="" disabled="">
+				        </label>
+				        <label>
+				        	<input type="checkbox" class="form-control" id="credit" name = "credit" value="Credit">
+				        	Credit %
+				        	<input type="text" class="form-control" id="credit_percent" name = "" value="" disabled="">
+				        </label>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="is active" class="col-sm-2 control-label">Is Active: </label>
+					<div class="col-sm-3">
+				        <input type="checkbox" class="form-control" id="is_active" name = "is_active" value="1">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="is default membership applied" class="col-sm-2 control-label">Is Default Membership Applied: </label>
+					<div class="col-sm-3">
+				        <input type="checkbox" class="form-control" id="is_default_membership_applied" name = "is_default_membership_applied" value="1">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="are coupon applied" class="col-sm-2 control-label">Are Coupon Applied: </label>
+					<div class="col-sm-3">
+				        <input type="checkbox" class="form-control" id="are_coupon_applied" name = "are_coupon_applied" value="1">
+				    </div>
+				</div>
+				<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+			    <div class="form-group">
+			      <div class="col-sm-10 col-sm-offset-6">
+			        <button type="submit" class="btn btn-primary">Create</button>
+			      </div>
+			    </div>
+			    <div class = "forerrors">
+					{% if 'offerexistalready' in request.session %}
+						<p class= "text-danger"><b>*offer already exists</b></p>
+					{% endif%}
+            	</div>
+			</form>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		document.getElementById('cod').onchange = function() {
+		    document.getElementById('cod_percent').disabled = !this.checked;
+		};
+		document.getElementById('online').onchange = function() {
+		    document.getElementById('online_percent').disabled = !this.checked;
+		};
+		document.getElementById('smd').onchange = function() {
+		    document.getElementById('smd_percent').disabled = !this.checked;
+		};
+		document.getElementById('credit').onchange = function() {
+		    document.getElementById('credit_percent').disabled = !this.checked;
+		};
+	</script>
+{%endblock content%}

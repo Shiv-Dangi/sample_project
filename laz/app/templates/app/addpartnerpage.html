@@ -1,0 +1,160 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class = "jumbotron">
+			<form class = "form-horizontal" method = "post" action = "/myadmin/createpartner/">
+				{% csrf_token %}
+				<legend>Create New Partner</legend>
+				<div class = "form-group">
+					<label for="name" class="col-sm-2 control-label">Name: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="name" placeholder="Name" name = "name">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="loginid" class="col-sm-2 control-label">Login ID: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="loginid" placeholder="loginid" name = "loginid">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="password" class="col-sm-2 control-label">Password: </label>
+					<div class="col-sm-10">
+				        <input type="text" pattern = ".{6,}" class="form-control" id="password" placeholder="*******" name = "password" required title = "Minimum 6 letters">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="email" class="col-sm-2 control-label">Email: </label>
+					<div class="col-sm-10">
+				        <input type="text" pattern = ".+@.+\..{2,}" class="form-control" id="email" placeholder="email" name = "email" required title="enter a valid email address">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="mobile" class="col-sm-2 control-label">Mobile No.: </label>
+					<div class="col-sm-10">
+				        <input type="text" pattern = "[0-9]{10}" class="form-control" id="phone" placeholder="Mobile Number" name = "mobile" required title="enter a 10 digit mobile number">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="address" class="col-sm-2 control-label">address: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="address" placeholder="address" name = "address">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="city" class="col-sm-2 control-label">City: </label>
+					<div class="col-sm-10">
+				        <select class="form-control" id="city" name = "city">
+				        	{%for city in cities%}
+							<option value="{{city}}">{{city}}</option>
+							{%endfor%}
+			        	</select>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="partner_name" class="col-sm-2 control-label">Partner Name: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="partner_name" placeholder="Partner Name" name = "partner_name">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="owner_no." class="col-sm-2 control-label">Owner Number: </label>
+					<div class="col-sm-10">
+				        <input type="text" pattern = "[0-9]{10}" class="form-control" id="owner_number" placeholder="Owner Number" name = "owner_number" required title="enter a 10 digit mobile number">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="contact_no." class="col-sm-2 control-label">Contact Number: </label>
+					<div class="col-sm-10">
+				        <input type="text" pattern = "[0-9]{10}" class="form-control" id="contact_number" placeholder="Contact Number" name = "contact_number" required title="enter a 10 digit mobile number">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="service_tax_no." class="col-sm-2 control-label">Service Tax Number: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="service_tax_number" placeholder="Service Tax Number" name = "service_tax_number" required title="enter a valid service tax number">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="vat_no." class="col-sm-2 control-label">VAT Number: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="vat_number" placeholder="VAT Number" name = "vat_number" required title="enter a valid vat number">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="logo_link" class="col-sm-2 control-label">Logo link: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="logo_link" placeholder="Logo link" name="logo_link">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="vat_percent" class="col-sm-2 control-label">VAT%: </label>
+					<div class="col-sm-10">
+				        <input type="number" class="form-control" id="vat_percent" placeholder="VAT%" name = "vat_percent">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="service_charge_percent" class="col-sm-2 control-label">Service Charge%: </label>
+					<div class="col-sm-10">
+				        <input type="number" class="form-control" id="service_charge_percent" placeholder="Service Charge%" name = "service_charge_percent">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="service_tax_percent" class="col-sm-2 control-label">Service Tax%: </label>
+					<div class="col-sm-10">
+				        <input type="number" class="form-control" id="service_tax_percent" placeholder="Service Tax%" name = "service_tax_percent">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="e_wallet" class="col-sm-2 control-label">E-Wallet: </label>
+					<div class="col-sm-10">
+				        <input type="number" class="form-control" id="e_wallet" placeholder="0.0" name = "e_wallet">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="my_counter" class="col-sm-2 control-label">My Counter: </label>
+					<div class="col-sm-10">
+				        <input type="number" class="form-control" id="my_counter" placeholder="0.0" name="my_counter">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="credit_limit" class="col-sm-2 control-label">Credit Limit: </label>
+					<div class="col-sm-10">
+				        <input type="number" class="form-control" id="credit_limit" placeholder="50,000" name = "credit_limit">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="membership_type" class="col-sm-2 control-label">Membership Type: </label>
+					<div class="col-sm-10">
+				        <select class="form-control" id="membership_type" name = "membership_type">
+				        	{%for membership in membership_types%}
+							<option value="{{membership}}" {% if membership.membership_id == 3 %}selected{% endif %}>{{membership}}</option>
+							{%endfor%}
+			        	</select>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="otp_required" class="col-sm-2 control-label">OTP Required: </label>
+					<div class="col-sm-10">
+				        <input type="checkbox" class="form-control" id="otp_required" name = "otp_required">
+				    </div>
+				</div>
+				<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+			    <div class="form-group">
+			      <div class="col-sm-10 col-sm-offset-6">
+			        <button type="submit" class="btn btn-primary">Submit</button>
+			      </div>
+			    </div>
+			    <div class = "forerrors">
+					{% if 'partnerloginidexistsalready' in request.session %}
+						<p class= "text-danger"><b>*Login ID already exists</b></p>
+					{% endif%}
+            	</div>
+			</form>
+		</div>
+	</div>
+{%endblock content%}

@@ -1,0 +1,130 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class = "jumbotron">
+			<form class = "form-horizontal" method = "post" action = "/myadmin/editonlineuser/{{user.phone}}/">
+				{% csrf_token %}
+				<legend>Edit User</legend>
+				<div class = "form-group">
+					<label for="user_name" class="col-sm-2 control-label">Name: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="name" placeholder="User Name" name = "name" value="{{user.full_name}}" readonly>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="mobile" class="col-sm-2 control-label">Mobile No.: </label>
+					<div class="col-sm-10">
+				        <input type="text" pattern = "[0-9]{10}" class="form-control" id="phone" placeholder="mobile no." name = "phone" required title="enter a 10 digit mobile number" value="{{user.phone}}" readonly>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="password" class="col-sm-2 control-label">Password: </label>
+					<div class="col-sm-10">
+				        <input type="text" pattern = ".{6,}" class="form-control" id="password" placeholder="*******" name = "password" required title = "Minimum 6 letters" value="{{user.password}}" readonly>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="email" class="col-sm-2 control-label">Email: </label>
+					<div class="col-sm-10">
+				        <input type="text" pattern = ".+@.+\..{2,}" class="form-control" id="email" placeholder="email" name = "email" required title="enter a valid email address" value="{{user.email}}" readonly>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="gender" class="col-sm-2 control-label">gender</label>
+					<div class="col-sm-10">
+				        <select class="form-control" id="gender" name = "gender">
+							{% if user.gender == 'Male' %}
+				        		<option value="Male" selected="selected">Male</option>
+				        		<option value="Female">Female</option>
+				        	{% else %}
+				        		<option value="Male">Male</option>
+								<option value="Female" selected="selected">Female</option>
+				        	{% endif %}
+			        	</select>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="address" class="col-sm-2 control-label">address: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="address" placeholder="address" name = "address" value="{{user.address}}">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="city" class="col-sm-2 control-label">City: </label>
+					<div class="col-sm-10">
+				        <select class="form-control" id="city" name = "city">
+				        	{%for city in cities%}
+							<option value="{{city}}" {% if user.city == city %}selected{% endif %}>{{city}}</option>
+							{%endfor%}
+			        	</select>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="branch" class="col-sm-2 control-label">Branch: </label>
+					<div class="col-sm-10">
+				        <select class="form-control" id="branch" name = "branch">
+				        	{%for branch in branches%}
+							<option value="{{branch}}" {% if user.branch == branch %}selected{% endif %}>{{branch}}</option>
+							{%endfor%}
+			        	</select>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="membership_type" class="col-sm-2 control-label">Membership Type: </label>
+					<div class="col-sm-10">
+				        <select class="form-control" id="membership_type" name = "membership_type">
+				        	{%for membership in membership_types%}
+							<option value="{{membership}}" {% if user.membership_type == membership %}selected{% endif %}>{{membership}}</option>
+							{%endfor%}
+			        	</select>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="company" class="col-sm-2 control-label">company: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="company" placeholder="company" name = "company" value="{{user.company}}">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="credit_limit" class="col-sm-2 control-label">Credit Limit: </label>
+					<div class="col-sm-10">
+				        <input type="number" class="form-control" id="credit_limit" placeholder="5000" name = "credit_limit" value="{{user.credit_limit}}">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="e_wallet" class="col-sm-2 control-label">e-Wallet: </label>
+					<div class="col-sm-10">
+				        <input type="number" class="form-control" id="e_wallet" placeholder="100" name = "e_wallet" value="{{user.e_wallet}}">
+				    </div>
+				</div>
+				<!-- <div class = "form-group">
+					<label for="otp" class="col-sm-2 control-label">OTP: </label>
+					<div class="col-sm-10">
+				        <input type="text"  pattern = "[0-9]{6}" class="form-control" id="otp" placeholder="456233" name = "otp" value="{{user.otp}}">
+				    </div>
+				</div> -->
+				<div class = "form-group">
+					<label for="dateofbirth" class="col-sm-2 control-label">Date of Birth: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="dateofbirth" placeholder="YYYY-MM-DD" name = "dateofbirth" required title="enter a valid date in desired formet" value="{{user.date_of_birth | date:"Y-m-d"}}">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="block_user" class="col-sm-2 control-label">Block User: </label>
+					<div class="col-sm-10">
+				        <input type="checkbox" class="form-control" id="block_user"name = "checks1" value="1" {% if user.block_user == True %}checked{% endif %}>
+				    </div>
+				</div>
+			    <div class="form-group">
+			      <div class="col-sm-10 col-sm-offset-6">
+			        <button type="submit" class="btn btn-primary">Update</button>
+			      </div>
+			    </div>
+			</form>
+		</div>
+	</div>
+{%endblock content%}

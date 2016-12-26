@@ -1,0 +1,35 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<style type="text/css">
+		.applicationsetup-option {
+			padding: 60px;
+			width: 100%;
+			height: 100%;
+			font-size: 35px;
+		}
+	</style>
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-signal"></span>&nbsp;&nbsp;&nbsp;Laundry Application Setup
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<div class = "row">
+				<div class = "col-sm-4">
+					<a class = "btn btn-info glyphicon glyphicon-list applicationsetup-option" href = "/laundry/setupratelist/"><br><h3><b>Setup Rate List</b></h3></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-info glyphicon glyphicon-file applicationsetup-option" href = "/laundry/setuplaundryplans/"><br><h3><b>Laundry Plans</b></h3></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-info glyphicon glyphicon-tasks applicationsetup-option" href = "/laundry/setuppickupdropslots/"><br><h3><b>Pickup-Drop Slots</b></h3></a>
+				</div>
+			</div>
+		</div>
+	</div>
+{%endblock content%}

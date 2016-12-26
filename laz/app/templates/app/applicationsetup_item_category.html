@@ -1,0 +1,42 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color: #10452f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-th-list"></span>&nbsp;&nbsp;&nbsp;Item Category
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<a href = "/myadmin/additemcategorypage/" class = "btn btn-default pull-right">create item category</a>
+			<table class = "table table-striped">
+				<thead>
+					<tr>
+						<th>Image</th>
+						<th>Item Category</th>
+						<th>Is Active</th>
+						<th>Is Home Display</th>
+						<th>Manage Subcategory</th>
+						<th colspan="2">Action</th>
+					</tr>
+				</thead>
+				<tbody>	
+					{%for item in items%}
+						<tr>
+							<td><img src ="{{item.image}}" style = "height:100px;width:100px;" \></td>
+							<td>{{item.item_category}}</td>
+							<td>{{item.is_active}}</td>
+							<td>{{item.is_home_display}}</td>
+							<td><a href="/myadmin/manageitemsubcategory/{{item.id}}/">subcategories</a></td>
+							<td><a href="/myadmin/edititemcategorypage/{{item.id}}/" class="glyphicon glyphicon-pencil"></a></td>
+							<td><a href="/myadmin/deleteitemcategory/{{item.id}}/" class="glyphicon glyphicon-trash"></a></td>
+						</tr>
+					{%endfor%}
+				</tbody>
+			</table>
+		</div>
+	</div>
+{%endblock content%}

@@ -1,0 +1,70 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<style type="text/css">
+		.additem {
+			padding-left: 22px;
+		}
+		.control-field {
+			padding-left: 0px;
+			padding-right: 0px;
+		}
+		.btn {
+			margin-top: 25px
+		}
+	</style>
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class= "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-align-justify"></span>&nbsp;&nbsp;&nbsp;Manage Subcategory
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<div>Item Category: &nbsp;&nbsp;&nbsp; {{category.item_category}}</div></br>
+			<div class="row additemform">
+				<form method = "post" action= "/myadmin/createsubcategory/{{category.id}}/" enctype="multipart/form-data">
+				  	{% csrf_token %}
+				  	<div class = "form-group col-xs-5 col-md-5 control-field">
+						<label for="subcategory" class="control-label additem">Subcategory Name: </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" id="subcategory" placeholder="" name="subcategory">
+					    </div>
+					</div>
+					<input type = "text" style = "display:none;" value = "{{ request.path }}" name = "url" />
+				  	<div class = "form-group col-xs-5 col-md-5 control-field">
+						<label for="item_category" class="control-label additem">Category: </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" id="category" value="{{category.item_category}}" 
+					        name="category" readonly />
+					    </div>
+					</div>				
+				  	<button type="submit" class="btn btn-default col-xs-2 col-md-2">Add</button>
+				</form>
+			</div></br>
+
+			<table class = "table table-striped">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Item Subcategory</th>
+						<th>Parent Category</th>
+						<th>Delete</th>
+					</tr>
+				</thead>
+				<tbody>
+					{%for subcategory in subcategories%}
+						<tr>
+							<td>{{forloop.counter}}</td>
+							<td>{{subcategory.subcategory_name}}</td>
+							<td>{{subcategory.belongs_to_category}}</td>
+							<td><a href="/myadmin/deletesubcategory/{{subcategory.id}}/{{category.id}}/" class="glyphicon glyphicon-trash"></a></td>
+						</tr>
+					{%endfor%}
+				</tbody>
+			</table>
+		</div>
+	</div>
+{%endblock content%}

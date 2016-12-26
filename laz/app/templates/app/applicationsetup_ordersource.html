@@ -1,0 +1,43 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color: #10452f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Manage Order Source
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<div class="row" style="margin-top: 20px">
+				<div class = "pull-left"><b>Add New Order Source</b></div><br>
+					<form class = "form-horizontal" method = "post" action = "/myadmin/addordersource/" enctype="multipart/form-data">
+						{% csrf_token %}
+						<div class = "form-group">
+							<label for="source_name" class="col-sm-2 control-label">Order Source Name: </label>
+							<div class="col-sm-8">
+						        <input type="text" class="form-control" name = "order_source">
+						    </div>
+						    <input name="url" value="{{request.path}}" type="hidden" />
+						    <div class="col-sm-2">
+					            <button type="submit" class="btn btn-primary">Add</button>
+					        </div>
+						</div>
+					</form>
+					<table class = "table table-striped">
+						<tbody>
+						{% for source in order_source %}
+							<tr>
+								<td>{{forloop.counter}}</td>
+								<td>{{source.source}}</td>
+								<td><a href="/myadmin/deleteordersource/{{source.id}}/" class="glyphicon glyphicon-trash"></a></td>
+							</tr>
+						{%endfor%}
+						</tbody>
+					</table>
+			</div>
+		</div>
+	</div>
+{%endblock content%}

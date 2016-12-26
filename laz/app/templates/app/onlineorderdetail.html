@@ -1,0 +1,220 @@
+{% extends "app/baseadmin.html" %}
+{% load staticfiles %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+	<div class = "navbar navbar-inverse navbar-static-top">
+		{% include "app/adminnavbar.html" %}
+	</div><br>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-signal"></span>&nbsp;&nbsp;&nbsp;Order Details
+		    <span class="pull-right">Order No:{{order.order_number}}&nbsp;&nbsp;&nbsp;</span>
+		  </div>
+		</div>
+		<div class = "container">
+			<!--Order progress bar-->
+			<div class="row">
+				<ul class="wizard">         
+				    <li class="{% if order.order_status == "just placed"%}active{% endif %}">
+				    	<span>1</span>Booked {{order.placed_at|date:"d M, f a"}}
+				    </li>
+				    <li class="{% if order.order_status == "assigned to branch"%}active{% endif %}">
+				    	<span>2</span>Assigned {{order.branch_assigned_at|date:"d M, f a"}}
+				    </li>
+				    <li class="{% if order.order_status == "accepted"%}active{% endif %}">
+				    	<span>3</span>Accepted {{order.accepted_at|date:"d M, f a"}}
+				    </li>
+				    <li class="{% if order.order_status == "dispatched"%}active{% endif %}">
+				    	<span>4</span>Dispatched {{order.dispatched_at|date:"d M, f a"}}
+				    </li>
+				    <li class="{% if order.order_status == "delivered"%}active{% endif %}">
+				    	<span>5</span>Delivered {{order.delivered_at|date:"d M, f a"}}
+				    </li>
+				    <li class="{% if order.order_status == "paid"%}active{% endif %}">
+				    	<span>6</span>Paid {{order.paid_at|date:"d M, f a"}}
+				    </li>
+				</ul>
+				<style type="text/css">
+					/*## Wizard ##*/
+					.wizard { width: 100%; margin: 0; padding: 0; background: #F5F5F5; height: 10px; -webkit-border-radius: 5px; border-radius: 5px; -webkit-box-shadow: inset 0px 1px 0px 0px #CCC; box-shadow: inset 0px 1px 0px 0px #CCC; list-style: none; margin-bottom: 40px; margin-top: 25px; }
+					.wizard li { display: table-cell; width: 1%; float: none; text-align: center; }
+					.wizard li span { display: block; width: 30px; height: 25px; background: #F5F5F5; text-align: center; color: #999; margin: auto; margin-top: -10px; padding-top: 5px; font-size: 1.1em; font-weight: bold; -webkit-border-radius:15px; border-radius: 15px; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15); -webkit-text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15); box-shadow: inset 0px 1px 0px 0px rgba(0, 0, 0, 0.15); -webkit-box-shadow: inset 0px 1px 0px 0px rgba(0, 0, 0, 0.15); }
+					.wizard li.active span { background: #0088CC; color: #FFF; }
+				</style>
+			</div>
+
+			<!--Order basic Information-->
+			<div class="row table-responsive" style="margin-top: 25px">
+				<table class = "table table-bordered" border="1 px">
+					<tbody>
+						<tr>
+							<td>
+								<b>LAZEEZ HAKEEM DELIVERY</b><br/>
+								Bhopal, Madhy Pradesh, India<br/>
+								0755 6222227<br/>
+								support@lhdindia.com<br/>
+								<b>Service Tax No.:</b>AAUPH6905KSD001<br/>
+								<b>VAT No.:</b>23864007086
+							</td>
+							<td>
+								<b>BUYER</b><br/>
+								{{order.customer_name}}<br/>
+								{{order.customer_mobile}}<br/>
+								{{order.address}}<br/>
+								<b>Payment Mode :</b>{{order.payment_mode}}
+
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<b>Order Number :</b>{{order.order_number}}<br/>
+								<b>Order Date :</b>{{order.placed_at}}
+							</td>
+							<td>
+								<b>Delivery Type :</b>{{order.delivery_type}}
+								{%if order.delivery_type == 'Dining'%}
+									<b>Number of People :</b>{{order.no_of_people}}
+								{%endif%}<br/>
+								<b>Delivery Date :</b>{{order.delivered_at|default_if_none:order.expected_at}}
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<b>ORDER</b><br>
+								<b>Status :</b> {{order.order_status}}<br>
+								<b>Status Change (By/On) :</b> <br>
+								<b>Source :</b> {{order.source}}<br>
+								<b>Ref. Number :</b>
+							</td>
+							<td>
+								<b>Branch :</b> {{order.branch_assigned}}<br>
+								<b>Assigned (By/On) :</b> abc/{{branch_assigned_at}}<br>
+								<b>Accepted (By/On) :</b> {{order.accepted_by}}/{{order.accepted_at|default_if_none:""}}<br>
+								<b>Payment Mode :</b>{{order.payment_mode}} <br>
+								<b>Delivery Boy :</b>{{order.dispatched_with}}
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<!--Item description-->
+			<style type="text/css">
+				tbody
+				{
+				    counter-reset: Serial;           /* Set the Serial counter to 0 */
+				}
+				.iteminfo tbody tr td:first-child:before
+				{
+				  counter-increment: Serial;      /* Increment the Serial counter */
+				  content: counter(Serial); /* Display the counter */
+				}
+			</style>
+			<div class="row">
+				<table class = "table table-bordered iteminfo">
+					<thead class="jumbotron">
+						<tr>
+							<th>S.No.</th>
+							<th>Item Description</th>
+							<th>Quantity</th>
+							<th>Price</th>
+							<th>Total</th>
+						</tr>
+					</thead>
+					<tbody>
+						{%for key1,value1 in request.session.cart.items%}
+							{%if key1 != 'totalcost'%}
+									{%for k,v in value1.items%}
+									{%if k != 'name'%}
+									<tr>
+										<td></td>
+										<td>{{v.name}}-{{v.subname}}</td>
+										<td>{{v.quantity}}</td>
+										<td>{{v.price}}</td>
+										<td>{% widthratio v.quantity 1 v.price %}</td>
+									</tr>
+									{%endif%}
+									{%endfor%}
+							{%endif%}
+						{%endfor%}
+					</tbody>
+					<tfoot class="jumbotron">
+						<tr>
+							<td colspan="2">Sub Total</td>
+							<td></td>
+							<td></td>
+							<td colspan="2">{{request.session.cart.totalcost}}</td>
+						</tr>
+					</tfoot>
+				</table>
+			</div>
+
+			<!--discount and tax info-->
+			<div class="row jumbotron">
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label for="comment">Remark/Comments</label>
+						<textarea class="form-control" rows="7" id="commentbox" readonly>{{order.special_comment}}
+						</textarea>
+					</div>
+				</div>
+				<div class="col-sm-6 table-responsive">
+					<table class = "table table-bordered">
+						<thead>
+							<tr>
+								<th colspan="3">Sub Total</th>
+								<th>{{request.session.cart.totalcost}}</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Discount(%)</td>
+								<td><input class="input-control" id="discount_percent" type="Number" value="{{order.discount_percent}}" readonly></input></td>
+								<td>Discount(Rs)</td>
+								<td><input class="input-control" id="discount_rs" type="Number" value="{{order.discount_rs}}" readonly></input></td>
+							</tr>
+							<tr>
+								<td>Service Tax(%)</td>
+								<td>
+									<input class="input-control" id="service_tax_percent" type="Number" value="{{order.service_tax_percent}}" readonly>
+									</input>
+								</td>
+								<td>Service Tax(Rs)</td>
+								<td><input class="input-control" id="service_tax_rs" type="Number" value="{{order.service_tax_rs}}" readonly></input></td>
+							</tr>
+							<tr>
+								<td>VAT(%)</td>
+								<td><input class="input-control" id="vat_percent" type="Number" value="{{order.vat_percent}}" readonly></input></td>
+								<td>VAT(Rs)</td>
+								<td><input class="input-control" id="vat_rs" type="Number" value="{{order.vat_rs}}" readonly></input></td>
+							</tr>
+							<tr>
+								<td>Service Charge(%)</td>
+								<td>
+									<input class="input-control" id="service_charge_percent" type="Number" value="{{order.service_charge_percent}}" readonly>
+									</input>
+								</td>
+								<td>Service Charge(Rs)</td>
+								<td><input class="input-control" id="service_charge_rs" type="Number" value="{{order.service_charge_rs}}" readonly></input></td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<tr>
+								<th colspan="3">Grand Total</th>
+								<th><input class="input-control" id="grand_total" value="{{order.grand_total}}" readonly /></th>
+							</tr>
+						</tfoot>
+					</table>
+					<style type="text/css">
+						.input-control {
+							width: 75px;
+						}
+					</style>	
+				</div>
+			</div>
+
+		</div>
+	</div>
+{%endblock content%}

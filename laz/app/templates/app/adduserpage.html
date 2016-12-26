@@ -1,0 +1,156 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class = "jumbotron">
+			<form class = "form-horizontal" method = "post" action = "/myadmin/createuser/">
+				{% csrf_token %}
+				<legend>Create User</legend>
+				<div class = "form-group">
+					<label for="first_name" class="col-sm-2 control-label">First Name: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="first_name" placeholder="first_name" name = "first_name">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="last_name" class="col-sm-2 control-label">Last Name: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="last_name" placeholder="last_name" name = "last_name">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="loginid" class="col-sm-2 control-label">Login Id: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="loginid" placeholder="loginid" name = "loginid">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="email" class="col-sm-2 control-label">Email: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="email" placeholder="email" name = "email">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="mobile" class="col-sm-2 control-label">Mobile: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="mobile" placeholder="mobile" name = "mobile">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="gender" class="col-sm-2 control-label">gender</label>
+					<div class="col-sm-10">
+				        <select class="form-control" id="gender" name = "gender">
+							<option value="Male">Male</option>
+							<option value="Female">Female</option>
+			        	</select>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="password" class="col-sm-2 control-label">password: </label>
+					<div class="col-sm-10">
+				        <input type="password" class="form-control" id="password" placeholder="password" name = "password">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="address" class="col-sm-2 control-label">address: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="address" placeholder="address" name = "address">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="city" class="col-sm-2 control-label">city: </label>
+					<div class="col-sm-10">
+				        <select class="form-control" id="city" name = "city">
+				        	{%for city in cities%}
+							<option value="{{city}}">{{city}}</option>
+							{%endfor%}
+			        	</select>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="branch" class="col-sm-2 control-label">branch: </label>
+					<div class="col-sm-10">
+				        <select class="form-control" id="branch" name = "branch">
+				        	{%for branch in branches%}
+							<option value="{{branch}}">{{branch}}</option>
+							{%endfor%}
+			        	</select>
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="company" class="col-sm-2 control-label">company: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="company" placeholder="company" name = "company">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="dateofbirth" class="col-sm-2 control-label">Date of Birth: </label>
+					<div class="col-sm-10">
+				        <input type="text" class="form-control" id="dateofbirth" placeholder="dateofbirth" name = "dateofbirth">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="attendance" class="col-sm-2 control-label">Is attendance enabled: </label>
+					<div class="col-sm-10">
+				        <input type="checkbox" class="form-control" id="attendance"name = "checks1" value="1">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<label for="loginenable" class="col-sm-2 control-label">Is Login enabled: </label>
+					<div class="col-sm-10">
+				        <input type="checkbox" class="form-control" id="loginenable"name = "checks2" value="2">
+				    </div>
+				</div>
+				<div class="form-group">
+			      <label class="col-lg-2 control-label">Role: </label>
+			      <div class="col-lg-10">
+			        <div class="radio">
+			          <label>
+			            <input type="radio" name="optionsRadios" id="admin" value="admin">
+			            Admin
+			          </label>
+			        </div>
+			        <div class="radio">
+			          <label>
+			            <input type="radio" name="optionsRadios" id="branchuser" value="branchuser" >
+			            branchuser
+			          </label>
+			        </div>
+			        <div class="radio">
+			          <label>
+			            <input type="radio" name="optionsRadios" id="deliveryboy" value="deliveryboy" >
+			            deliveryboy
+			          </label>
+			        </div>
+			        <div class="radio">
+			          <label>
+			            <input type="radio" name="optionsRadios" id="callcenteroperator" value="callcenteroperator" >
+			            call center operator
+			          </label>
+			        </div>
+			        <div class="radio">
+			          <label>
+			            <input type="radio" name="optionsRadios" id="billinguser" value="billinguser" >
+			            billing user
+			          </label>
+			        </div>
+			        <div class="radio">
+			          <label>
+			            <input type="radio" name="optionsRadios" id="partner" value="partner">
+			            partner
+			          </label>
+			        </div>
+			      </div>
+			    </div>
+			    <div class="form-group">
+			      <div class="col-sm-10 col-sm-offset-6">
+			        <button type="submit" class="btn btn-primary">Submit</button>
+			      </div>
+			    </div>
+			</form>
+		</div>
+	</div>
+{%endblock content%}

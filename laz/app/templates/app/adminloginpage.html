@@ -1,0 +1,60 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		<div class = "container">
+			<a href = "/adminloginpage/" class = "navbar-brand" style="padding: 0px 0px;"><img src="/static/app/img/lhdlogo.jpg" width="175" height="60"></a>
+			<button class = "navbar-toggle" data-toggle = "collapse" data-target = ".navcollapse">
+				<span class = "glyphicon glyphicon-menu-hamburger text-danger"></span>
+			</button>
+			<div class = "collapse navbar-collapse navcollapse">
+				<ul class = "nav navbar-nav">
+					
+				</ul>
+			</div>
+		</div>
+	</div>
+	<img src="/static/app/img/foradminlogin.jpg" style='position:fixed;top:0px;left:0px;width:100%;height:100%;z-index:-1;'>
+	<br><br><br>
+	<div class = "row">
+		<div class="col-sm-8 text-center" style="background:rgba(0,0,0,0.15);">
+			<br><img src="/static/app/img/logomain.jpg" width="160" height="160">
+			<h1 style="color:#ffffff;font-family: 'Great Vibes', cursive;">God is great, God is good,<br>And we thank him, for the food!<br>By his hands, We are fed,<br>Give us lord our daily bread!!</h1><br><br>
+		</div>
+		<div class = "col-sm-4 jumbotron text-center" style="padding:40px;background-color:#d2e28b;opacity:0.95;">
+			<img src="/static/app/img/lhdlogo.jpg" width="175" height="60"><br><br><br>
+			<h4><b>Admin Login</b></h4><br>
+			<form class = "form-horizontal" method = "post" action = "/adminlogin/">
+				{% csrf_token %}
+				<div class = "form-group">
+					<div class="col-sm-12">
+				        <input type="text" class="form-control" id="username" placeholder="username" name = "username">
+				    </div>
+				</div>
+				<div class = "form-group">
+					<div class="col-sm-12">
+				        <input type="password" class="form-control" id="password" placeholder="password" name = "password">
+				    </div>
+				</div>
+				<div class="form-group">
+			        <button type="submit" style="background-color:#10452f;" class="btn btn-success">Submit</button>
+			    </div>
+			    <div class = "forerrors">
+					{% if 'loginnotallow' in request.session %}
+						<p class= "text-danger"><b>*Login is not enabled for this user.</b></p>
+					{% endif%}
+            	</div>
+			</form>
+		</div>
+	</div>
+	<div class="footer navbar-fixed-bottom" style="background-color:#10452f;">
+		<div class="row">
+			<div class="col-sm-6">
+				<h5>&nbsp;&nbsp;&nbsp; LHDINDIA - ALL RIGHTS RESERVED</h5>
+			</div>
+			<div class="col-sm-6 text-right">
+				<h5>DESIGNED & DEVELOPED BY - Enable Live Solutions &nbsp;&nbsp;&nbsp;</h5>
+			</div>
+		</div>
+	</div>
+{%endblock content%}

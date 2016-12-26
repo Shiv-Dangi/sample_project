@@ -1,0 +1,89 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<style type="text/css">
+		.additem {
+			padding-left: 22px;
+		}
+		.control-field {
+			padding-left: 0px;
+			padding-right: 0px;
+		}
+		.btn {
+			margin-top: 25px
+		}
+	</style>
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class= "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-align-justify"></span>&nbsp;&nbsp;&nbsp;Manage Waiters
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<div>Add New Waiter</div></br>
+			<div class="row additemform">
+				<form method = "post" action ="/myadmin/addnewwaiter/" enctype="multipart/form-data">
+				  	{% csrf_token %}
+				  	<div class = "form-group col-xs-2 col-md-2 control-field">
+						<label for="branch_name" class="control-label additem">Branch Name </label>
+						<div class="col-sm-10">
+							<select class="form-control" name="branch">
+								{% for branch in branch_list %}
+									<option value="{{branch.branch}}">{{branch}}</option>}
+								{% endfor %}
+							</select>
+					    </div>
+					</div>
+				  	<div class = "form-group col-xs-3 col-md-3 control-field">
+						<label for="item_category" class="control-label additem">Waiter Name </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" id="waitername" placeholder="Waiter Name" name="name" required>
+					    </div>
+					</div>
+					<div class = "form-group col-xs-3 col-md-3 control-field">
+						<label for="item_category" class="control-label additem">UserId </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" id="userid" placeholder="userid" name="userid" required>
+					    </div>
+					</div>
+					<div class = "form-group col-xs-3 col-md-3 control-field">
+						<label for="item_category" class="control-label additem">Password </label>
+						<div class="col-sm-10">
+					        <input type="text" class="form-control" id="password" placeholder="password" name="password" required>
+					    </div>
+					</div>
+					<input name="url" value="{{request.path}}" type="hidden"></input>
+				  	<button type="submit" class="btn btn-default col-xs-1 col-md-1">Add</button>
+				</form>
+			</div></br>
+
+			<table class = "table table-striped">
+				<thead>
+					<tr>
+						<th>S.No.</th>
+						<th>Waiter Name</th>
+						<th>Branch</th>
+						<th>UserId</th>
+						<th>Password</th>
+						<th>Delete</th>
+					</tr>
+				</thead>
+				<tbody>
+					{%for waiter in waiters %}
+						<tr>
+							<td>{{forloop.counter}}</td>
+							<td>{{waiter.name}}</td>
+							<td>{{waiter.branch_name}}</td>
+							<td>{{waiter.userid}}</td>
+							<td>{{waiter.password}}</td>
+							<td><a href="/myadmin/removewaiter/{{waiter.id}}/" class="glyphicon glyphicon-remove"></a></td>
+						</tr>
+					{%endfor%}
+				</tbody>
+			</table>
+		</div>
+	</div>
+{%endblock content%}

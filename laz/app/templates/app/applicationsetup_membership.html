@@ -1,0 +1,38 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color: #10452f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Membership
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<a href = "/myadmin/addmembershippage/" class = "btn btn-default pull-right">Create new Membership</a><br>
+			<table class = "table table-striped">
+			<thead>
+				<tr>
+					<th>Membership_Name</th>
+					<th>Discount%</th>
+					<th>Is_active</th>
+					<th colspan="2">Action</th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for membership in memberships%}
+				<tr>
+					<td>{{membership.membership_name}}</td>
+					<td>{{membership.discount}}</td>
+					<td>{{membership.is_active}}</td>
+					<td><a href="/myadmin/editmembershippage/{{membership.membership_id}}/" class="glyphicon glyphicon-pencil"></a></td>
+					<td><a href="/myadmin/deletemembership/{{membership.membership_id}}/" class="glyphicon glyphicon-trash"></a></td>
+				</tr>
+			{%endfor%}
+			</tbody>
+			</table>
+		</div>
+	</div>
+{%endblock content%}

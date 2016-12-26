@@ -1,0 +1,95 @@
+{% extends "app/baseadmin.html" %}
+{%block title%}LHDINDIA | LAZEEZ HAKEEM{%endblock title%}
+{%block content%}
+	<style type="text/css">
+		.applicationsetup-option {
+			padding: 60px;
+			width: 100%;
+			height: 100%;
+			font-size: 35px;
+		}
+	</style>
+	<div class = "navbar navbar-inverse navbar-static-top" style="background-color:#10462f;">
+		{% include "app/adminnavbar.html" %}
+	</div>
+	<div class = "container">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    <span class = "glyphicon glyphicon-signal"></span>&nbsp;&nbsp;&nbsp;Application Setup
+		  </div>
+		</div>
+		<div class = "jumbotron">
+			<div class = "row">
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-user applicationsetup-option" href = "/myadmin/applicationsetup/admin/"><br><h3><b>Admin</b></h3></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-th-list applicationsetup-option" href = "/myadmin/applicationsetup/menu/"><br><h3><b>Menu</b></h3></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-th applicationsetup-option" href = "/myadmin/applicationsetup/itemcategory/"><br><h3><b>Item Category</b></h3></a>
+				</div>
+			</div>
+			<div class="row" style="margin-top: 20px">
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-user applicationsetup-option" href = "/myadmin/applicationsetup/membership/"><br><h3><b>Membership</b></h3></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-globe applicationsetup-option" href = "/myadmin/applicationsetup/online_users/"><br><h3><b>Online Users</b></h3></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-user applicationsetup-option" href = "/myadmin/applicationsetup/partner/"><br><h3><b>Partner</b></h3></a>
+				</div>
+			</div>
+			<div class="row" style="margin-top: 20px">
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-gift applicationsetup-option" href = "/myadmin/applicationsetup/coupons/"><br><h3><b>Coupons</b></h3></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-cog applicationsetup-option" href = "/myadmin/applicationsetup/managepromotion/"><br><h3><b>Manage Promotions</b></h3></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-user applicationsetup-option" href = "/myadmin/applicationsetup/customer/"><br><h3><b>Customers</b></h3></a>
+				</div>
+			</div>
+			<div class="row" style="margin-top: 20px">
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-gift applicationsetup-option" href = "/myadmin/applicationsetup/offers/"><br><h3><b>OFFERS</b></h3></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-plus applicationsetup-option" href = "/myadmin/applicationsetup/ordersource/"><br><h3><b>Order Source</b></h3></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-th-list applicationsetup-option" href = "/myadmin/applicationsetup/restrictedareas/" ><br><h3><b>Restricted Areas</b></h3></a>
+				</div>
+			</div>
+			<div class="row" style="margin-top: 20px">
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-cog applicationsetup-option" href = "/myadmin/applicationsetup/managewaiter/"><br><h3><b>Manage Waiters</b></h3></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-th-list applicationsetup-option" href = "/myadmin/applicationsetup/managetables/" ><br><h3><b>Manage Table</b></h3></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-th-list applicationsetup-option" href = "/myadmin/applicationsetup/manage_inventry/" ><br><h3><b>Manage Inventries</b></h3></a>
+				</div>
+			</div>
+			<div class="row" style="margin-top: 20px">
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-cog applicationsetup-option" href = "/myadmin/applicationsetup/manage_news_and_events/"><br><h3><b>Manage News&Event</b></h3></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-cog applicationsetup-option" href = "/laundry_applicationsetup/"><br><h3><b>Manage Laundry</b></h3></a>
+				</div>
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-th-list applicationsetup-option" href = "/myadmin/manage_images_description/"><br><h3><b>Manage Images ETC</b></h3></a>
+				</div>
+			</div>
+			<div class="row" style="margin-top: 20px">
+				<div class = "col-sm-4">
+					<a class = "btn btn-warning glyphicon glyphicon-th-list applicationsetup-option" href = "/myadmin/manage_app_carousel/"><br><h3><b>App Carousel</b></h3></a>
+				</div>
+			</div>
+		</div>
+	</div>
+{%endblock content%}

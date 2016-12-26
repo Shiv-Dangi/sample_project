@@ -1,0 +1,80 @@
+{% extends "app/laundry_customerendbase.html" %}
+{%block title%}LHDINDIA LAUNDRY | LAUNDRY SERVICES IN BHOPAL | ONLINE LAUNDRY IN BHOPAL | GET CLOTHES WASHED ONLINE{%endblock title%}
+
+{% block content %}
+
+<div class="container">
+	<div class="row" style="margin-top:20px;">
+		<div class="col l3"></div>
+		<div class="col l6 s12 center-align">
+		  <ul class="tabs">
+		    <li class="tab col s6"><a class="active" href="#plan">Plan Based</a></li>
+		    <li class="tab col s6"><a href="#peritem">Per Item Based</a></li>
+		  </ul>
+		</div>
+		<div class="col l3"></div>
+		<div id="plan" class="col s12" style="margin-top:10px;">
+			<div class="row">
+				<div class="col l1"></div>
+				<div class="col s12 l10" style="margin-bottom:100px;">
+					<form action="/laundry/laundry_login/" method="post">
+			            {%csrf_token%}
+			            	<div class="input-field col s12">
+			            		<div class="center-align">
+					            	{% for laundryplan in laundryplans %}
+					              	<input class="with-gap" name="group1" type="radio" id="{{laundryplan.plan_code}}"/>
+		      						<label style="padding-right:20px;" for="{{laundryplan.plan_code}}">{{laundryplan.plan_name}} ({{laundryplan.lot_size}})</label>
+		      						{% endfor %}
+	      						</div>
+	      					</div>
+	      					<div class="input-field col s12" style="margin-top:30px;">
+	      						<input type="date" class="datepicker" placeholder="Choose Pickup Date" id="pickup_date">
+	      					</div>
+	      					<div class="input-field col s12">
+							    <select class="center-align" id="pickup_slot">
+							      <option value="" disabled selected>Choose your pickup slot</option>
+							      {% for pickupslot in pickupslots %}
+							      <option value="{{pickupslot.slot_code}}">{{pickupslot.slot_begins_at}} - {{pickupslot.slot_ends_at}}</option>
+							      {% endfor %}
+							    </select>
+							</div>
+							<div class="input-field col s12">
+							    <select class="center-align" id="drop_slot">
+							      <option value="" disabled selected>Choose your preferred drop slot</option>
+							      {% for dropslot in dropslots %}
+							      <option value="{{dropslot.slot_code}}">{{dropslot.slot_begins_at}} - {{dropslot.slot_ends_at}}</option>
+							      {% endfor %}
+							    </select>
+							</div>
+							<!-- Switch -->
+							<div class="center-align">
+								<div class="switch">
+								    <label>
+								      Express Service Off
+								      <input type="checkbox">
+								      <span class="lever"></span>
+								      Express Service On
+								    </label>
+								</div>
+							</div><br>
+			              <div class="center-align">
+				              <button class="waves-effect waves-teal light-blue btn-flat" type="submit" style="width:50%;color:#ffffff;">Submit</button>
+				          </div>
+			        </form>
+				</div>
+				<div class="col l1"></div>
+			</div>
+		</div>
+		<div id="peritem" class="col s12" style="margin-bottom:100px;">
+			<div class="row">
+				<div class="col l1"></div>
+				<div class="col s12 l10">
+					
+				</div>
+				<div class="col l1"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock content %}
